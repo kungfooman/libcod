@@ -1,0 +1,1 @@
+#include <stdio.h>// time back when it crashed without dl_close(), i read it doesnt crash with a "_" in the function name// oh yeah, it needs a _ in name, otherwise it crashes!int test_printa(){	printf("Bla Bla Bla!\n");	printf("Foo Foo Foo!\n");	printf("Blarg Blarg!\n");}
