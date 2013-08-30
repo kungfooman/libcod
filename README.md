@@ -1,38 +1,43 @@
 The Call of Duty extension *libcod* is adding new server-side functions to:
-	- Call Of Duty 2 1.2
-	- Call Of Duty 2 1.3
-	- Call Of Duty 4 1.7
 
-Install:
-	apt-get install gcc-multilib
-	apt-get install libmysqlclient-dev:i386
-	apt-get install g++-multilib
+ - Call Of Duty 2 1.2
+ - Call Of Duty 2 1.3
+ - Call Of Duty 4 1.7
+
+Requirements:
+```
+apt-get install gcc-multilib
+apt-get install libmysqlclient-dev:i386
+apt-get install g++-multilib
+```
 
 Starting the server:
-	LD_PRELOAD=libcod/bin/libcod2_1_3.so ./cod2_lnxded +set fs_game ...
+
+```LD_PRELOAD=libcod/bin/libcod2_1_3.so ./cod2_lnxded +set fs_game ...```
 	
 Working with the source / Compiling:
-	./doit.sh tar
-	./doit.sh base # compiles object files needed by every .so
-	./doit.sh cod1_1_5 # compiles object files for CoD 1 1.5 and linking them against base to the actual bin/libcod1_1_5.so
-	./doit.sh cod2_1_2
-	./doit.sh cod2_1_3
-	./doit.sh cod4_1_7
-	./doit.sh wrapper
+```
+./doit.sh tar
+./doit.sh base # compiles object files needed by every .so
+./doit.sh cod1_1_5 # compiles object files for CoD 1 1.5 and linking them against base to the actual bin/libcod1_1_5.so
+./doit.sh cod2_1_2
+./doit.sh cod2_1_3
+./doit.sh cod4_1_7
+./doit.sh wrapper
+```
 
 Mods depending on *libcod*:
-	 - http://killtube.org/showthread.php?1533-DOWNLOAD-CoD2-Surf-Mod
-	 - http://killtube.org/showthread.php?1527-DOWNLOAD-CoD2-Basetdm-Mod
-	 - Jump-Mod by IzNoGod
-	 - Portal-Mod
+- http://killtube.org/showthread.php?1533-DOWNLOAD-CoD2-Surf-Mod
+- http://killtube.org/showthread.php?1527-DOWNLOAD-CoD2-Basetdm-Mod
+- Jump-Mod by IzNoGod
+- Portal-Mod
 	
 Little overview of added functions:
-	- MySQL
-	- setVelocity, getVelocity, addVelocity (needed for the mods: portal, surf)
-	- keyPressed-functions for left, right, forward, backward, leanleft, leanright, jump etc., (needed for: surf, doublejump made by IzNoGod)
-	- blazing fast astar-implementation (needed for: zombots)
-	- setAlive-function (needed for: zombots, so xmodels are damagable without damage-trigger... zombots in stockmaps)
-	- disableGlobalPlayerCollision() 
+- MySQL
+- setVelocity, getVelocity, addVelocity (needed for the mods: portal, surf)
+- keyPressed-functions for left, right, forward, backward, leanleft, leanright, jump etc., (needed for: surf, doublejump made by IzNoGod)
+- blazing fast astar-implementation (needed for: zombots)
+- setAlive-function (needed for: zombots, so xmodels are damagable without damage-trigger... zombots in stockmaps)
+- disableGlobalPlayerCollision() 
 	
-Community / Help:
-	http://killtube.org/forum.php
+Community / Help: http://killtube.org/forum.php
