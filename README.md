@@ -11,9 +11,11 @@ apt-get install libmysqlclient-dev:i386
 apt-get install g++-multilib
 ```
 
+Precompiled shared libraries: http://killtube.org/downloads/libcod/
+
 Starting the server:
 
-```LD_PRELOAD=libcod/bin/libcod2_1_3.so ./cod2_lnxded +set fs_game ...```
+```LD_PRELOAD=libcod2_1_3_nomysql.so ./cod2_lnxded +set fs_game ...```
 	
 Working with the source / Compiling:
 ```

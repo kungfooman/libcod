@@ -55,9 +55,11 @@ if [ "$1" == "" ] || [ "$1" == "base" ]; then
 	gcc $options -c cracking.cpp -o objects_normal/cracking.opp
 fi
 
-if [ "$1" == "" ] || [ "$1" == "clear" ]; then
-	echo "##### CLEAR OBJECTS #####"
+if [ "$1" == "" ] || [ "$1" == "clean" ]; then
+	echo "##### CLEAN OBJECTS #####"
 	rm objects_* -r
+	rm bin -r
+	rm libcod.tar
 fi
 
 
