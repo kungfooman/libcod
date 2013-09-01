@@ -13,6 +13,9 @@
 mkdir -p bin
 mkdir -p objects_normal
 
+# clang warns about everything
+cc="gcc"
+
 #options="-I. -m32 -fPIC -fvisibility=hidden -O1"
 options="-I. -m32 -fPIC"
 
@@ -44,15 +47,15 @@ fi
 
 if [ "$1" == "" ] || [ "$1" == "base" ]; then
 	echo "##### COMPILE GSC_ASTAR.CPP #####"
-	gcc $options -c gsc_astar.cpp -o objects_normal/gsc_astar.opp
+	$cc $options -c gsc_astar.cpp -o objects_normal/gsc_astar.opp
 	echo "##### COMPILE GSC_MYSQL.CPP #####"
-	gcc $options -c gsc_mysql.cpp -o objects_normal/gsc_mysql.opp -lmysqlclient -L/usr/lib/mysql
+	$cc $options -c gsc_mysql.cpp -o objects_normal/gsc_mysql.opp -lmysqlclient -L/usr/lib/mysql
 	echo "##### COMPILE SERVER.CPP #####"
-	gcc $options -c server.c -o objects_normal/server.opp -D SERVER_PORT=8000
+	$cc $options -c server.c -o objects_normal/server.opp -D SERVER_PORT=8000
 	echo "##### COMPILE GSC_MEMORY.CPP #####"
-	gcc $options -c gsc_memory.cpp -o objects_normal/gsc_memory.opp
+	$cc $options -c gsc_memory.cpp -o objects_normal/gsc_memory.opp
 	echo "##### COMPILE cracking.CPP #####"
-	gcc $options -c cracking.cpp -o objects_normal/cracking.opp
+	$cc $options -c cracking.cpp -o objects_normal/cracking.opp
 fi
 
 if [ "$1" == "" ] || [ "$1" == "clean" ]; then
@@ -67,14 +70,14 @@ if [ "$1" == "" ] || [ "$1" == "tcc" ]; then
 	mkdir -p objects_tcc
 
 	echo "##### COMPILE gsc_tcc.cpp #####"
-	gcc $options -c gsc_tcc.cpp -o objects_tcc/gsc_tcc.opp
+	$cc $options -c gsc_tcc.cpp -o objects_tcc/gsc_tcc.opp
 fi
 
 if [ "$1" == "" ] || [ "$1" == "car" ]; then
 	mkdir -p objects_car
 
 	echo "##### COMPILE GSC_CAR.CPP #####"
-	gcc $options -c gsc_car.cpp -o objects_car/gsc_car.opp -I/root/q3rally/q3rallysa/
+	$cc $options -c gsc_car.cpp -o objects_car/gsc_car.opp -I/root/q3rally/q3rallysa/
 fi
 
 if [ "$1" == "" ] || [ "$1" == "cod2_1_3" ]; then
@@ -82,17 +85,17 @@ if [ "$1" == "" ] || [ "$1" == "cod2_1_3" ]; then
 
 	mkdir -p objects_$1
 	echo "##### COMPILE $1 LIBCOD.CPP #####"
-	gcc $options $constants -o objects_$1/libcod.opp -c libcod.cpp
+	$cc $options $constants -o objects_$1/libcod.opp -c libcod.cpp
 	echo "##### COMPILE $1 GSC.CPP #####"
-	gcc $options $constants -o objects_$1/gsc.opp -c gsc.cpp
+	$cc $options $constants -o objects_$1/gsc.opp -c gsc.cpp
 	echo "##### COMPILE $1 GSC_PLAYER.CPP #####"
-	gcc $options $constants -o objects_$1/gsc_player.opp -c gsc_player.cpp
+	$cc $options $constants -o objects_$1/gsc_player.opp -c gsc_player.cpp
 	echo "##### COMPILE $1 GSC_UTILS.CPP #####"
-	gcc $options $constants -o objects_$1/gsc_utils.opp -c gsc_utils.cpp
+	$cc $options $constants -o objects_$1/gsc_utils.opp -c gsc_utils.cpp
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	gcc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
+	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
 fi
 # -Xlinker --defsym -Xlinker stackStart=0x08297500 
 
@@ -101,17 +104,17 @@ if [ "$1" == "" ] || [ "$1" == "cod2_1_2" ]; then
 
 	mkdir -p objects_$1
 	echo "##### COMPILE $1 LIBCOD.CPP #####"
-	gcc $options $constants -o objects_$1/libcod.opp -c libcod.cpp
+	$cc $options $constants -o objects_$1/libcod.opp -c libcod.cpp
 	echo "##### COMPILE $1 GSC.CPP #####"
-	gcc $options $constants -o objects_$1/gsc.opp -c gsc.cpp
+	$cc $options $constants -o objects_$1/gsc.opp -c gsc.cpp
 	echo "##### COMPILE $1 GSC_PLAYER.CPP #####"
-	gcc $options $constants -o objects_$1/gsc_player.opp -c gsc_player.cpp
+	$cc $options $constants -o objects_$1/gsc_player.opp -c gsc_player.cpp
 	echo "##### COMPILE $1 GSC_UTILS.CPP #####"
-	gcc $options $constants -o objects_$1/gsc_utils.opp -c gsc_utils.cpp
+	$cc $options $constants -o objects_$1/gsc_utils.opp -c gsc_utils.cpp
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	gcc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
+	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
 fi
 
 
@@ -119,14 +122,14 @@ if [ "$1" == "" ] || [ "$1" == "cod1_1_5" ]; then
 	constants="-D COD_VERSION=COD1_1_5"
 	
 	#echo "##### COMPILE CoD1 1.5 LIBCOD2.CPP #####"
-	#gcc $options $constants -c libcod2.cpp -o libcod2.opp
+	#$cc $options $constants -c libcod2.cpp -o libcod2.opp
 	echo "##### COMPILE CoD1 1.5 GSC.CPP #####"
-	gcc $options $constants -c gsc.cpp -o gsc.opp
+	$cc $options $constants -c gsc.cpp -o gsc.opp
 	#echo "##### COMPILE CoD1 1.5 GSC_PLAYER.CPP #####"
-	#gcc $options $constants -c gsc_player.cpp -o gsc_player.opp
+	#$cc $options $constants -c gsc_player.cpp -o gsc_player.opp
 
 	echo "##### LINK libcod1_1_5.so #####"
-	gcc -m32 -shared -L/lib32 -lmysqlclient -L./vendors/lib -o bin/libcod1_1_5.so libcod2.opp gsc.opp gsc_player.opp gsc_astar.opp gsc_mysql.opp server.opp gsc_memory.opp cracking.opp $objects_tcc -Os -s -ldl -Wall
+	$cc -m32 -shared -L/lib32 -lmysqlclient -L./vendors/lib -o bin/libcod1_1_5.so libcod2.opp gsc.opp gsc_player.opp gsc_astar.opp gsc_mysql.opp server.opp gsc_memory.opp cracking.opp $objects_tcc -Os -s -ldl -Wall
 fi
 
 
@@ -135,17 +138,17 @@ if [ "$1" == "" ] || [ "$1" == "cod4_1_7" ]; then
 
 	mkdir -p objects_$1
 	echo "##### COMPILE $1 LIBCOD.CPP #####"
-	gcc $options $constants -o objects_$1/libcod.opp -c libcod.cpp
+	$cc $options $constants -o objects_$1/libcod.opp -c libcod.cpp
 	echo "##### COMPILE $1 GSC.CPP #####"
-	gcc $options $constants -o objects_$1/gsc.opp -c gsc.cpp
+	$cc $options $constants -o objects_$1/gsc.opp -c gsc.cpp
 	echo "##### COMPILE $1 GSC_PLAYER.CPP #####"
-	gcc $options $constants -o objects_$1/gsc_player.opp -c gsc_player.cpp
+	$cc $options $constants -o objects_$1/gsc_player.opp -c gsc_player.cpp
 	echo "##### COMPILE $1 GSC_UTILS.CPP #####"
-	gcc $options $constants -o objects_$1/gsc_utils.opp -c gsc_utils.cpp
+	$cc $options $constants -o objects_$1/gsc_utils.opp -c gsc_utils.cpp
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	gcc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
+	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
 fi
 
 
@@ -153,13 +156,13 @@ fi
 if [ "$1" == "wrapper" ]; then
 	echo "##### WRAPPER: COMPILE wrapper_libcod2.cpp #####"
 	cp wrapper_libcod2.cpp a.cpp # just for name hiding in the .opp/.so -.-
-	gcc -m32 -fPIC -c a.cpp -o wrapper_libcod2.opp
+	$cc -m32 -fPIC -c a.cpp -o wrapper_libcod2.opp
 
 	#strip wrapper_libcod2.opp
 
 	# make the shared lib for the wrapper
 	echo "##### WRAPPER: LINK wrapper_libcod2.so #####"
-	gcc -m32 -shared -L/lib32 -o wrapper_libcod2.so wrapper_libcod2.opp
+	$cc -m32 -shared -L/lib32 -o wrapper_libcod2.so wrapper_libcod2.opp
 
 
 	cp wrapper_libcod2.so bin/libcod2.so
