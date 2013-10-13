@@ -18,6 +18,10 @@ Precompiled shared libraries: http://killtube.org/downloads/libcod/
 Starting the server:
 
 ```LD_PRELOAD=libcod2_1_3_nomysql.so ./cod2_lnxded +set fs_game ...```
+
+Some enviroments need LD_LIBRARY_PATH also:
+
+```LD_LIBRARY_PATH=. LD_PRELOAD=libcod2_1_3_nomysql.so ./cod2_lnxded +set fs_game ...```
 	
 Working with the source / Compiling:
 ```
@@ -33,8 +37,8 @@ Working with the source / Compiling:
 Mods depending on *libcod*:
 - http://killtube.org/showthread.php?1533-DOWNLOAD-CoD2-Surf-Mod
 - http://killtube.org/showthread.php?1527-DOWNLOAD-CoD2-Basetdm-Mod
+- http://killtube.org/showthread.php?1593-DOWNLOAD-CoD2-Portal-Mod
 - Jump-Mod by IzNoGod
-- Portal-Mod
 	
 Little overview of added functions:
 - MySQL
