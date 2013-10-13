@@ -117,6 +117,24 @@ if [ "$1" == "" ] || [ "$1" == "cod2_1_2" ]; then
 	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
 fi
 
+if [ "$1" == "" ] || [ "$1" == "cod2_1_0" ]; then
+	constants="-D COD2_VERSION=COD2_VERSION_1_0 -D COD_VERSION=COD2_1_0"
+
+	mkdir -p objects_$1
+	echo "##### COMPILE $1 LIBCOD.CPP #####"
+	#$cc $options $constants -o objects_$1/libcod.opp -c libcod.cpp
+	echo "##### COMPILE $1 GSC.CPP #####"
+	$cc $options $constants -o objects_$1/gsc.opp -c gsc.cpp
+	echo "##### COMPILE $1 GSC_PLAYER.CPP #####"
+	#$cc $options $constants -o objects_$1/gsc_player.opp -c gsc_player.cpp
+	echo "##### COMPILE $1 GSC_UTILS.CPP #####"
+	#$cc $options $constants -o objects_$1/gsc_utils.opp -c gsc_utils.cpp
+
+	echo "##### LINK lib$1.so #####"
+	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
+	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
+fi
+
 
 if [ "$1" == "" ] || [ "$1" == "cod1_1_5" ]; then
 	constants="-D COD_VERSION=COD1_1_5"

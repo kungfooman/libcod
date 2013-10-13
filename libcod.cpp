@@ -552,9 +552,9 @@ int codecallback_playercommand = 0;
 
 
 typedef void (*gametype_scripts_t)();
-#if COD2_VERSION == COD2_VERSION_1_2
+#if COD_VERSION == COD2_1_2
 	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x0811012A;
-#elif COD2_VERSION == COD2_VERSION_1_3
+#elif COD_VERSION == COD2_1_3
 	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x08110286;
 #else
 	#warning gametype_scripts_t gametype_scripts = (gametype_scripts_t)NULL;
@@ -562,9 +562,9 @@ typedef void (*gametype_scripts_t)();
 #endif
 
 typedef int (*codscript_load_function_t)(char *file, char *function, int isNeeded);
-#if COD2_VERSION == COD2_VERSION_1_2
+#if COD_VERSION == COD2_1_2
 	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x081100AC;
-#elif COD2_VERSION == COD2_VERSION_1_3
+#elif COD_VERSION == COD2_1_3
 	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x08110208;
 #else
 	#warning codscript_load_function_t codscript_load_function = (codscript_load_function_t)NULL;
@@ -624,9 +624,9 @@ int hook_ClientCommand(int clientNum)
 	}
 
 	// todo: G_ENTITY(clientNum)
-	#if COD2_VERSION == COD2_VERSION_1_2
+	#if COD_VERSION == COD2_1_2
 		short ret = codscript_call_callback_entity(/*gentity*/0x08679380 + 560 * clientNum, codecallback_playercommand, 1);
-	#elif COD2_VERSION == COD2_VERSION_1_3
+	#elif COD_VERSION == COD2_1_3
 		short ret = codscript_call_callback_entity(/*gentity*/0x08716400 + 560 * clientNum, codecallback_playercommand, 1);
 	#else
 		#warning short ret = codscript_call_callback_entity(NULL, codecallback_playercommand, 1);
@@ -693,9 +693,9 @@ void Cmd_AddCommand(const char *cmd_name, xcommand_t function)
 {
 	void (*signature)(const char *cmd_name, xcommand_t function);
 
-	#if COD2_VERSION == COD2_VERSION_1_2
+	#if COD_VERSION == COD2_1_2
 		*((int *)(&signature)) = 0x080606BE;
-	//#elif COD2_VERSION == COD2_VERSION_1_3
+	//#elif COD_VERSION == COD2_1_3
 	//	printf_hide("Cmd_AddCommand not implemented!\n");
 	//	return;
 	#elif COD_VERSION == COD4_1_7
@@ -1437,6 +1437,8 @@ void SV_SendServerCommand(/*client_t*/int *client, int bla, const char *fmt, ...
 	printf("client=%08x bla=%08p message=%s\n", client, bla, message);
 }
 
+#define TOSTRING2(str) #str
+#define TOSTRING1(str) TOSTRING2(str) // else there is written "__LINE__"
 class cCallOfDuty2Pro
 {
 	public:
@@ -1444,13 +1446,13 @@ class cCallOfDuty2Pro
 	{
 	
 		setbuf(stdout, NULL); // otherwise the printf()'s are printed at crash/end
-	
-		#if COD2_VERSION == COD2_VERSION_1_2
+
+		#if COD_VERSION == COD2_1_2
 			printf("> [INFO] Compiled for: CoD2 1.2\n");
-		#elif COD2_VERSION == COD2_VERSION_1_3
+		#elif COD_VERSION == COD2_1_3
 			printf("> [INFO] Compiled for: CoD2 1.3\n");
 		#else
-			printf("> [WARNING] Compiled for: %s\n", str(COD_VERSION));
+			printf("> [WARNING] Compiled for: %s\n", TOSTRING1(COD_VERSION));
 		#endif
 		
 		printf("Compiled: " __DATE__ " " __TIME__ "\n");
@@ -1517,19 +1519,21 @@ class cCallOfDuty2Pro
 		#endif
 		
 		// SET gsc.closer TO c.closer
-		#if COD2_VERSION == COD2_VERSION_1_2
+		#if COD_VERSION == COD2_1_2
 			int *addressToCloserPointer = (int *)0x081872D0;
-		#elif COD2_VERSION == COD2_VERSION_1_3
+		#elif COD_VERSION == COD2_1_3
 			int *addressToCloserPointer = (int *)0x081882F0;
 		#elif COD_VERSION == COD4_1_7
 			int *addressToCloserPointer = (int *)0x0826D66C;
+		#elif COD_VERSION == COD2_1_0
+			int *addressToCloserPointer = (int *)0x08167E70;
 		#else
 			#warning int *addressToCloserPointer = NULL;
 			int *addressToCloserPointer = NULL;
 		#endif
 		printf_hide("> [INFO] value of closer=%.8x\n", *addressToCloserPointer);
 		*addressToCloserPointer = (int) cdecl_injected_closer/*_stack_debug*/;
-		
+		//printf("after\n");
 
 		/*
 		printf_hide("> [INFO] recvfrom=%08x\n", dlsym(NULL, "recvfrom"));
@@ -1675,8 +1679,12 @@ class cCallOfDuty2Pro
 			Happy gaming, Mokolator. 
 		*/
 		
-		Cmd_AddCommand("stupidTestFunction", stupidTestFunction);
-
+		#if COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
+			Cmd_AddCommand("stupidTestFunction", stupidTestFunction);
+		#endif
+		
+		//printf("checkpoint 2\n");
+		
 		
 		#if COMPILE_DEBUG_SERVER == 1
 		//startServerAsThread();
@@ -1689,7 +1697,7 @@ class cCallOfDuty2Pro
 				- done, current position is wanted address
 		*/
 		
-		#if COD2_VERSION == COD2_VERSION_1_2
+		#if COD_VERSION == COD2_1_2
 			//cracking_hook_function(0x0804A0B4, (int)hook_sendto);
 			//#error asd
 			printf("cracking_hook_function(0x08049E64, (int)hook_recvfrom);\n");
@@ -1700,16 +1708,10 @@ class cCallOfDuty2Pro
 			//cracking_hook_function(0x0804A084, (int)hook_fread);
 		#endif
 		
-		#if COD2_VERSION == COD2_VERSION_1_3
+		#if COD_VERSION == COD2_1_3
 			cracking_hook_function(0x08049E64, (int)hook_recvfrom); // same address then cod2 1.2
 		#endif
-		
-		
-		//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
-		cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 	
-		cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
-			
 		
 		//cracking_hook_function(0x08078EE6, (int)hook_str2hash_8078EE6);
 		
@@ -1721,6 +1723,16 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x08094958, (int)SV_SendServerCommand);
+				
+			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
+			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
+			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
+		#endif
+		
+		#if COD_VERSION == COD2_1_3
+			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
+			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
+			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 		#endif
 		
 		printf_hide("> [PLUGIN LOADED]\n");

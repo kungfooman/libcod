@@ -6,6 +6,8 @@ The Call of Duty extension *libcod* is adding new server-side functions to:
 
 Requirements:
 ```
+dpkg --add-architecture i386
+apt-get update
 apt-get install gcc-multilib
 apt-get install libmysqlclient-dev:i386
 apt-get install g++-multilib

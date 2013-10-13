@@ -7,34 +7,38 @@
 */
 int getStack()
 {
-	#if COD_VERSION == COD2_1_2
-		return 0x83D7A10; // diff to 1.3: 1080
+	#  if COD_VERSION == COD2_1_0
+		return 0x083D7610;
+	#elif COD_VERSION == COD2_1_2
+		return 0x083D7A10; // diff to 1.3: 1080
 	#elif COD_VERSION == COD2_1_3
-		return 0x83D8A90;
+		return 0x083D8A90;
 	#elif COD_VERSION == COD1_1_5
 		return 0x0830AE88;
 	#elif COD_VERSION == COD4_1_7
 		return 0x08c055b0;
 	#else
 		#warning int getStack() return NULL;
-		return NULL;
+		return (int)NULL;
 	#endif
 }
 
 // function can be found in same context as getStack()
 int getNumberOfParams() // as in stackNew()
 {
-	#if COD_VERSION == COD2_1_2
-		return 0x83D7A1C; // diff to 1.3: 1080
+	#  if COD_VERSION == COD2_1_0
+		return 0x083D761C;
+	#elif COD_VERSION == COD2_1_2
+		return 0x083D7A1C; // diff to 1.3: 1080
 	#elif COD_VERSION == COD2_1_3
-		return 0x83D8A9C;
+		return 0x083D8A9C;
 	#elif COD_VERSION == COD1_1_5
 		return 0x0830AE84;
 	#elif COD_VERSION == COD4_1_7
 		return 0x08c055bc;
 	#else
 		#warning int getNumberOfParams() return NULL;
-		return NULL;
+		return (int)NULL;
 	#endif
 }
 
@@ -76,7 +80,9 @@ int stackGetParamString(int param, char **value) // as in the sub-functions in g
 	// lnxded 1.3: get_string_stack_element_by_id_sub_8078ec8(int id)
 	//printf_hide("datatable + 8*%d = %.8x \"%s\"\n", arg->offsetData, *(int *)0x08206F00 + 8*(int)arg->offsetData, *(int *)0x08206F00 + 8*(int)arg->offsetData + 4);
 	
-	#if COD_VERSION == COD2_1_2
+	#  if COD_VERSION == COD2_1_0
+		*value = (char *)(*(int *)0x08283E80 + 8*(int)arg->offsetData + 4);
+	#elif COD_VERSION == COD2_1_2
 		*value = (char *)(*(int *)0x08205E80 + 8*(int)arg->offsetData + 4);
 	#elif COD_VERSION == COD2_1_3
 		*value = (char *)(*(int *)0x08206F00 + 8*(int)arg->offsetData + 4);
@@ -182,7 +188,9 @@ int stackNew()
 {
 	int (*signature)();
 	
-	#if COD_VERSION == COD2_1_2
+	#if COD_VERSION == COD2_1_0
+		*((int *)(&signature)) = 0x080837B0;
+	#elif COD_VERSION == COD2_1_2
 		*((int *)(&signature)) = 0x08083D2C;
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08083DF8;
@@ -192,7 +200,7 @@ int stackNew()
 		*((int *)(&signature)) = 0x0815EC48;
 	#else
 		#warning int stackNew() *((int *)(&signature)) = NULL;
-		*((int *)(&signature)) = NULL;
+		*((int *)(&signature)) = (int)NULL;
 	#endif
 	
 	return signature();
@@ -246,7 +254,9 @@ int stackPushInt(int ret) // as in isalive
 	#if 1
 		int (*signature)(int);
 		
-		#if COD_VERSION == COD2_1_2
+		#  if COD_VERSION == COD2_1_0
+			*((int *)(&signature)) = 0x08084B1C;
+		#elif COD_VERSION == COD2_1_2
 			*((int *)(&signature)) = 0x08085098; // difference to 1.3: CC
 		#elif COD_VERSION == COD2_1_3
 			*((int *)(&signature)) = 0x08085164;
@@ -254,7 +264,7 @@ int stackPushInt(int ret) // as in isalive
 			*((int *)(&signature)) = 0x0815EFFA;
 		#else
 			#warning int stackPushInt(int ret)
-			*((int *)(&signature)) = NULL;
+			*((int *)(&signature)) = (int)NULL;
 		#endif
 		
 		return signature(ret);
@@ -291,7 +301,9 @@ int stackPushVector(float *ret) // as in vectornormalize
 	
 	int (*signature)(float *);
 	
-	#if COD_VERSION == COD2_1_2
+	#  if COD_VERSION == COD2_1_0
+		*((int *)(&signature)) = 0x08084CBE;
+	#elif COD_VERSION == COD2_1_2
 		*((int *)(&signature)) = 0x0808523A; // difference to 1.3: CC
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08085306;
@@ -302,7 +314,7 @@ int stackPushVector(float *ret) // as in vectornormalize
 		*((int *)(&signature)) = 0x0815EDF2;
 	#else
 		#warning int stackPushVector(float *ret) *((int *)(&signature)) = NULL;
-		*((int *)(&signature)) = NULL;
+		*((int *)(&signature)) = (int)NULL;
 	#endif
 	
 	return signature(ret);
@@ -325,7 +337,9 @@ int stackPushFloat(float ret) // as in distance
 {
 	int (*signature)(float);
 	
-	#if COD_VERSION == COD2_1_2
+	#  if COD_VERSION == COD2_1_0
+		*((int *)(&signature)) = 0x08084B40;
+	#elif COD_VERSION == COD2_1_2
 		*((int *)(&signature)) = 0x080850BC; // difference to 1.3: CC
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08085188;
@@ -333,7 +347,7 @@ int stackPushFloat(float ret) // as in distance
 		*((int *)(&signature)) = 0x0815EF7A;
 	#else
 		#warning int stackPushFloat(float ret) *((int *)(&signature)) = NULL;
-		*((int *)(&signature)) = NULL;
+		*((int *)(&signature)) = (int)NULL;
 	#endif
 	
 	return signature(ret);
@@ -342,7 +356,9 @@ int stackPushString(char *toPush) // as in getcvar()
 {
 	int (*signature)(char *);
 	
-	#if COD_VERSION == COD2_1_2
+	#  if COD_VERSION == COD2_1_0
+		*((int *)(&signature)) = 0x08084C1A;
+	#elif COD_VERSION == COD2_1_2
 		*((int *)(&signature)) = 0x08085196; // difference to 1.3: CC
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08085262;
@@ -350,7 +366,7 @@ int stackPushString(char *toPush) // as in getcvar()
 		*((int *)(&signature)) = 0x0815EC48;
 	#else
 		#warning int stackPushString(char *toPush) *((int *)(&signature)) = NULL;
-		*((int *)(&signature)) = NULL;
+		*((int *)(&signature)) = (int)NULL;
 	#endif
 	
 	return signature(toPush);
@@ -359,7 +375,9 @@ int stackPushEntity(int arg) // as in getent() // todo: find out how to represen
 {
 	int (*signature)(int);
 	
-	#if COD_VERSION == COD2_1_2
+	#  if COD_VERSION == COD2_1_0
+		*((int *)(&signature)) = 0x08118CC0;
+	#elif COD_VERSION == COD2_1_2
 		*((int *)(&signature)) = 0x0811AFF4; // difference OTHER then CC
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08117F50;
@@ -367,7 +385,7 @@ int stackPushEntity(int arg) // as in getent() // todo: find out how to represen
 		*((int *)(&signature)) = 0x080C7770;
 	#else
 		#warning int stackPushEntity(int arg) *((int *)(&signature)) = NULL;
-		*((int *)(&signature)) = NULL;
+		*((int *)(&signature)) = (int)NULL;
 	#endif
 	
 	return signature(arg);
@@ -386,7 +404,9 @@ int alloc_object_and_push_to_array() // use stackPushArray() now
 {
 	int (*signature)();
 	
-	#if COD_VERSION == COD2_1_2
+	#  if COD_VERSION == COD2_1_0
+		*((int *)(&signature)) = 0x08084CF0;
+	#elif COD_VERSION == COD2_1_2
 		*((int *)(&signature)) = 0x0808526C;
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08085338;
@@ -394,7 +414,7 @@ int alloc_object_and_push_to_array() // use stackPushArray() now
 		*((int *)(&signature)) = 0x0815ED6A;
 	#else
 		#warning int alloc_object_and_push_to_array() *((int *)(&signature)) = NULL;
-		*((int *)(&signature)) = NULL;
+		*((int *)(&signature)) = (int)NULL;
 	#endif
 	
 	return signature();
@@ -415,7 +435,9 @@ int push_previous_var_in_array_sub() // stackPushArrayLast()
 {
 	int (*signature)();
 	
-	#if COD_VERSION == COD2_1_2
+	#  if COD_VERSION == COD2_1_0
+		*((int *)(&signature)) = 0x08084D1C;
+	#elif COD_VERSION == COD2_1_2
 		*((int *)(&signature)) = 0x08085298;
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08085364;
@@ -423,7 +445,7 @@ int push_previous_var_in_array_sub() // stackPushArrayLast()
 		*((int *)(&signature)) = 0x0815D5A0;
 	#else
 		#warning int push_previous_var_in_array_sub() *((int *)(&signature)) = NULL;
-		*((int *)(&signature)) = NULL;
+		*((int *)(&signature)) = (int)NULL;
 	#endif
 	
 	return signature();
@@ -935,6 +957,42 @@ int cdecl_injected_closer()
 	
 	// print in debug-modus dynamically the parameters
 	//printf_hide("scriptengine> closer(function=%d, %d, %.2f, %.2f, %.2f)\n", function, playerid, velocity_x, velocity_y, velocity_z);
+
+	
+	#if 0
+		printf("Welcome in my closer()! The first step for a new CoD-Version is to make stackGetNumberOfParams() work!\n");
+		printf("argc=%d\n", stackGetNumberOfParams());
+		//exit(1);
+		
+		if (0)
+		{
+			int testInt;
+			if (stackGetParamInt(0, &testInt))
+				printf("testInt: %d\n", testInt);
+			else
+				printf("No INT given!\n");
+			return stackPushInt(111);
+		}
+		if (0)
+		{
+			char *testString;
+			if (stackGetParamString(0, &testString))
+				printf("testString: \"%s\"\n", testString);
+			else
+				printf("No STRING given!\n");
+			return stackPushString("aaaaaaaaaaaa");
+		}
+		if (0)
+		{
+			float testVector[3];
+			if (stackGetParamVector(0, testVector))
+				printf("testVector: (%.2f, %.2f, %.2f)\n", testVector[0], testVector[1], testVector[2]);
+			else
+				printf("No VECTOR given!\n");
+			float tmp[3] = {0,1,2};
+			return stackPushVector(tmp);
+		}
+	#endif
 	
 	float reference[3], point_a[3], point_b[3];
 	if (
@@ -963,36 +1021,7 @@ int cdecl_injected_closer()
 			return stackPushInt(0);
 	}
 	
-	#if 0
-		printf("Welcome in my closer()! The first step for a new CoD-Version is to make stackGetParamInt() work!\n");
-		printf("argc=%d\n", stackGetNumberOfParams());
-		//exit(1);
-		
-		if (0)
-		{
-			int testInt;
-			if (stackGetParamInt(0, &testInt))
-				printf("testInt: %d\n", testInt);
-			else
-				printf("No INT given!\n");
-		}
-		if (0)
-		{
-			char *testString;
-			if (stackGetParamString(0, &testString))
-				printf("testString: \"%s\"\n", testString);
-			else
-				printf("No STRING given!\n");
-		}
-		if (0)
-		{
-			float testVector[3];
-			if (stackGetParamVector(0, testVector))
-				printf("testString: (%.2f, %.2f, %.2f)\n", testVector[0], testVector[1], testVector[2]);
-			else
-				printf("No STRING given!\n");
-		}
-	#endif
+
 	
 	
 	if (!stackGetParamInt(0, &function))

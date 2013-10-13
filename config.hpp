@@ -32,6 +32,6 @@
 #define DEBUG_PRINTF 1
 
 // GLOBAL MACROS
-#define str(s) #s // stringify used for __FUNCTION__
+#define STR(s) #s // stringify used for __FUNCTION__
 
 #endif

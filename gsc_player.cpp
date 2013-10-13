@@ -44,6 +44,9 @@
 	#define PLAYERSTATE_VELOCITY(playerid) (PLAYERSTATE(playerid) + 0x20)
 #elif COD_VERSION == COD4_1_7
 	#define PLAYERSTATE_VELOCITY(playerid) (PLAYERSTATE(playerid) + 40)
+#else
+	#warning NO PLAYERSTATE_VELOCITY!
+	#define PLAYERSTATE_VELOCITY(playerid) 0
 #endif
 
 int gsc_player_velocity_set()
@@ -489,7 +492,6 @@ int gsc_player_getip()
 		int info_size = 0x0;
 		int info_ip_offset = 0x0;
 		int info_port_offset = 0x0;
-		return stackReturnUndefined();
 	#endif
 	
 	int info_player = info_base + playerid * info_size;
@@ -538,7 +540,6 @@ int gsc_player_getping()
 		int info_size = 0x0;
 		int info_ip_offset = 0x0;
 		int info_port_offset = 0x0;
-		return stackReturnUndefined();
 	#endif
 	
 	int info_player = info_base + playerid * info_size;

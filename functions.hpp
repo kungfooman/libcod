@@ -38,7 +38,7 @@ typedef int (*ClientCommand_t)(int clientNum);
 	#warning static ClientCommand_t ClientCommand = (ClientCommand_t)NULL;
 	#warning static int hook_ClientCommand_call = NULL;
 	static ClientCommand_t ClientCommand = (ClientCommand_t)NULL;
-	static int hook_ClientCommand_call = NULL;
+	static int hook_ClientCommand_call = (int)NULL;
 #endif
 
 typedef short (*codscript_call_callback_entity_t)(int self, int callback, int params);

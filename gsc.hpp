@@ -74,7 +74,7 @@ static void printf_hide(const char *str, ...)
 	in cod4 search for "developer codepos"
 */
 
-#if COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
+#if COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3 || COD_VERSION == COD2_1_0
 	#define STACK_UNDEFINED 0
 	#define STACK_OBJECT 1
 	#define STACK_STRING 2
