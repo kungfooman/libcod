@@ -81,7 +81,7 @@ if [ "$1" == "" ] || [ "$1" == "car" ]; then
 fi
 
 if [ "$1" == "" ] || [ "$1" == "cod2_1_3" ]; then
-	constants="-D COD2_VERSION=COD2_VERSION_1_3 -D COD_VERSION=COD2_1_2"
+	constants="-D COD2_VERSION=COD2_VERSION_1_3 -D COD_VERSION=COD2_1_3"
 
 	mkdir -p objects_$1
 	echo "##### COMPILE $1 LIBCOD.CPP #####"
