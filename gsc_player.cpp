@@ -479,14 +479,19 @@ int gsc_player_getip()
 		return stackPushUndefined();
 	}
 	
-	#if COD2_VERSION == COD2_VERSION_1_3
-		int info_base = *(int *)0x0842308C;
-		int info_size = 0xB1064;
-		int info_ip_offset = 0x6E6D8;
-		int info_port_offset = 0x6E6B4;
+	#if COD2_VERSION == COD2_VERSION_1_0
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+		int info_ip_offset = 0x6E5C8;
+		int info_port_offset = 0x6E5A4;
 	#elif COD2_VERSION == COD2_VERSION_1_2
 		int info_base = *(int *)0x0842200C;
 		int info_size = 0x79064;
+		int info_ip_offset = 0x6E6D8;
+		int info_port_offset = 0x6E6B4;	
+	#elif COD2_VERSION == COD2_VERSION_1_3
+		int info_base = *(int *)0x0842308C;
+		int info_size = 0xB1064;
 		int info_ip_offset = 0x6E6D8;
 		int info_port_offset = 0x6E6B4;
 	#else
@@ -527,14 +532,19 @@ int gsc_player_getping()
 		return stackPushUndefined();
 	}
 	
-	#if COD2_VERSION == COD2_VERSION_1_3
-		int info_base = *(int *)0x0842308C;
-		int info_size = 0xB1064;
-		int info_ip_offset = 0x6E6D8;
-		int info_port_offset = 0x6E6B4;
+	#if COD2_VERSION == COD2_VERSION_1_0
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+		int info_ip_offset = 0x6E5C8;
+		int info_port_offset = 0x6E5A4;
 	#elif COD2_VERSION == COD2_VERSION_1_2
 		int info_base = *(int *)0x0842200C;
 		int info_size = 0x79064;
+		int info_ip_offset = 0x6E6D8;
+		int info_port_offset = 0x6E6B4;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+		int info_base = *(int *)0x0842308C;
+		int info_size = 0xB1064;
 		int info_ip_offset = 0x6E6D8;
 		int info_port_offset = 0x6E6B4;
 	#else
