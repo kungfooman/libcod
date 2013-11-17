@@ -2,7 +2,10 @@
 
 #if COMPILE_PLAYER == 1
 
-#if COD2_VERSION == COD2_VERSION_1_2
+#if COD2_VERSION == COD2_VERSION_1_0
+	int playerStates = 0x086F1480; // search 'winner'
+	int sizeOfPlayer = 0x28A4;
+#elif COD2_VERSION == COD2_VERSION_1_2
 	int playerStates = 0x08705480; // as in game initialisation "------- Game Initializati"
 	int sizeOfPlayer = 0x28A4;
 	// memset(&playerStates_8705480, 0, 0xA2900u);  
@@ -202,7 +205,7 @@ int gsc_player_button_left()
 		return stackReturnInt(0);
 	}
 
-	#if COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
+	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26FD);
 	#elif COD_VERSION == COD4_1_7
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FA7);
@@ -227,7 +230,7 @@ int gsc_player_button_right()
 		return stackReturnInt(0);
 	}
 
-	#if COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
+	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26FD);
 	#elif COD_VERSION == COD4_1_7
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FA7);
@@ -253,7 +256,7 @@ int gsc_player_button_forward()
 		return stackReturnInt(0);
 	}
 	
-	#if COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
+	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26FC);
 	#elif COD_VERSION == COD4_1_7
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FA6);
@@ -279,7 +282,7 @@ int gsc_player_button_back()
 		return stackReturnInt(0);
 	}
 	
-	#if COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
+	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26FC);
 	#elif COD_VERSION == COD4_1_7
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FA6);
@@ -305,7 +308,7 @@ int gsc_player_button_leanleft()
 		return stackReturnInt(0);
 	}
 
-	#if COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
+	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26E8);
 	#elif COD_VERSION == COD4_1_7
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FB4);
@@ -332,7 +335,7 @@ int gsc_player_button_leanright()
 		return stackReturnInt(0);
 	}
 	
-	#if COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
+	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26E8);
 	#elif COD_VERSION == COD4_1_7
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FB4);
@@ -358,7 +361,7 @@ int gsc_player_button_jump()
 		return stackReturnInt(0);
 	}
 	
-	#if COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
+	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26E9);
 	#elif COD_VERSION == COD4_1_7
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FB5);

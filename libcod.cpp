@@ -552,7 +552,9 @@ int codecallback_playercommand = 0;
 
 
 typedef void (*gametype_scripts_t)();
-#if COD_VERSION == COD2_1_2
+#if COD_VERSION == COD2_1_0
+	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x0810DDEE; 
+#elif COD_VERSION == COD2_1_2
 	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x0811012A;
 #elif COD_VERSION == COD2_1_3
 	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x08110286;
@@ -562,7 +564,9 @@ typedef void (*gametype_scripts_t)();
 #endif
 
 typedef int (*codscript_load_function_t)(char *file, char *function, int isNeeded);
-#if COD_VERSION == COD2_1_2
+#if COD_VERSION == COD2_1_0
+	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x0810DD70;
+#elif COD_VERSION == COD2_1_2
 	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x081100AC;
 #elif COD_VERSION == COD2_1_3
 	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x08110208;
@@ -1447,7 +1451,9 @@ class cCallOfDuty2Pro
 	
 		setbuf(stdout, NULL); // otherwise the printf()'s are printed at crash/end
 
-		#if COD_VERSION == COD2_1_2
+		#if COD_VERSION == COD2_1_0
+			printf("> [INFO] Compiled for: CoD2 1.0\n");
+		#elif COD_VERSION == COD2_1_2
 			printf("> [INFO] Compiled for: CoD2 1.2\n");
 		#elif COD_VERSION == COD2_1_3
 			printf("> [INFO] Compiled for: CoD2 1.3\n");
@@ -2007,8 +2013,6 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
 
     return rf;
 }
-
-
 
 #pragma GCC visibility pop
 

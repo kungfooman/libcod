@@ -6,7 +6,9 @@
 // CoD2 1.2 = 80601F2
 static int trap_Argc()
 {
-	#if COD2_VERSION == COD2_VERSION_1_2
+	#if COD2_VERSION == COD2_VERSION_1_0
+		return *(int *)0x0819BE80;
+	#elif COD2_VERSION == COD2_VERSION_1_2
 		return *(int *)0x0819E080;
 	#elif COD2_VERSION == COD2_VERSION_1_3
 		return *(int *)0x0819F100;
@@ -17,7 +19,9 @@ static int trap_Argc()
 }
 
 typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
-#if COD2_VERSION == COD2_VERSION_1_2
+#if COD2_VERSION == COD2_VERSION_1_0
+	static trap_Argv_t trap_Argv = (trap_Argv_t)0x08060074;
+#elif COD2_VERSION == COD2_VERSION_1_2
 	static trap_Argv_t trap_Argv = (trap_Argv_t)0x08060280;
 #elif COD2_VERSION == COD2_VERSION_1_3
 	static trap_Argv_t trap_Argv = (trap_Argv_t)0x08060278;
@@ -28,7 +32,10 @@ typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
 
 
 typedef int (*ClientCommand_t)(int clientNum);
-#if COD2_VERSION == COD2_VERSION_1_2
+#if COD2_VERSION == COD2_VERSION_1_0
+	static ClientCommand_t ClientCommand = (ClientCommand_t)0x080FE998; // search 'say_team' and see code xref function
+	static int hook_ClientCommand_call = 0x0808F281;
+#elif COD2_VERSION == COD2_VERSION_1_2
 	static ClientCommand_t ClientCommand = (ClientCommand_t)0x08100D1E;
 	static int hook_ClientCommand_call = 0x08090B0C;
 #elif COD2_VERSION == COD2_VERSION_1_3
@@ -42,7 +49,10 @@ typedef int (*ClientCommand_t)(int clientNum);
 #endif
 
 typedef short (*codscript_call_callback_entity_t)(int self, int callback, int params);
-#if COD2_VERSION == COD2_VERSION_1_2
+#if COD2_VERSION == COD2_VERSION_1_0
+	static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)0x08118DF4; // search 'badMOD'
+
+#elif COD2_VERSION == COD2_VERSION_1_2
 	static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)0x0811B128;
 #elif COD2_VERSION == COD2_VERSION_1_3
 	static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)0x0811B284;
@@ -52,7 +62,9 @@ typedef short (*codscript_call_callback_entity_t)(int self, int callback, int pa
 #endif
 
 typedef int (*codscript_callback_finish_t)(short callback_handle);
-#if COD2_VERSION == COD2_VERSION_1_2
+#if COD2_VERSION == COD2_VERSION_1_0
+	static codscript_callback_finish_t codscript_callback_finish = (codscript_callback_finish_t)0x08083B8E;
+#elif COD2_VERSION == COD2_VERSION_1_2
 	static codscript_callback_finish_t codscript_callback_finish = (codscript_callback_finish_t)0x0808410A;
 #elif COD2_VERSION == COD2_VERSION_1_3
 	static codscript_callback_finish_t codscript_callback_finish = (codscript_callback_finish_t)0x080841D6;
