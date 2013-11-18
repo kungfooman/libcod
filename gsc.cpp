@@ -7,7 +7,7 @@
 */
 int getStack()
 {
-	#  if COD_VERSION == COD2_1_0
+	#if COD_VERSION == COD2_1_0
 		return 0x083D7610;
 	#elif COD_VERSION == COD2_1_2
 		return 0x083D7A10; // diff to 1.3: 1080
@@ -19,6 +19,26 @@ int getStack()
 		return 0x08c055b0;
 	#else
 		#warning int getStack() return NULL;
+		return (int)NULL;
+	#endif
+}
+
+/*
+	search for '\"%s\" is: \"%s^7\" default: \"%s^7\"\n'
+	Now see code ref. Now you need find a function that only calls that function
+*/
+int getExecuteString()
+{
+	#if COD_VERSION == COD2_1_0
+		return 0x08060754;
+	#elif COD_VERSION == COD2_1_2
+		return 0x080609D4;
+	#elif COD_VERSION == COD2_1_3
+		return 0x080609CC;
+	#elif COD_VERSION == COD4_1_7
+		return 0x08111F32;
+	#else
+		#warning int getExecuteString() return NULL;
 		return (int)NULL;
 	#endif
 }
@@ -1620,6 +1640,35 @@ typedef struct aSearchPath_t{
 			//SV_SendServerCommand(NULL, 0, "f \"Un^9Real.JumperZ^2/^7IzNoGoD ^7quit the game\"");
 			SV_SendServerCommand((unsigned int *)0xec859008, 0, "h \"some chat msg\"");
 		
+			return stackPushInt(1);
+		}
+
+		case 1204:
+		{
+			#if COD_VERSION == COD4_1_7
+				void (*Cmd_ExecuteString)(int a1, int a2, const char *text);
+			#else
+				void (*Cmd_ExecuteString)(const char *text);
+			#endif
+
+			(*(int *)&Cmd_ExecuteString) = getExecuteString();
+
+			char *msg;
+			int helper = 0;
+			helper += stackGetParamString(1, &msg); // todo: is string?
+
+			if (helper < 1)
+			{
+				printf_hide("scriptengine> wrongs args for: say(): at least 1 arg\n");
+				return stackReturnInt(0);
+			}
+
+			#if COD_VERSION == COD4_1_7
+				Cmd_ExecuteString(0, 0, msg); // idk what first 2 numbers do
+			#else
+				Cmd_ExecuteString(msg);
+			#endif
+
 			return stackPushInt(1);
 		}
 	}
