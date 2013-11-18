@@ -30,7 +30,10 @@
 	int sizeOfPlayer = NULL;
 #endif
 
-#if COD2_VERSION == COD2_VERSION_1_2
+#if COD2_VERSION == COD2_VERSION_1_0
+	int gentities = 0x08665480;
+	int gentities_size = 560;
+#elif COD2_VERSION == COD2_VERSION_1_2
 	int gentities = 0x08679380;
 	int gentities_size = 560;
 #elif COD2_VERSION == COD2_VERSION_1_3
@@ -43,7 +46,7 @@
 #endif
 
 #define PLAYERSTATE(playerid) (playerStates + playerid * sizeOfPlayer)
-#if COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
+#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 	#define PLAYERSTATE_VELOCITY(playerid) (PLAYERSTATE(playerid) + 0x20)
 #elif COD_VERSION == COD4_1_7
 	#define PLAYERSTATE_VELOCITY(playerid) (PLAYERSTATE(playerid) + 40)
