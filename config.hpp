@@ -33,5 +33,6 @@
 
 // GLOBAL MACROS
 #define STR(s) #s // stringify used for __FUNCTION__
+#define INT(address) (*(int*)(address))
 
 #endif
