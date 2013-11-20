@@ -122,13 +122,13 @@ if [ "$1" == "" ] || [ "$1" == "cod2_1_0" ]; then
 
 	mkdir -p objects_$1
 	echo "##### COMPILE $1 LIBCOD.CPP #####"
-	#$cc $options $constants -o objects_$1/libcod.opp -c libcod.cpp
+	$cc $options $constants -o objects_$1/libcod.opp -c libcod.cpp
 	echo "##### COMPILE $1 GSC.CPP #####"
 	$cc $options $constants -o objects_$1/gsc.opp -c gsc.cpp
 	echo "##### COMPILE $1 GSC_PLAYER.CPP #####"
-	#$cc $options $constants -o objects_$1/gsc_player.opp -c gsc_player.cpp
+	$cc $options $constants -o objects_$1/gsc_player.opp -c gsc_player.cpp
 	echo "##### COMPILE $1 GSC_UTILS.CPP #####"
-	#$cc $options $constants -o objects_$1/gsc_utils.opp -c gsc_utils.cpp
+	$cc $options $constants -o objects_$1/gsc_utils.opp -c gsc_utils.cpp
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"

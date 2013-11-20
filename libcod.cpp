@@ -552,7 +552,9 @@ int codecallback_playercommand = 0;
 
 
 typedef void (*gametype_scripts_t)();
-#if COD_VERSION == COD2_1_2
+#if COD_VERSION == COD2_1_0
+	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x0810DDEE; 
+#elif COD_VERSION == COD2_1_2
 	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x0811012A;
 #elif COD_VERSION == COD2_1_3
 	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x08110286;
@@ -562,7 +564,9 @@ typedef void (*gametype_scripts_t)();
 #endif
 
 typedef int (*codscript_load_function_t)(char *file, char *function, int isNeeded);
-#if COD_VERSION == COD2_1_2
+#if COD_VERSION == COD2_1_0
+	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x0810DD70;
+#elif COD_VERSION == COD2_1_2
 	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x081100AC;
 #elif COD_VERSION == COD2_1_3
 	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x08110208;
@@ -624,7 +628,9 @@ int hook_ClientCommand(int clientNum)
 	}
 
 	// todo: G_ENTITY(clientNum)
-	#if COD_VERSION == COD2_1_2
+	#if COD_VERSION == COD2_1_0 // search '\\name\\badinfo'
+		short ret = codscript_call_callback_entity(/*gentity*/0x08665480 + 560 * clientNum, codecallback_playercommand, 1);
+	#elif COD_VERSION == COD2_1_2
 		short ret = codscript_call_callback_entity(/*gentity*/0x08679380 + 560 * clientNum, codecallback_playercommand, 1);
 	#elif COD_VERSION == COD2_1_3
 		short ret = codscript_call_callback_entity(/*gentity*/0x08716400 + 560 * clientNum, codecallback_playercommand, 1);
@@ -693,11 +699,12 @@ void Cmd_AddCommand(const char *cmd_name, xcommand_t function)
 {
 	void (*signature)(const char *cmd_name, xcommand_t function);
 
-	#if COD_VERSION == COD2_1_2
+	#if COD_VERSION == COD2_1_0
+		*((int *)(&signature)) = 0x080604B2;
+	#elif COD_VERSION == COD2_1_2
 		*((int *)(&signature)) = 0x080606BE;
-	//#elif COD_VERSION == COD2_1_3
-	//	printf_hide("Cmd_AddCommand not implemented!\n");
-	//	return;
+	#elif COD_VERSION == COD2_1_3
+		*((int *)(&signature)) = 0x080606B6;
 	#elif COD_VERSION == COD4_1_7
 		*((int *)(&signature)) = 0x081116B4;
 	#else
@@ -1609,7 +1616,9 @@ class cCallOfDuty2Pro
 	
 		setbuf(stdout, NULL); // otherwise the printf()'s are printed at crash/end
 
-		#if COD_VERSION == COD2_1_2
+		#if COD_VERSION == COD2_1_0
+			printf("> [INFO] Compiled for: CoD2 1.0\n");
+		#elif COD_VERSION == COD2_1_2
 			printf("> [INFO] Compiled for: CoD2 1.2\n");
 		#elif COD_VERSION == COD2_1_3
 			printf("> [INFO] Compiled for: CoD2 1.3\n");
@@ -1841,7 +1850,7 @@ class cCallOfDuty2Pro
 			Happy gaming, Mokolator. 
 		*/
 		
-		#if COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
+		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
 			Cmd_AddCommand("stupidTestFunction", stupidTestFunction);
 		#endif
 		
@@ -1859,7 +1868,9 @@ class cCallOfDuty2Pro
 				- done, current position is wanted address
 		*/
 		
-		#if COD_VERSION == COD2_1_2
+		#if COD_VERSION == COD2_1_0
+			cracking_hook_function(0x08049CD0, (int)hook_recvfrom);
+		#elif COD_VERSION == COD2_1_2
 			//cracking_hook_function(0x0804A0B4, (int)hook_sendto);
 			//#error asd
 			printf("cracking_hook_function(0x08049E64, (int)hook_recvfrom);\n");
@@ -1884,7 +1895,15 @@ class cCallOfDuty2Pro
 		// cod2 functions
 		//cracking_hook_function(0x080F6D5A, (int)hook_player_eject);
 		
-		#if COD_VERSION == COD2_1_2
+		#if COD_VERSION == COD2_1_0
+			if (0)
+				cracking_hook_function(0x08092D5C, (int)SV_AddServerCommand);
+			if (0)
+				cracking_hook_function(0x0809301C, (int)SV_SendServerCommand);
+
+			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
+			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
+		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
 			if (0)
@@ -1896,6 +1915,11 @@ class cCallOfDuty2Pro
 		#endif
 		
 		#if COD_VERSION == COD2_1_3
+			if (0)
+				cracking_hook_function(0x08094750, (int)SV_AddServerCommand);
+			if (0)
+				cracking_hook_function(0x080AC5D8, (int)SV_SendServerCommand);
+
 			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
@@ -2173,8 +2197,6 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
 
     return rf;
 }
-
-
 
 #pragma GCC visibility pop
 
