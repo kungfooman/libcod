@@ -1444,6 +1444,75 @@ void SV_SendServerCommand(/*client_t*/int *client, int bla, const char *fmt, ...
 	printf("client=%08x bla=%08p message=%s\n", client, bla, message);
 }
 
+typedef enum {
+    NA_BOT,
+    NA_BAD,                    // an address lookup failed
+    NA_LOOPBACK,
+    NA_BROADCAST,
+    NA_IP,
+    NA_IPX,
+    NA_BROADCAST_IPX
+} netadrtype_t;
+
+typedef struct {
+    netadrtype_t    type;
+
+    char    ip[4];
+    char    ipx[10];
+
+    unsigned short    port;
+} netadr_t;
+
+typedef struct {
+    bool    allowoverflow;    // if false, do a Com_Error
+    bool    overflowed;        // set to true if the buffer size failed (with allowoverflow set)
+    bool    oob;            // set to true if the buffer size failed (with allowoverflow set)
+    char    *data;
+    int        maxsize;
+    int        cursize;
+    int        readcount;
+    int        bit;                // for bitwise reads and writes
+} msg_t;
+
+void hook_ServerCommand( netadr_t from, msg_t *msg )
+{
+    //const char * (*NET_AdrToString)( netadr_t a );
+    //(*(int *)&NET_AdrToString) = 0x0806B1D4;
+
+    //printf("From %s\n", NET_AdrToString (from) );
+    //strncpy(d, &d[4], msg->cursize);
+    //printf("Data: %s\n", msg->data);
+
+	if (strncmp (msg->data,"ÿÿÿÿipAuthorize", 15) == 0)
+	{
+		if(strstr (msg->data, "deny") != NULL)
+		{
+			char d[100];
+			char * pch = strtok (msg->data, " ");
+		
+			while(pch != NULL)
+			{
+				if(strcmp (pch, "deny") == 0)
+					strcpy (pch, "accept");
+
+				strcat (d, pch);
+				pch = strtok (NULL, " ");
+
+				if(pch != NULL)
+					strcat (d, " ");
+			}
+
+			msg->data = d;
+			printf("Data: %s\n", msg->data);
+		}
+	}
+
+	void (*SV_ConnectionlessPacket)( netadr_t from, msg_t * msg );
+    (*(int *)&SV_ConnectionlessPacket) = 0x0809594E;
+	return SV_ConnectionlessPacket(from, msg);
+}
+
+
 #define TOSTRING2(str) #str
 #define TOSTRING1(str) TOSTRING2(str) // else there is written "__LINE__"
 class cCallOfDuty2Pro
@@ -1757,6 +1826,7 @@ class cCallOfDuty2Pro
 			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
+			cracking_hook_call(0x08096126, (int)hook_ServerCommand);
 		#endif
 		
 		printf_hide("> [PLUGIN LOADED]\n");
