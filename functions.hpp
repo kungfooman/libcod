@@ -48,6 +48,16 @@ typedef int (*ClientCommand_t)(int clientNum);
 	static int hook_ClientCommand_call = (int)NULL;
 #endif
 
+#if COD2_VERSION == COD2_VERSION_1_3
+	static int hook_ServerCommand_call = 0x08096126;
+	static int hook_ConnectionlessPacket = 0x0809594E;
+#else
+	#warning static int hook_ServerCommand_call = NULL;
+	#warning static int hook_ConnectionlessPacket = NULL;
+	static int hook_ServerCommand_call = (int)NULL;
+	static int hook_ConnectionlessPacket = (int)NULL;
+#endif
+
 typedef short (*codscript_call_callback_entity_t)(int self, int callback, int params);
 #if COD2_VERSION == COD2_VERSION_1_0
 	static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)0x08118DF4; // search 'badMOD'

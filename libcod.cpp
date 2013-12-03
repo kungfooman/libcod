@@ -1476,14 +1476,7 @@ typedef struct {
 
 void hook_ServerCommand( netadr_t from, msg_t *msg )
 {
-    //const char * (*NET_AdrToString)( netadr_t a );
-    //(*(int *)&NET_AdrToString) = 0x0806B1D4;
-
-    //printf("From %s\n", NET_AdrToString (from) );
-    //strncpy(d, &d[4], msg->cursize);
-    //printf("Data: %s\n", msg->data);
-
-	if (strncmp (msg->data,"ÿÿÿÿipAuthorize", 15) == 0)
+	if (strncmp (msg->data,"\xff\xff\xff\xffipAuthorize", 15) == 0)
 	{
 		if(strstr (msg->data, "deny") != NULL)
 		{
@@ -1508,7 +1501,7 @@ void hook_ServerCommand( netadr_t from, msg_t *msg )
 	}
 
 	void (*SV_ConnectionlessPacket)( netadr_t from, msg_t * msg );
-    (*(int *)&SV_ConnectionlessPacket) = 0x0809594E;
+    (*(int *)&SV_ConnectionlessPacket) = hook_ConnectionlessPacket;
 	return SV_ConnectionlessPacket(from, msg);
 }
 
@@ -1826,7 +1819,7 @@ class cCallOfDuty2Pro
 			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
-			cracking_hook_call(0x08096126, (int)hook_ServerCommand);
+			cracking_hook_call(hook_ServerCommand_call, (int)hook_ServerCommand);
 		#endif
 		
 		printf_hide("> [PLUGIN LOADED]\n");
