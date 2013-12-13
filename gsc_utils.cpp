@@ -8,6 +8,11 @@ int gsc_utils_disableGlobalPlayerCollision()
 	
 	// well, i could also just write LEAVE,RETN C9,C3 at beginnung of function
 	
+	#if COD_VERSION == COD2_1_0
+		cracking_write_hex(0x080F474A, (char *)"C3");
+		cracking_write_hex(0x080F5199, (char *)"02");
+		cracking_write_hex(0x0805AA0E, (char *)"C3");
+	#endif
 	#if COD_VERSION == COD2_1_2
 	/*
 	//ret = cracking_nop(0x080F6D5A, 0x080F7150);
