@@ -48,7 +48,13 @@ typedef int (*ClientCommand_t)(int clientNum);
 	static int hook_ClientCommand_call = (int)NULL;
 #endif
 
-#if COD2_VERSION == COD2_VERSION_1_3
+#if COD2_VERSION == COD2_VERSION_1_0
+	static int hook_ServerCommand_call = 0x080941F2;
+	static int hook_ConnectionlessPacket = 0x08093F1E;
+#elif COD2_VERSION == COD2_VERSION_1_2
+	static int hook_ServerCommand_call = 0x0809606C;
+	static int hook_ConnectionlessPacket = 0x08095894;
+#elif COD2_VERSION == COD2_VERSION_1_3
 	static int hook_ServerCommand_call = 0x08096126;
 	static int hook_ConnectionlessPacket = 0x0809594E;
 #else
