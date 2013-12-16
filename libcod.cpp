@@ -1486,9 +1486,10 @@ void hook_ServerCommand( netadr_t from, msg_t *msg )
 			while(pch != NULL)
 			{
 				if(strcmp (pch, "deny") == 0)
-					strcpy (pch, "accept");
+					strcat (d, "accept");
+				else
+					strcat (d, pch);
 
-				strcat (d, pch);
 				pch = strtok (NULL, " ");
 
 				if(pch != NULL)
@@ -1496,7 +1497,7 @@ void hook_ServerCommand( netadr_t from, msg_t *msg )
 			}
 
 			msg->data = d;
-			printf("Data: %s\n", msg->data);
+			printf("%s\n", msg->data);
 		}
 	}
 
