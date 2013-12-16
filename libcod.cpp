@@ -1487,6 +1487,8 @@ void hook_ServerCommand( netadr_t from, msg_t *msg )
 			{
 				if(strcmp (pch, "deny") == 0)
 					strcat (d, "accept");
+				else if(strcmp (pch, "INVALID_CDKEY") == 0 || strcmp (pch, "BANNED_CDKEY") == 0)
+					strcat (d, "KEY_IS_GOOD"); // to prevent too long data
 				else
 					strcat (d, pch);
 
