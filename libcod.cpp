@@ -1606,6 +1606,17 @@ int BG_PlayAnim(int ps, int animIndex, int bodyPart, int is_0, int setTimer, int
 	return 0;
 }
 
+int FS_AddGameDirectory(char *path, char *dir)
+{
+	printf("FS_AddGameDirectory(char *path=%s, char *dir=%s)\n", path, dir);
+}
+
+int FS_LoadIWD(char *a, char *b)
+{
+	printf("FS_LoadIWD(char *a=%s, char *b=%s)\n", a, b);
+	return 1;
+}
+
 #define TOSTRING2(str) #str
 #define TOSTRING1(str) TOSTRING2(str) // else there is written "__LINE__"
 class cCallOfDuty2Pro
@@ -1883,6 +1894,9 @@ class cCallOfDuty2Pro
 			//cracking_hook_function(0x080D6C8C, (int)BG_AnimationIndexForString);
 			//cracking_hook_function(0x080D915C, (int)BG_PlayAnimName);
 			//cracking_hook_function(0x080D8F92, (int)BG_PlayAnim);
+			
+			//cracking_hook_function(0x080A28CC, (int)FS_AddGameDirectory);
+			//cracking_hook_function(0x080A22D8, (int)FS_LoadIWD);
 		#endif
 		
 		#if COD_VERSION == COD2_1_3

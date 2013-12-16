@@ -108,5 +108,28 @@ int gsc_utils_file_unlink()
 	return stackPushInt(ret); // 0 == success
 }
 
+int gsc_utils_FS_LoadDir() // closer(1302, "/home/ns_test", "NsZombiesV4.3");
+{
+	char *path, *dir;
+	
+	if ( ! stackGetParams("ss", &path, &dir))
+		return stackPushUndefined();
+	
+	//printf("path %s dir %s \n", path, dir);
+	int ret = FS_LoadDir(path, dir);
+	return stackPushInt(ret);
+}
+
+int gsc_utils_fileexists()
+{
+	char *filename;
+	
+	if ( ! stackGetParams("s", &filename))
+		return stackPushUndefined();
+	
+	if (access(filename, F_OK) == -1)
+		return stackPushInt(0);
+	return stackPushInt(1);
+}
 
 //#endif
