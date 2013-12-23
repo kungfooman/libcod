@@ -1481,14 +1481,18 @@ void hook_ServerCommand( netadr_t from, msg_t *msg )
 		if(strstr (msg->data, "deny") != NULL)
 		{
 			char d[100];
+			int	 next = 0;
 			char * pch = strtok (msg->data, " ");
 		
 			while(pch != NULL)
 			{
 				if(strcmp (pch, "deny") == 0)
+				{
 					strcat (d, "accept");
-				else if(strcmp (pch, "INVALID_CDKEY") == 0 || strcmp (pch, "BANNED_CDKEY") == 0)
-					strcat (d, "KEY_IS_GOOD"); // to prevent too long data
+					next = 1;
+				}
+				else if(next == 1)
+					strncat (d, pch, strlen(pch)-2); // prevent too long data (reason gets ignored anyway when connect is accepted)
 				else
 					strcat (d, pch);
 
