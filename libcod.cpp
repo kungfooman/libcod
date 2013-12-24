@@ -1502,7 +1502,7 @@ void hook_ServerCommand( netadr_t from, msg_t *msg )
 					strcat (d, " ");
 			}
 
-			msg->data = d;
+			strcpy(msg->data, d);
 			printf("%s\n", msg->data);
 		}
 	}
