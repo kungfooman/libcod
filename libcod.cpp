@@ -1478,31 +1478,11 @@ void hook_ServerCommand( netadr_t from, msg_t *msg )
 {
 	if (strncmp (msg->data,"\xff\xff\xff\xffipAuthorize", 15) == 0)
 	{
-		if(strstr (msg->data, "deny") != NULL)
+		char * pch = strstr (msg->data, "deny");
+
+		if(pch != NULL)
 		{
-			char d[100];
-			int	 next = 0;
-			char * pch = strtok (msg->data, " ");
-		
-			while(pch != NULL)
-			{
-				if(strcmp (pch, "deny") == 0)
-				{
-					strcat (d, "accept");
-					next = 1;
-				}
-				else if(next == 1)
-					strncat (d, pch, strlen(pch)-2); // prevent too long data (reason gets ignored anyway when connect is accepted)
-				else
-					strcat (d, pch);
-
-				pch = strtok (NULL, " ");
-
-				if(pch != NULL)
-					strcat (d, " ");
-			}
-
-			strcpy(msg->data, d);
+			strncpy (pch,"demo",4); // replace 'deny' with 'demo' (now you need to set fs_restrict in cod to allow the deny players)
 			printf("%s\n", msg->data);
 		}
 	}
