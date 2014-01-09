@@ -1481,7 +1481,7 @@ typedef struct {
 
 void hook_ServerCommand( netadr_t from, msg_t *msg )
 {
-	if ((CvarVariableValue == NULL || CvarVariableValue("sv_cracked")) && strncmp (msg->data,"\xff\xff\xff\xffipAuthorize", 15) == 0)
+	if ((CvarVariableValue == NULL || CvarVariableValue("sv_cracked") == 1) && strncmp (msg->data,"\xff\xff\xff\xffipAuthorize", 15) == 0)
 	{
 		char * pch = strstr (msg->data, "deny");
 
@@ -1495,6 +1495,12 @@ void hook_ServerCommand( netadr_t from, msg_t *msg )
 	void (*SV_ConnectionlessPacket)( netadr_t from, msg_t * msg );
     (*(int *)&SV_ConnectionlessPacket) = hook_ConnectionlessPacket;
 	return SV_ConnectionlessPacket(from, msg);
+}
+
+void replaceServerCommandCvar()
+{
+	char * cracked = (char *)"sv_cracked";
+	memcpy((void *)(fsrestrict_ServerCommand+3), &cracked, 4);
 }
 
 #define TOSTRING2(str) #str
@@ -1791,8 +1797,7 @@ class cCallOfDuty2Pro
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 			cracking_hook_call(hook_ServerCommand_call, (int)hook_ServerCommand);
-			char * cracked = (char *)"sv_cracked"; // to do clean up on unload
-			memcpy((void *)(fsrestrict_ServerCommand+3), &cracked, 4);
+			replaceServerCommandCvar();
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
@@ -1803,8 +1808,7 @@ class cCallOfDuty2Pro
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 			cracking_hook_call(hook_ServerCommand_call, (int)hook_ServerCommand);
-			char * cracked = (char *)"sv_cracked"; // to do clean up on unload
-			memcpy((void *)(fsrestrict_ServerCommand+3), &cracked, 4);
+			replaceServerCommandCvar();
 		#endif
 		
 		#if COD_VERSION == COD2_1_3
@@ -1817,8 +1821,7 @@ class cCallOfDuty2Pro
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 			cracking_hook_call(hook_ServerCommand_call, (int)hook_ServerCommand);
-			char * cracked = (char *)"sv_cracked"; // to do clean up on unload
-			memcpy((void *)(fsrestrict_ServerCommand+3), &cracked, 4);
+			replaceServerCommandCvar();
 		#endif
 		
 		printf_hide("> [PLUGIN LOADED]\n");

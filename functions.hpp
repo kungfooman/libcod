@@ -48,7 +48,7 @@ typedef int (*ClientCommand_t)(int clientNum);
 	static int hook_ClientCommand_call = (int)NULL;
 #endif
 
-typedef float (*Cvar_VariableValue_t)(const char *var_name);
+typedef int (*Cvar_VariableValue_t)(const char *var_name);
 #if COD2_VERSION == COD2_VERSION_1_0
 	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B0BB6;
 #elif COD2_VERSION == COD2_VERSION_1_2
