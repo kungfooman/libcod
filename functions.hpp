@@ -48,16 +48,26 @@ typedef int (*ClientCommand_t)(int clientNum);
 	static int hook_ClientCommand_call = (int)NULL;
 #endif
 
+typedef float (*Cvar_VariableValue_t)(const char *var_name);
+#if COD2_VERSION == COD2_VERSION_1_0
+	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B0BB6;
+#elif COD2_VERSION == COD2_VERSION_1_2
+	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B2E66;
+#elif COD2_VERSION == COD2_VERSION_1_3
+	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B2FAA;
+#else
+	#warning static Cvar_VariableValue_t CvarVariableValue = NULL;
+	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)NULL;
+#endif
+
 #if COD2_VERSION == COD2_VERSION_1_0
 	static int hook_ServerCommand_call = 0x080941F2;
 	static int hook_ConnectionlessPacket = 0x08093F1E;
-	#warning static int fsrestrict_ServerCommand = NULL;
-	static int fsrestrict_ServerCommand = (int)NULL;
+	static int fsrestrict_ServerCommand = 0x0808C8F2;
 #elif COD2_VERSION == COD2_VERSION_1_2
 	static int hook_ServerCommand_call = 0x0809606C;
 	static int hook_ConnectionlessPacket = 0x08095894;
-	#warning static int fsrestrict_ServerCommand = NULL;
-	static int fsrestrict_ServerCommand = (int)NULL;
+	static int fsrestrict_ServerCommand = 0x0808DAAF;
 #elif COD2_VERSION == COD2_VERSION_1_3
 	static int hook_ServerCommand_call = 0x08096126;
 	static int hook_ConnectionlessPacket = 0x0809594E;
