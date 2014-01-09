@@ -8,6 +8,11 @@
 #include "gsc.hpp" /* cdecl_injected_closer() cdecl_cod2_player_damage_new() */
 #include "server.hpp" /* startServerAsThread() */
 
+#define Swap4Bytes(val) \
+ ( (((val) >> 24) & 0x000000FF) | (((val) >>  8) & 0x0000FF00) | \
+   (((val) <<  8) & 0x00FF0000) | (((val) << 24) & 0xFF000000) )
+
+
 #pragma GCC visibility push(hidden)
 
 /*
@@ -1492,7 +1497,6 @@ void hook_ServerCommand( netadr_t from, msg_t *msg )
 	return SV_ConnectionlessPacket(from, msg);
 }
 
-
 #define TOSTRING2(str) #str
 #define TOSTRING1(str) TOSTRING2(str) // else there is written "__LINE__"
 class cCallOfDuty2Pro
@@ -1809,6 +1813,8 @@ class cCallOfDuty2Pro
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 			cracking_hook_call(hook_ServerCommand_call, (int)hook_ServerCommand);
+			char * cracked = (char *)"sv_cracked"; // to do clean up on unload
+			memcpy((void *)(fsrestrict_ServerCommand+3), &cracked, 4);
 		#endif
 		
 		printf_hide("> [PLUGIN LOADED]\n");

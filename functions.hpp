@@ -51,17 +51,24 @@ typedef int (*ClientCommand_t)(int clientNum);
 #if COD2_VERSION == COD2_VERSION_1_0
 	static int hook_ServerCommand_call = 0x080941F2;
 	static int hook_ConnectionlessPacket = 0x08093F1E;
+	#warning static int fsrestrict_ServerCommand = NULL;
+	static int fsrestrict_ServerCommand = (int)NULL;
 #elif COD2_VERSION == COD2_VERSION_1_2
 	static int hook_ServerCommand_call = 0x0809606C;
 	static int hook_ConnectionlessPacket = 0x08095894;
+	#warning static int fsrestrict_ServerCommand = NULL;
+	static int fsrestrict_ServerCommand = (int)NULL;
 #elif COD2_VERSION == COD2_VERSION_1_3
 	static int hook_ServerCommand_call = 0x08096126;
 	static int hook_ConnectionlessPacket = 0x0809594E;
+	static int fsrestrict_ServerCommand = 0x0808DB6F;
 #else
 	#warning static int hook_ServerCommand_call = NULL;
 	#warning static int hook_ConnectionlessPacket = NULL;
+	#warning static int fsrestrict_ServerCommand = NULL;
 	static int hook_ServerCommand_call = (int)NULL;
 	static int hook_ConnectionlessPacket = (int)NULL;
+	static int fsrestrict_ServerCommand = (int)NULL;
 #endif
 
 typedef short (*codscript_call_callback_entity_t)(int self, int callback, int params);
