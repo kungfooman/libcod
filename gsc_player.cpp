@@ -520,6 +520,47 @@ int gsc_player_getip()
 	return stackPushString(tmp);
 }
 
+int gsc_player_getlastmsg()
+{
+	int playerid;
+	if (stackGetNumberOfParams() < 2) // function, playerid
+	{
+		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_player_getlastmsg()\n");
+		return stackPushUndefined();
+	}
+	if (!stackGetParamInt(1, &playerid))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
+		return stackPushUndefined();
+	}
+	
+	#if COD2_VERSION == COD2_VERSION_1_0
+		int info_start = *(int *)0x0841FB04;
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+		int info_lastmsg_offset = 0x20D10;
+	#elif COD2_VERSION == COD2_VERSION_1_2
+		int info_start = *(int *)0x08422004;
+		int info_base = *(int *)0x0842200C;
+		int info_size = 0x79064;
+		int info_lastmsg_offset = 0x20E20;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+		int info_start = *(int *)0x08423084;
+		int info_base = *(int *)0x0842308C;
+		int info_size = 0xB1064;
+		int info_lastmsg_offset = 0x20E20;
+	#else
+		#warning gsc_player_getlastmsg() got no working addresses
+		int info_start = *(int *)0x0;
+		int info_base = *(int *)0x0;
+		int info_size = 0x0;
+		int info_lastmsg_offset = 0x0;
+	#endif
+	
+	int info_player = info_base + playerid * info_size;
+	int lastmsg = info_start - *(unsigned int *)(info_player + info_lastmsg_offset);
+	return stackPushInt(lastmsg);
+}
 
 int gsc_player_getping()
 {

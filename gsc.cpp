@@ -1390,6 +1390,7 @@ int cdecl_injected_closer()
 		
 		case 430: return gsc_player_getip();
 		case 431: return gsc_player_getping();
+		case 432: return gsc_player_getlastmsg();
 		
 		case 450: return gsc_player_spectatorclient_get();
 	}
