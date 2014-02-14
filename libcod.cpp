@@ -1449,58 +1449,36 @@ void SV_SendServerCommand(/*client_t*/int *client, int bla, const char *fmt, ...
 	printf("client=%08x bla=%08p message=%s\n", client, bla, message);
 }
 
-typedef enum {
-    NA_BOT,
-    NA_BAD,                    // an address lookup failed
-    NA_LOOPBACK,
-    NA_BROADCAST,
-    NA_IP,
-    NA_IPX,
-    NA_BROADCAST_IPX
-} netadrtype_t;
-
-typedef struct {
-    netadrtype_t    type;
-
-    char    ip[4];
-    char    ipx[10];
-
-    unsigned short    port;
-} netadr_t;
-
-typedef struct {
-    bool    allowoverflow;    // if false, do a Com_Error
-    bool    overflowed;        // set to true if the buffer size failed (with allowoverflow set)
-    bool    oob;            // set to true if the buffer size failed (with allowoverflow set)
-    char    *data;
-    int        maxsize;
-    int        cursize;
-    int        readcount;
-    int        bit;                // for bitwise reads and writes
-} msg_t;
-
-void hook_ServerCommand( netadr_t from, msg_t *msg )
+char * hook_AuthorizeState( int arg )
 {
-	if ((CvarVariableValue == NULL || CvarVariableValue("sv_cracked") == 1) && strncmp (msg->data,"\xff\xff\xff\xffipAuthorize", 15) == 0)
-	{
-		char * pch = strstr (msg->data, "deny");
+	char * s = Cmd_Argv(arg);
 
-		if(pch != NULL)
-		{
-			strncpy (pch,"demo",4); // replace 'deny' with 'demo' (now you need to set fs_restrict in cod to allow the deny players)
-			printf("%s\n", msg->data);
-		}
-	}
+	if ((CvarVariableValue == NULL || CvarVariableValue("sv_cracked") == 1) && strcmp (s, "deny") == 0)
+		strncpy (s, "demo", 4); // replace deny with demo when sv_cracked is 1
 
-	void (*SV_ConnectionlessPacket)( netadr_t from, msg_t * msg );
-    (*(int *)&SV_ConnectionlessPacket) = hook_ConnectionlessPacket;
-	return SV_ConnectionlessPacket(from, msg);
+	return s;
 }
 
 void replaceServerCommandCvar()
 {
 	char * cracked = (char *)"sv_cracked";
 	memcpy((void *)(fsrestrict_ServerCommand+3), &cracked, 4);
+}
+
+int hook_findMap(const char *qpath, void **buffer)
+{
+	int read = FS_ReadFile(qpath, buffer);
+
+	if(read != -1)
+		return read;
+
+	char * map = Cmd_Argv(1);
+	char tmp[256];
+	snprintf(tmp, 256, "%s/%s/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), map);
+
+	int exists = access(tmp, F_OK);
+
+	return exists;
 }
 
 #define TOSTRING2(str) #str
@@ -1793,34 +1771,23 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x08092D5C, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x0809301C, (int)SV_SendServerCommand);
-
-			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
-			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
-			cracking_hook_call(hook_ServerCommand_call, (int)hook_ServerCommand);
-			replaceServerCommandCvar();
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x08094958, (int)SV_SendServerCommand);
-				
-			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
-			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
-			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
-			cracking_hook_call(hook_ServerCommand_call, (int)hook_ServerCommand);
-			replaceServerCommandCvar();
-		#endif
-		
-		#if COD_VERSION == COD2_1_3
+		#elif COD_VERSION == COD2_1_3
 			if (0)
 				cracking_hook_function(0x08094750, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x080AC5D8, (int)SV_SendServerCommand);
+		#endif
 
-			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
+		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
-			cracking_hook_call(hook_ServerCommand_call, (int)hook_ServerCommand);
+			cracking_hook_call(hook_AuthorizeState_call, (int)hook_AuthorizeState);
+			cracking_hook_call(hook_findMap_call, (int)hook_findMap);
 			replaceServerCommandCvar();
 		#endif
 		

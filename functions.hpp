@@ -18,6 +18,18 @@ static int trap_Argc()
 	#endif
 }
 
+typedef char * (*Cmd_Argv_t)(int arg);
+#if COD_VERSION == COD2_1_0
+	static Cmd_Argv_t Cmd_Argv = (Cmd_Argv_t)0x0806001C;
+#elif COD_VERSION == COD2_1_2
+	static Cmd_Argv_t Cmd_Argv = (Cmd_Argv_t)0x08060228;
+#elif COD_VERSION == COD2_1_3
+	static Cmd_Argv_t Cmd_Argv = (Cmd_Argv_t)0x08060220;
+#else
+	#warning static Cmd_Argv_t Cmd_Argv = (Cmd_Argv_t)NULL;
+	static Cmd_Argv_t Cmd_Argv = (Cmd_Argv_t)NULL;
+#endif
+
 typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
 #if COD2_VERSION == COD2_VERSION_1_0
 	static trap_Argv_t trap_Argv = (trap_Argv_t)0x08060074;
@@ -60,24 +72,54 @@ typedef int (*Cvar_VariableValue_t)(const char *var_name);
 	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)NULL;
 #endif
 
-#if COD2_VERSION == COD2_VERSION_1_0
-	static int hook_ServerCommand_call = 0x080941F2;
-	static int hook_ConnectionlessPacket = 0x08093F1E;
+typedef char * (*Cvar_VariableString_t)(const char *var_name);
+#if COD_VERSION == COD2_1_0
+	static Cvar_VariableString_t Cvar_VariableString = (Cvar_VariableString_t)0x080B0D96;
+#elif COD_VERSION == COD2_1_2
+	static Cvar_VariableString_t Cvar_VariableString = (Cvar_VariableString_t)0x080B3046;
+#elif COD_VERSION == COD2_1_3
+	static Cvar_VariableString_t Cvar_VariableString = (Cvar_VariableString_t)0x080B318A;
+#else
+	#warning static Cvar_VariableValue_t CvarVariableValue = NULL;
+	static Cvar_VariableString_t Cvar_VariableString = (Cvar_VariableString_t)NULL;
+#endif
+
+typedef int (*FS_ReadFile_t)(const char *qpath, void **buffer);
+#if COD_VERSION == COD2_1_0
+	static FS_ReadFile_t FS_ReadFile = (FS_ReadFile_t)0x0809E892;
+#elif COD_VERSION == COD2_1_2
+	static FS_ReadFile_t FS_ReadFile = (FS_ReadFile_t)0x080A0958;
+#elif COD_VERSION == COD2_1_3
+	static FS_ReadFile_t FS_ReadFile = (FS_ReadFile_t)0x080A0A9C;
+#else
+	#warning static FS_ReadFile_t CvarVariableValue = NULL;
+	static FS_ReadFile_t FS_ReadFile = (FS_ReadFile_t)NULL;
+#endif
+
+#if COD_VERSION == COD2_1_0
+	static int hook_findMap_call = 0x0808AD00;
+#elif COD_VERSION == COD2_1_2
+	static int hook_findMap_call = 0x0808BCFC;
+#elif COD_VERSION == COD2_1_3
+	static int hook_findMap_call = 0x0808BDC8;
+#else
+	#warning static int hook_findMap_call = NULL;
+	static int hook_findMap_call = (int)NULL;
+#endif
+
+#if COD_VERSION == COD2_1_0
+	static int hook_AuthorizeState_call = 0x0808C8C0;
 	static int fsrestrict_ServerCommand = 0x0808C8F2;
-#elif COD2_VERSION == COD2_VERSION_1_2
-	static int hook_ServerCommand_call = 0x0809606C;
-	static int hook_ConnectionlessPacket = 0x08095894;
+#elif COD_VERSION == COD2_1_2
+	static int hook_AuthorizeState_call = 0x0808DA52;
 	static int fsrestrict_ServerCommand = 0x0808DAAF;
-#elif COD2_VERSION == COD2_VERSION_1_3
-	static int hook_ServerCommand_call = 0x08096126;
-	static int hook_ConnectionlessPacket = 0x0809594E;
+#elif COD_VERSION == COD2_1_3
+	static int hook_AuthorizeState_call = 0x0808DB12;
 	static int fsrestrict_ServerCommand = 0x0808DB6F;
 #else
-	#warning static int hook_ServerCommand_call = NULL;
-	#warning static int hook_ConnectionlessPacket = NULL;
+	#warning static int hook_AuthorizeState_call = NULL;
 	#warning static int fsrestrict_ServerCommand = NULL;
-	static int hook_ServerCommand_call = (int)NULL;
-	static int hook_ConnectionlessPacket = (int)NULL;
+	static int hook_AuthorizeState_call = (int)NULL;
 	static int fsrestrict_ServerCommand = (int)NULL;
 #endif
 
