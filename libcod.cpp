@@ -1465,6 +1465,20 @@ void replaceServerCommandCvar()
 	memcpy((void *)(fsrestrict_ServerCommand+3), &cracked, 4);
 }
 
+void SV_BeginDownload_f( int a1 ) {
+	char * file = Cmd_Argv(1);
+	int len;
+
+	if((len = strlen(file)) > 3 && !strcmp(file + len - 4, ".iwd"))
+	{
+		typedef int (*SV_BeginDownload_f_t)(int a1);
+		SV_BeginDownload_f_t SV_BeginDownload_f = (SV_BeginDownload_f_t)0x0808E508;
+		SV_BeginDownload_f(a1);
+	}
+	else
+		printf("Invalid download attempt: %s\n", file);
+}
+
 int hook_findMap(const char *qpath, void **buffer)
 {
 	int read = FS_ReadFile(qpath, buffer);
@@ -1593,6 +1607,11 @@ class cCallOfDuty2Pro
 		//init_native_interface(); // inits functions and globals in the executable
 
 		//hideargs_thread();
+
+		#if COD_VERSION == COD2_1_0
+			int * addressToDownloadPointer = (int *)0x0815D584;
+			*addressToDownloadPointer = (int)SV_BeginDownload_f;
+		#endif
 		
 		#if COD_VERSION == COD4_1_7
 			cracking_hook_function(0x0804AB6C, (int)hook_recvfrom);
