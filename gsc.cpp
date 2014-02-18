@@ -1614,6 +1614,7 @@ typedef struct aSearchPath_t{
 		case 903: return gsc_utils_system();
 		case 904: return gsc_utils_file_link();
 		case 905: return gsc_utils_file_unlink();
+		case 907: return gsc_utils_RemoveCommand();
 		
 		case 906: {
 			/*

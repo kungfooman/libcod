@@ -1465,16 +1465,12 @@ void replaceServerCommandCvar()
 	memcpy((void *)(fsrestrict_ServerCommand+3), &cracked, 4);
 }
 
-void SV_BeginDownload_f( int a1 ) {
+void hook_SV_BeginDownload_f( int a1 ) {
 	char * file = Cmd_Argv(1);
 	int len;
 
 	if((len = strlen(file)) > 3 && !strcmp(file + len - 4, ".iwd"))
-	{
-		typedef int (*SV_BeginDownload_f_t)(int a1);
-		SV_BeginDownload_f_t SV_BeginDownload_f = (SV_BeginDownload_f_t)0x0808E508;
 		SV_BeginDownload_f(a1);
-	}
 	else
 		printf("Invalid download attempt: %s\n", file);
 }
@@ -1610,8 +1606,18 @@ class cCallOfDuty2Pro
 
 		#if COD_VERSION == COD2_1_0
 			int * addressToDownloadPointer = (int *)0x0815D584;
-			*addressToDownloadPointer = (int)SV_BeginDownload_f;
+		#elif COD_VERSION == COD2_1_2
+			int * addressToDownloadPointer = (int *)0x0817C9E4;
+		#elif COD_VERSION == COD2_1_3
+			int * addressToDownloadPointer = (int *)0x0817DA04;
+		#else
+			#warning int *addressToDownloadPointer = NULL;
+			int *addressToDownloadPointer = NULL;
 		#endif
+
+		printf_hide("> [INFO] value of download=%.8x\n", *addressToDownloadPointer);
+		SV_BeginDownload_f = (SV_BeginDownload_f_t)*addressToDownloadPointer;
+		*addressToDownloadPointer = (int)hook_SV_BeginDownload_f;
 		
 		#if COD_VERSION == COD4_1_7
 			cracking_hook_function(0x0804AB6C, (int)hook_recvfrom);

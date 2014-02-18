@@ -42,6 +42,17 @@ typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
 	static trap_Argv_t trap_Argv = (trap_Argv_t)NULL;
 #endif
 
+typedef int (*Cmd_RemoveCommand_t)(const char *cmd_name);
+#if COD_VERSION == COD2_1_0
+	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)0x0806052A;
+#elif COD_VERSION == COD2_1_2
+	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)0x08060736;
+#elif COD_VERSION == COD2_1_3
+	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)0x0806072E;
+#else
+	#warning static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)NULL;
+	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)NULL;
+#endif
 
 typedef int (*ClientCommand_t)(int clientNum);
 #if COD2_VERSION == COD2_VERSION_1_0
@@ -122,6 +133,9 @@ typedef int (*FS_ReadFile_t)(const char *qpath, void **buffer);
 	static int hook_AuthorizeState_call = (int)NULL;
 	static int fsrestrict_ServerCommand = (int)NULL;
 #endif
+
+typedef int (*SV_BeginDownload_f_t)(int a1);
+static SV_BeginDownload_f_t SV_BeginDownload_f = (SV_BeginDownload_f_t)NULL;
 
 typedef short (*codscript_call_callback_entity_t)(int self, int callback, int params);
 #if COD2_VERSION == COD2_VERSION_1_0

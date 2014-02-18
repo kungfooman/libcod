@@ -99,7 +99,7 @@ int gsc_utils_file_link()
 int gsc_utils_file_unlink()
 {
 	char *file;
-	if (stackGetNumberOfParams() < 2) // function, source, dest
+	if (stackGetNumberOfParams() < 2) // function, file
 	{
 		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_unlink_file()\n");
 		return stackPushUndefined();
@@ -113,5 +113,24 @@ int gsc_utils_file_unlink()
 	return stackPushInt(ret); // 0 == success
 }
 
+int gsc_utils_RemoveCommand()
+{
+	char *command;
+
+	if (stackGetNumberOfParams() < 2) // function, command
+	{
+		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_utils_RemoveCommand()\n");
+		return stackPushInt(0);
+	}
+
+	if (!stackGetParamString(1, &command))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"command\"[1] has to be a string!\n");
+		return stackPushInt(0);
+	}
+
+	Cmd_RemoveCommand(command);
+	return stackPushInt(1);
+}
 
 //#endif
