@@ -1,6 +1,50 @@
 #include "gsc.hpp"
 
 /*
+	//TODO
+		- Add Scr_GetMethod (works the same way so should be an easy find)
+	
+	:: Scr_GetFunction/GetMethod ::
+	
+	CoD2 search for "parameter count exceeds 256" and go upwards
+	CoD1 search for "parameter count exceeds 256" or "unknown (builtin) function '%s'" and go upwards
+*/
+
+Scr_Function scriptFunctions[] = {
+	//name, function, developer
+    {"printconsole", GScr_printconsole, 0}
+};
+
+#if COD_VERSION == COD2_1_2
+Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117B56;
+#elif COD_VERSION == COD2_1_3
+Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117CB2;
+#endif
+
+Scr_FunctionCall Scr_GetCustomFunction(const char** fname, int* fdev) {
+    Scr_FunctionCall m = Scr_GetFunction(fname, fdev);
+    void (*fc)(int);
+    *(int*)&fc = (int)m;
+    if(m == NULL) {
+        for(unsigned int i = 0; i < (sizeof(scriptFunctions)/sizeof(Scr_Function)); i++) {
+            if(!strcmp(*fname, scriptFunctions[i].name)) {
+                Scr_Function func = scriptFunctions[i];
+                *fname = func.name;
+                *fdev = func.developer;
+                return func.call;
+            }
+        }
+    }
+	return fc;
+}
+
+void GScr_printconsole(int entityIndex) { //if this was a method the index would be the entity's number
+    char* msg;
+	stackGetParamString(0, &msg);
+	printf(msg);
+}
+
+/*
 	In CoD2 this address can be found in every get-param-function
 	In CoD1 its a bit harder, search for: "cannot cast %s to int" and go the function upwards:
 		the stack-address is in a context like: dword_830AE88 - 8 * a1
