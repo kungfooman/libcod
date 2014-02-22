@@ -1617,6 +1617,30 @@ int FS_LoadIWD(char *a, char *b)
 	return 1;
 }
 
+static int size_all = 0;
+static int i = 0;
+cHook *hook_MSG_WriteBigString;
+void MSG_WriteBigString(int *MSG, char *s)
+{
+
+	int len;
+
+	len = strlen(s);
+	printf("i=%d size_all=%d len=%d MSG=%.8p %s\n", i, size_all, len, MSG, s);
+
+	size_all += len;
+	i++;
+	
+	hook_MSG_WriteBigString->unhook();
+	
+	void (*sig)(int *MSG, char *s);
+	*(int *)&sig = 0x0806825E;
+	sig(MSG, s);
+	
+	hook_MSG_WriteBigString->hook();
+	
+}
+
 #define TOSTRING2(str) #str
 #define TOSTRING1(str) TOSTRING2(str) // else there is written "__LINE__"
 class cCallOfDuty2Pro
@@ -1926,6 +1950,9 @@ class cCallOfDuty2Pro
 			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
+			
+			hook_MSG_WriteBigString = new cHook(0x0806825E, (int)MSG_WriteBigString);
+			//hook_MSG_WriteBigString->hook();
 		#endif
 		
 		#if COD_VERSION == COD2_1_3
