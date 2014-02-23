@@ -43,6 +43,42 @@ int getExecuteString()
 	#endif
 }
 
+int stackGetParamType(int param)
+{
+	aStackElement *scriptStack = *(aStackElement**)getStack();
+	aStackElement *arg = scriptStack - param;
+	return arg->type;
+}
+
+int stackGetParams(char *params, ...)
+{
+	va_list args;
+	va_start(args, params);
+	
+	int errors = 0;
+	
+	int len = strlen(params);
+	int i;
+	for (i=0; i<len; i++)
+	{
+		switch (params[i])
+		{
+			case 's': {
+				char **tmp = va_arg(args, char **);
+				if ( ! stackGetParamString(i + 1, tmp)) // first param is function-id
+				{
+					printf("Param %d needs to be a string, %s=%d given! NumParams=%d\n", i + 1, ">make function for this<", stackGetParamType(i+1), stackGetNumberOfParams());
+					errors++;
+				}
+				break;
+			}
+		}
+	}
+	
+	va_end(args);
+	return errors == 0; // success if no errors
+}
+
 // function can be found in same context as getStack()
 int getNumberOfParams() // as in stackNew()
 {
@@ -958,6 +994,15 @@ int sub_80853B6(int key) // setKeyInArray
 	
 	//printf_hide("blub\n");
 }
+
+// e.g. FS_LoadDir("/home/ns_test", "NsZombiesV4.3");
+int FS_LoadDir(char *path, char *dir)
+{
+	int (*signature)(char *path, char *dir);
+	*(int *)&signature = 0x080A22D8;
+	return signature(path, dir);
+}
+
 /*
 	functions:
 	0 == setVelocity
@@ -1687,6 +1732,83 @@ typedef struct aSearchPath_t{
 		case 1004: return gsc_tcc_delete();
 	}
 	#endif
+	
+	int (*BG_PlayAnim)(int ps, int animIndex, int bodyPart, int is_0, int setTimer, int isContinue, int force);
+	*(int *)&BG_PlayAnim = 0x080D8F92;
+	if (0) printf("newAnim=%.8p %.8p %.8p\n",
+		INT(0x0856E3A4) + 96 * 0x118 + 72,
+		INT((0x0856E3A4) + 96 * 0x118 + 72),
+		INT((0x0856E3A4) + 96 * 0x118 + 72) + 50
+	);
+	switch (function)
+	{
+	
+		// *(_DWORD *)(dword_856E3A4 + 96 * animIndex + 72) + 50;
+		// ==  *(085b2940 + 96*280 + 72) + 50 // reload
+		// ==    140192064 + 26880 
+		// ==        85B9240        +72
+		// ==          *(85B9288) + 50
+		
+		
+		// ==  *(085b2940 + 96*280 + 72) + 50 // reload
+		// ==    140192064 + 26880 
+		// ==        85B9240        +72
+		// ==          *(85B9288) + 50
+		// console.log("Address: " + (0x085b2940 + 96*(animIndex=0x118)).toString(16));
+		// Address: 85b9240 
+		
+		// dword_856E3A4 = 0x085b2940;
+		// animIndex = 0x118;
+		// address = dword_856E3A4 + 96 * animIndex + 72
+		// address.toString(16);
+		// = 85b9288
+		//                                         ps          animIndex   bodyPart    is_0/time   setTimer, isContinue, force
+		case 1100: return stackPushInt(BG_PlayAnim(0x08705480, 0x00000118, 0x00000002, 0x00/*000567*/, 1, 0, 1)); // reload
+		case 1101: return stackPushInt(BG_PlayAnim(0x08705480, 0x00000082, 0x00000003, 0x00/*000037*/, 1, /*0*/1, 1)); // strafejump
+		case 1102: return stackPushInt(BG_PlayAnim(0x08705480, 0x00000083, 0x00000003, 0x00/*000037*/, 1, 0, 1)); // oO 1
+		case 1103: return stackPushInt(BG_PlayAnim(0x08705480, 0x00000080, 0x00000003, 0x00/*000037*/, 1, 0, 1)); // oO 2
+		case 1104: return stackPushInt(BG_PlayAnim(0x08705480, 0x00000000, 0x00000002, 0x00/*001000*/, 1, 1, 1)); // nothing
+		case 1105: return stackPushInt(BG_PlayAnim(0x08705480, 0x00000085, 0x00000003, 0x00/*000600*/, 1, 1, 1)); // highjump
+		case 1106: return stackPushInt(BG_PlayAnim(0x08705480, 0x00000081, 0x00000003, 0x00/*000037*/, 1, 1, 1)); // highjump
+		case 1107: return stackPushInt(BG_PlayAnim(0x08705480,          6, 0x00000003, 0x00/*000037*/, 1, 1, 1));
+	}
+	
+	/*
+
+BG_PlayAnim: ps=0x08705480 animIndex=0x00000085 bodyPart=0x00000003 is_0:0x00000037 setTimer=0x00000001, isContinue=(nil) force=0x00000001
+Bad rcon from 127.0.0.1:-12058:
+status
+Bad rcon from 127.0.0.1:-12058:
+say
+Your MUM^7: jump
+BG_PlayAnim: ps=0x08705480 animIndex=0x00000081 bodyPart=0x00000003 is_0:0x00000037 setTimer=0x00000001, isContinue=(nil) force=0x00000001
+BG_PlayAnim: ps=0x08705480 animIndex=0x00000080 bodyPart=0x00000003 is_0:0x00000037 setTimer=0x00000001, isContinue=(nil) force=0x00000001
+	*/
+	
+	switch (function)
+	{
+		case 1300:
+			// %s.iwd fileoffset:F9122
+			signed int (*FS_FOpenFileRead)(char *qpath, int *filehandle, int isOne);
+			*(int *)&FS_FOpenFileRead = 0x080A0122;
+			signed int size;
+			int filehandle;
+			size = FS_FOpenFileRead((char *)"mp_3TOW3Rs.iwd", &filehandle, 1);
+			printf("filesize:%d filehandle:%.8x\n", size, filehandle);
+			return stackReturnInt(1);
+			
+		case 1301: {
+			int (*FS_AddGameDirectory)(char *path, char *dir);
+			*(int *)&FS_AddGameDirectory = 0x080A28CC;
+			int ret = FS_AddGameDirectory("/home/ns_test", "NsZombiesV4.3");
+			printf("FS_AddGameDirectory=%d\n", ret);
+			return stackReturnInt(1);
+		}
+		
+		case 1302: return gsc_utils_FS_LoadDir();
+		case 1303: return gsc_utils_fileexists();
+	}
+	
 	// todo: analyse getentarray():
 	// - to learn where strings are saved
 	// - to learn how to return an array

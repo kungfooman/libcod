@@ -8,11 +8,6 @@
 #include "gsc.hpp" /* cdecl_injected_closer() cdecl_cod2_player_damage_new() */
 #include "server.hpp" /* startServerAsThread() */
 
-#define Swap4Bytes(val) \
- ( (((val) >> 24) & 0x000000FF) | (((val) >>  8) & 0x0000FF00) | \
-   (((val) <<  8) & 0x00FF0000) | (((val) << 24) & 0xFF000000) )
-
-
 #pragma GCC visibility push(hidden)
 
 /*
@@ -785,7 +780,22 @@ ssize_t hook_recvfrom(int sockfd, void *buf, size_t len, int flags, struct socka
 	if (*(unsigned int *)buf == 0xFFFFFFFF)
 	{
 		//printf("got stateless packet! %s\n", buf);
+		/*
+		typedef struct ip_s
+		{
+			unsigned char d;
+			unsigned char c;
+			unsigned char b;
+			unsigned char a;
+		} ip_t;*/
 		
+		if (0)
+		{
+			printf("> recvfrom(fd=%d, buf=%s, len=%zu, flags=%d, src_addr=%p, addrlen=%p) ip:%s\n", sockfd, buf, len, flags, src_addr, addrlen,
+				inet_ntoa(((struct sockaddr_in *)src_addr)->sin_addr)
+			);
+			printf(">>>>>>>%s<<<<<<<<<\n", buf);
+		}
 		int port, debug;
 		int ret = sscanf((char*)buf, "\xff\xff\xff\xffweb %d %d", &port, &debug);
 		
@@ -1491,6 +1501,164 @@ int hook_findMap(const char *qpath, void **buffer)
 	return exists;
 }
 
+/*
+static int BG_AnimationIndexForString( char *string, animModelInfo_t* animModelInfo ) {
+	int i, hash;
+	animation_t *anim;
+
+	hash = BG_StringHashValue( string );
+
+	for ( i = 0; i < animModelInfo->numAnimations; i++ ) {
+		anim = animModelInfo->animations[i];
+		if ( ( hash == anim->nameHash ) && !Q_stricmp( string, anim->name ) ) {
+			// found a match
+			return i;
+		}
+	}
+	// no match found
+	BG_AnimParseError( "BG_AnimationIndexForString: unknown index '%s' for animation group '%s'", string, animModelInfo->animationGroup );
+	return -1;  // shutup compiler
+}
+*/
+
+
+
+int BG_AnimationIndexForString(char *string)
+{
+	int i, hash, tmp;
+	int anim;
+	
+	int (*BG_StringHashValue)(char *fname);
+	*(int *)&BG_StringHashValue = 0x080D6B9C;
+	
+	int (*sub_806DEFE)(char *multiplayer, char *animname, int a3, int a4);
+	*(int *)&sub_806DEFE = 0x0806DEFE;
+	
+	int debug = 0;
+	
+	if (strstr(string, "reload"))
+		debug = 1;
+	
+	if (debug) printf("\narg 8571428:%d BG_AnimationIndexForString1(string=%s) ", INT(0x08571428), string);
+	
+	
+	if (INT(0x08571428))
+	{
+		hash = BG_StringHashValue(string);
+		//printf("Hash: %d ", hash);
+		i = 0;
+		for (i=INT(0x08571428); ; i+=72)
+		{
+			if (i >= INT(0x0857142C))
+			{
+				tmp = INT(0x08571428) + 72 * INT(INT(0x0857142C));
+				sub_806DEFE((char *)"multiplayer", string, tmp, INT(0x0856E3A0 + 0xB3BE8));
+				strcpy((char *)(tmp + 8), string);
+				INT(tmp + 4) = hash;
+				INT(INT(0x0857142C))++;
+				if (debug) printf("tmp:%.8p , %.8p", (tmp + 0), INT(tmp + 4));
+				return INT(0x0857142C) - 1;
+			}
+			if (hash == INT(i+4) && !strcmp(string, (char *)(i + 8)))
+			{
+				if (debug) printf("Found anim '%s', i=%d hash=%d", string, i, hash);
+				break;
+			}
+			i++;
+		}
+		if (debug) printf("NOT Found anim '%s', i=%d hash=%d", string, i, hash);
+		
+		return i;
+	} else {
+		hash = BG_StringHashValue(string);
+		i = 0;
+		for (anim=INT(0x0856E3A4); ; anim += 0x60)
+		{
+			if (i >= INT(INT(0x0856E3A4) + 0xC000)) {
+				if (debug) printf("BG_AnimationIndexForString: unknown player animation '%s'", string);
+				return -1;
+			}
+			if (hash == INT(anim + 0x4C) && !strcmp(string, (char *)anim))
+			{
+				if (debug) printf("Found anim '%s', i=%d hash=%d", string, i, hash);
+				break;
+			}
+			i++;
+		}
+		
+		/*
+			********************
+			ERROR: Player anim 'pb_prone_death_quickdeath' has no children
+			********************
+		*/
+		//return i - 1;
+		
+		return i;
+	}
+	
+	
+	//for (i=0; anim=INT(0x0856E3A4); i<10; anim+=0x60, i++)
+	{
+		/*if (i >= INT(0x0856E3A4 + 0xC000)) {
+			printf("BG_AnimationIndexForString: unknown player animation '%s'\n", string);
+			return -1;
+		}*/
+		
+		//printf("anim %d: %s\n", i, anim);
+		//printf("%s ", anim);
+	}
+	
+	
+	for (i=0; i<512; i++)
+	{
+		// points to: 085b2940
+		anim = INT(0x0856E3A4 + i * 96);
+		//printf("%s ", anim);
+	}
+	
+	//printf("address:%.8p %.8p %s %s %s\n", INT(0x0856E3A4), INT(INT(0x0856E3A4)), INT(0x0856E3A4), INT(0x0856E3A4 + 96), INT(0x0856E3A4 + 2 * 96));
+	
+	
+	/*
+	139102080 = 0x84A8780 = 80874a84
+8571428:139102080 BG_AnimationIndexForString1(string=pb_crouch_pain_holdStomach)
+8571428:139102080 BG_AnimationIndexForString1(string=pb_crouch_pain_holdStomach)
+
+	*/
+	
+	printf("\n");
+	
+	return -1; // When only returning 0, on client, error: Player animation index out of range (8): -513
+}
+
+int BG_PlayAnimName(int ps, const char *animName, int bodyPart, int setTimer, int isContinue, int force)
+{
+	printf("BG_PlayAnimName ps=%.8p animName=%s bodePart=%.8p setTimer=%d isContinue=%d force=%d\n",
+		ps, animName, bodyPart, setTimer, isContinue, force
+	);
+	return 0;
+}
+
+int BG_PlayAnim(int ps, int animIndex, int bodyPart, int is_0, int setTimer, int isContinue, int force)
+{
+	if (force)
+		printf("BG_PlayAnim: ps=%.8p animIndex=%d bodyPart=%.8p is_0:%.8p setTimer=%.8p, isContinue=%.8p force=%.8p\n",
+			ps, animIndex, bodyPart, is_0, setTimer, isContinue, force
+		);
+	return 0;
+}
+
+int FS_AddGameDirectory(char *path, char *dir)
+{
+	printf("FS_AddGameDirectory(char *path=%s, char *dir=%s)\n", path, dir);
+}
+
+int FS_LoadIWD(char *a, char *b)
+{
+	printf("FS_LoadIWD(char *a=%s, char *b=%s)\n", a, b);
+	return 1;
+}
+
 #define TOSTRING2(str) #str
 #define TOSTRING1(str) TOSTRING2(str) // else there is written "__LINE__"
 class cCallOfDuty2Pro
@@ -1779,6 +1947,13 @@ class cCallOfDuty2Pro
 			//cracking_hook_function(0x0804A5A4, (int)hook_pthread_mutex_unlock);
 			//cracking_hook_function(0x0804A254, (int)hook_pthread_self);
 			//cracking_hook_function(0x0804A084, (int)hook_fread);
+			
+			//cracking_hook_function(0x080D6C8C, (int)BG_AnimationIndexForString);
+			//cracking_hook_function(0x080D915C, (int)BG_PlayAnimName);
+			//cracking_hook_function(0x080D8F92, (int)BG_PlayAnim);
+			
+			//cracking_hook_function(0x080A28CC, (int)FS_AddGameDirectory);
+			//cracking_hook_function(0x080A22D8, (int)FS_LoadIWD);
 		#endif
 		
 		#if COD_VERSION == COD2_1_3

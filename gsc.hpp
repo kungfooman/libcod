@@ -172,6 +172,8 @@ int stackGetParamString(int param, char **value);
 int stackGetParamVector(int param, float value[3]);
 int stackGetParamFloat(int param, float *value);
 int stackGetNumberOfParams();
+int stackGetParamType(int param);
+int stackGetParams(char *params, ...);
 
 int cdecl_injected_closer_stack_debug();
 
@@ -192,6 +194,9 @@ int cdecl_injected_closer();
 
 int sub_8101B40(int self, int eInflictor, int eAttacker, float *vDir, float *vPoint, int iDamage, int iDFlags, int iMeansOfDeath, int iHitLoc, int psOffsetTime);
 int cdecl_cod2_player_damage_new(int self, int eInflictor, int eAttacker, float *vDir, float *vPoint, int iDamage, int iDFlags, int iMeansOfDeath, int iHitLoc, int psOffsetTime);
+
+// might put it in an extra file later, but atm its just one FS function
+int FS_LoadDir(char *path, char *dir);
 
 #ifdef __cplusplus
 }

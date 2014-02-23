@@ -17,7 +17,7 @@ mkdir -p objects_normal
 cc="gcc"
 
 #options="-I. -m32 -fPIC -fvisibility=hidden -O1"
-options="-I. -m32 -fPIC"
+options="-I. -m32 -fPIC -Wno-write-strings"
 
 #objects_tcc="build/gsc_tcc.opp /home/kung/tcc/tcc-0.9.25/libtcc.a"
 	
