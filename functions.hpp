@@ -103,8 +103,21 @@ typedef int (*FS_ReadFile_t)(const char *qpath, void **buffer);
 #elif COD_VERSION == COD2_1_3
 	static FS_ReadFile_t FS_ReadFile = (FS_ReadFile_t)0x080A0A9C;
 #else
-	#warning static FS_ReadFile_t CvarVariableValue = NULL;
+	#warning static FS_ReadFile_t FS_ReadFile = NULL;
 	static FS_ReadFile_t FS_ReadFile = (FS_ReadFile_t)NULL;
+#endif
+
+// e.g. FS_LoadDir("/home/ns_test", "NsZombiesV4.3");
+typedef int (*FS_LoadDir_t)(char *path, char *dir);
+#if COD_VERSION == COD2_1_0
+	static FS_LoadDir_t FS_LoadDir = (FS_LoadDir_t)0x080A01A4;
+#elif COD_VERSION == COD2_1_2
+	static FS_LoadDir_t FS_LoadDir = (FS_LoadDir_t)0x080A22D8;
+#elif COD_VERSION == COD2_1_3
+	static FS_LoadDir_t FS_LoadDir = (FS_LoadDir_t)0x080A241C;
+#else
+	#warning static FS_LoadDir_t FS_LoadDir = NULL;
+	static FS_LoadDir_t FS_LoadDir = (FS_LoadDir_t)NULL;
 #endif
 
 #if COD_VERSION == COD2_1_0

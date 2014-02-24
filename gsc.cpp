@@ -995,14 +995,6 @@ int sub_80853B6(int key) // setKeyInArray
 	//printf_hide("blub\n");
 }
 
-// e.g. FS_LoadDir("/home/ns_test", "NsZombiesV4.3");
-int FS_LoadDir(char *path, char *dir)
-{
-	int (*signature)(char *path, char *dir);
-	*(int *)&signature = 0x080A22D8;
-	return signature(path, dir);
-}
-
 /*
 	functions:
 	0 == setVelocity
