@@ -1151,6 +1151,7 @@ int cdecl_injected_closer()
 		case 1: return gsc_player_velocity_get();
 		case 2: return gsc_player_button_ads();
 		case 7: return gsc_player_state_alive_set();
+		case 17: return gsc_player_setbounds();
 		#endif 
 		
 		#if COMPILE_ASTAR == 1

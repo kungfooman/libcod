@@ -27,6 +27,7 @@ int gsc_player_button_leanright();
 int gsc_player_button_jump();
 
 int gsc_player_state_alive_set();
+int gsc_player_setbounds();
 
 int gsc_player_stance_get();
 

@@ -395,7 +395,7 @@ int gsc_player_state_alive_set() // as in isAlive?
 	int isAlive;
 	if (stackGetNumberOfParams() < 3) // function, playerid, isAlive
 	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
+		printf_hide("scriptengine> ERROR: please specify atleast 3 arguments to closer()\n");
 		return stackReturnInt(0);
 	}
 	if (!stackGetParamInt(1, &playerid))
@@ -414,6 +414,41 @@ int gsc_player_state_alive_set() // as in isAlive?
 
 	
 	return stackReturnInt(0);
+}
+
+int gsc_player_setbounds()
+{
+	int width, height, entityIndex;
+
+	if (stackGetNumberOfParams() < 4) // function, width, height, entityIndex 
+	{
+		printf_hide("scriptengine> ERROR: please specify atleast 4 arguments to closer()\n");
+		return stackReturnInt(0);
+	}
+
+	if(!stackGetParamInt(1, &width))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"width\"[1] has to be an integer!\n");
+		return stackReturnInt(0);
+	}
+
+	if(!stackGetParamInt(2, &height))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"height\"[1] has to be an integer!\n");
+		return stackReturnInt(0);
+	}
+
+	if(!stackGetParamInt(3, &entityIndex))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"entityIndex\"[1] has to be an integer!\n");
+		return stackReturnInt(0);
+	}
+
+	*(float*)(gentities_size * entityIndex + gentities + 280) = height;
+	*(float*)(gentities_size * entityIndex + gentities + 276) = width;
+	*(float*)(gentities_size * entityIndex + gentities + 272) = width;
+	*(float*)(gentities_size * entityIndex + gentities + 264) = -width;
+	*(float*)(gentities_size * entityIndex + gentities + 260) = -width;
 }
 
 int gsc_player_stance_get()
