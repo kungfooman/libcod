@@ -133,18 +133,13 @@ typedef int (*FS_LoadDir_t)(char *path, char *dir);
 
 #if COD_VERSION == COD2_1_0
 	static int hook_AuthorizeState_call = 0x0808C8C0;
-	static int fsrestrict_ServerCommand = 0x0808C8F2;
 #elif COD_VERSION == COD2_1_2
 	static int hook_AuthorizeState_call = 0x0808DA52;
-	static int fsrestrict_ServerCommand = 0x0808DAAF;
 #elif COD_VERSION == COD2_1_3
 	static int hook_AuthorizeState_call = 0x0808DB12;
-	static int fsrestrict_ServerCommand = 0x0808DB6F;
 #else
 	#warning static int hook_AuthorizeState_call = NULL;
-	#warning static int fsrestrict_ServerCommand = NULL;
 	static int hook_AuthorizeState_call = (int)NULL;
-	static int fsrestrict_ServerCommand = (int)NULL;
 #endif
 
 typedef int (*SV_BeginDownload_f_t)(int a1);

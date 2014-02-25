@@ -1464,15 +1464,9 @@ char * hook_AuthorizeState( int arg )
 	char * s = Cmd_Argv(arg);
 
 	if ((CvarVariableValue == NULL || CvarVariableValue("sv_cracked") == 1) && strcmp (s, "deny") == 0)
-		strncpy (s, "demo", 4); // replace deny with demo when sv_cracked is 1
+		return "accept";
 
 	return s;
-}
-
-void replaceServerCommandCvar()
-{
-	char * cracked = (char *)"sv_cracked";
-	memcpy((void *)(fsrestrict_ServerCommand+3), &cracked, 4);
 }
 
 void hook_SV_BeginDownload_f( int a1 ) {
@@ -1988,7 +1982,6 @@ class cCallOfDuty2Pro
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 			cracking_hook_call(hook_AuthorizeState_call, (int)hook_AuthorizeState);
 			cracking_hook_call(hook_findMap_call, (int)hook_findMap);
-			replaceServerCommandCvar();
 		#endif
 		
 		printf_hide("> [PLUGIN LOADED]\n");
