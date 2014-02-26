@@ -36,6 +36,7 @@ int gsc_player_spectatorclient_get();
 int gsc_player_getip();
 int gsc_player_getping();
 int gsc_player_getlastmsg();
+int gsc_player_getLastConnectTime();
 
 #ifdef __cplusplus
 }

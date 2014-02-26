@@ -555,6 +555,48 @@ int gsc_player_getip()
 	return stackPushString(tmp);
 }
 
+int gsc_player_getLastConnectTime()
+{
+	int playerid;
+	if (stackGetNumberOfParams() < 2) // function, playerid
+	{
+		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_player_getLastConnectTime()\n");
+		return stackPushUndefined();
+	}
+	if (!stackGetParamInt(1, &playerid))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
+		return stackPushUndefined();
+	}
+	
+	#if COD2_VERSION == COD2_VERSION_1_0
+		int info_start = *(int *)0x0841FB04;
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+		int info_connecttime_offset = 0x20D14;
+	#elif COD2_VERSION == COD2_VERSION_1_2
+		int info_start = *(int *)0x08422004;
+		int info_base = *(int *)0x0842200C;
+		int info_size = 0x79064;
+		int info_connecttime_offset = 0x20E24;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+		int info_start = *(int *)0x08423084;
+		int info_base = *(int *)0x0842308C;
+		int info_size = 0xB1064;
+		int info_connecttime_offset = 0x20E24;
+	#else
+		#warning gsc_player_getLastConnectTime() got no working addresses
+		int info_start = *(int *)0x0;
+		int info_base = *(int *)0x0;
+		int info_size = 0x0;
+		int info_connecttime_offset = 0x0;
+	#endif
+	
+	int info_player = info_base + playerid * info_size;
+	int lastconnect = info_start - *(unsigned int *)(info_player + info_connecttime_offset);
+	return stackPushInt(lastconnect);
+}
+
 int gsc_player_getlastmsg()
 {
 	int playerid;
@@ -627,7 +669,7 @@ int gsc_player_getping()
 		int info_ip_offset = 0x6E6D8;
 		int info_port_offset = 0x6E6B4;
 	#else
-		#warning gsc_player_getip() got no working addresses
+		#warning gsc_player_getping() got no working addresses
 		int info_base = *(int *)0x0;
 		int info_size = 0x0;
 		int info_ip_offset = 0x0;
