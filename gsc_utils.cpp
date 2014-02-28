@@ -112,7 +112,7 @@ int gsc_utils_FS_LoadDir() // closer(1302, "/home/ns_test", "NsZombiesV4.3");
 {
 	char *path, *dir;
 	
-	if ( ! stackGetParams("ss", &path, &dir))
+	if ( ! stackGetParams(" ss", &path, &dir))
 		return stackPushUndefined();
 	
 	//printf("path %s dir %s \n", path, dir);
@@ -124,7 +124,7 @@ int gsc_utils_fileexists()
 {
 	char *filename;
 	
-	if ( ! stackGetParams("s", &filename))
+	if ( ! stackGetParams(" s", &filename))
 		return stackPushUndefined();
 	
 	if (access(filename, F_OK) == -1)

@@ -1951,6 +1951,7 @@ class cCallOfDuty2Pro
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 			cracking_hook_call(0x8070B1B, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x8070D3F, (int)Scr_GetCustomMethod);
 			
 			hook_MSG_WriteBigString = new cHook(0x0806825E, (int)MSG_WriteBigString);
 			//hook_MSG_WriteBigString->hook();
@@ -1966,6 +1967,7 @@ class cCallOfDuty2Pro
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 			cracking_hook_call(0x8070BE7, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x8070E0B, (int)Scr_GetCustomMethod);
 		#endif
 		
 		printf_hide("> [PLUGIN LOADED]\n");

@@ -1,48 +1,84 @@
 #include "gsc.hpp"
 
 /*
-	//TODO
-		- Add Scr_GetMethod (works the same way so should be an easy find)
-	
-	:: Scr_GetFunction/GetMethod ::
-	
 	CoD2 search for "parameter count exceeds 256" and go upwards
 	CoD1 search for "parameter count exceeds 256" or "unknown (builtin) function '%s'" and go upwards
 */
 
-Scr_Function scriptFunctions[] = {
-	//name, function, developer
-    {"printconsole", GScr_printconsole, 0}
-};
-
 #if COD_VERSION == COD2_1_2
 Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117B56;
+Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x8117C8E;
 #elif COD_VERSION == COD2_1_3
 Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117CB2;
+Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x8117DEA;
 #endif
 
-Scr_FunctionCall Scr_GetCustomFunction(const char** fname, int* fdev) {
-    Scr_FunctionCall m = Scr_GetFunction(fname, fdev);
-    void (*fc)(int);
-    *(int*)&fc = (int)m;
-    if(m == NULL) {
-        for(unsigned int i = 0; i < (sizeof(scriptFunctions)/sizeof(Scr_Function)); i++) {
-            if(!strcmp(*fname, scriptFunctions[i].name)) {
-                Scr_Function func = scriptFunctions[i];
-                *fname = func.name;
-                *fdev = func.developer;
-                return func.call;
-            }
-        }
-    }
-	return fc;
+Scr_Function scriptFunctions[] = {
+	{"mysql_init"              , gsc_mysql_init              , 0},
+	{"mysql_real_connect"      , gsc_mysql_real_connect      , 0},
+	{"mysql_close"             , gsc_mysql_close             , 0},
+	{"mysql_query"             , gsc_mysql_query             , 0},
+	{"mysql_errno"             , gsc_mysql_errno             , 0},
+	{"mysql_error"             , gsc_mysql_error             , 0},
+	{"mysql_affected_rows"     , gsc_mysql_affected_rows     , 0},
+	{"mysql_store_result"      , gsc_mysql_store_result      , 0},
+	{"mysql_num_rows"          , gsc_mysql_num_rows          , 0},
+	{"mysql_num_fields"        , gsc_mysql_num_fields        , 0},
+	{"mysql_field_seek"        , gsc_mysql_field_seek        , 0},
+	{"mysql_fetch_field"       , gsc_mysql_fetch_field       , 0},
+	{"mysql_fetch_row"         , gsc_mysql_fetch_row         , 0},
+	{"mysql_free_result"       , gsc_mysql_free_result       , 0},
+	{"mysql_real_escape_string", gsc_mysql_real_escape_string, 0},
+
+	{NULL, NULL, 0}
+};
+
+Scr_FunctionCall Scr_GetCustomFunction(const char **fname, int *fdev) {
+	//printf("Scr_GetCustomFunction: fdev=%d fname=%s\n", *fdev, *fname);
+	Scr_FunctionCall m = Scr_GetFunction(fname, fdev);
+	if (m)
+		return m;
+	
+	for (int i=0; scriptFunctions[i].name; i++) {
+		if (strcmp(*fname, scriptFunctions[i].name))
+			continue;
+		Scr_Function func = scriptFunctions[i];
+		*fname = func.name;
+		*fdev = func.developer;
+		return func.call;		
+	}
+    
+	return NULL;
 }
 
-void GScr_printconsole(int entityIndex) { //if this was a method the index would be the entity's number
-    char* msg;
-	stackGetParamString(0, &msg);
-	printf(msg);
+void gsc_player_printf(int id) {
+	printf("id: %.8p\n", id);
 }
+
+Scr_Method scriptMethods[] = {
+	{"printf", gsc_player_printf, 0},
+	{NULL, NULL, 0}
+};
+
+Scr_MethodCall Scr_GetCustomMethod(const char **fname, int *fdev) {
+	//printf("Scr_GetCustomMethod: fdev=%d fname=%s\n", *fdev, *fname);
+	Scr_MethodCall m = Scr_GetMethod(fname, fdev);
+	if (m)
+		return m;
+	
+	for (int i=0; scriptMethods[i].name; i++) {
+		if (strcmp(*fname, scriptMethods[i].name))
+			continue;
+		Scr_Method func = scriptMethods[i];
+		*fname = func.name;
+		*fdev = func.developer;
+		return func.call;		
+	}
+	
+	return NULL;
+}
+
+
 
 /*
 	In CoD2 this address can be found in every get-param-function
@@ -107,15 +143,30 @@ int stackGetParams(char *params, ...)
 	{
 		switch (params[i])
 		{
-			case 's': {
-				char **tmp = va_arg(args, char **);
-				if ( ! stackGetParamString(i + 1, tmp)) // first param is function-id
+			case ' ': // ignore param (e.g. to ignore the function-id from closer()-wrapper)
+				break;
+			case 'i': {
+				int *tmp = va_arg(args, int *);
+				if ( ! stackGetParamInt(i, tmp))
 				{
-					printf("Param %d needs to be a string, %s=%d given! NumParams=%d\n", i + 1, ">make function for this<", stackGetParamType(i+1), stackGetNumberOfParams());
+					printf("Param %d needs to be an int, %s=%d given! NumParams=%d\n", i, ">make function for this<", stackGetParamType(i), stackGetNumberOfParams());
 					errors++;
 				}
 				break;
 			}
+			case 's': {
+				char **tmp = va_arg(args, char **);
+				if ( ! stackGetParamString(i, tmp))
+				{
+					printf("Param %d needs to be a string, %s=%d given! NumParams=%d\n", i, ">make function for this<", stackGetParamType(i), stackGetNumberOfParams());
+					errors++;
+				}
+				break;
+			}
+			
+			default:
+				errors++;
+				printf("[WARNING] stackGetParams: errors=%d Identifier '%c' is not implemented!\n", errors, params[i]);
 		}
 	}
 	
@@ -1267,21 +1318,21 @@ int cdecl_injected_closer()
 	#if COMPILE_MYSQL == 1
 	switch (function)
 	{
-		case 100: return gsc_mysql_init();
-		case 101: return gsc_mysql_real_connect();
-		case 102: return gsc_mysql_close();
-		case 103: return gsc_mysql_query();
-		case 104: return gsc_mysql_errno();
-		case 105: return gsc_mysql_error();
-		case 106: return gsc_mysql_affected_rows();
-		case 107: return gsc_mysql_store_result();
-		case 108: return gsc_mysql_num_rows();
-		case 109: return gsc_mysql_num_fields();
-		case 110: return gsc_mysql_field_seek();
-		case 111: return gsc_mysql_fetch_field();
-		case 112: return gsc_mysql_fetch_row();
-		case 113: return gsc_mysql_free_result();
-		case 114: return gsc_mysql_real_escape_string();
+		//case 100: return gsc_mysql_init();
+		//case 101: return gsc_mysql_real_connect();
+		//case 102: return gsc_mysql_close();
+		//case 103: return gsc_mysql_query();
+		//case 104: return gsc_mysql_errno();
+		//case 105: return gsc_mysql_error();
+		//case 106: return gsc_mysql_affected_rows();
+		//case 107: return gsc_mysql_store_result();
+		//case 108: return gsc_mysql_num_rows();
+		//case 109: return gsc_mysql_num_fields();
+		//case 110: return gsc_mysql_field_seek();
+		//case 111: return gsc_mysql_fetch_field();
+		//case 112: return gsc_mysql_fetch_row();
+		//case 113: return gsc_mysql_free_result();
+		//case 114: return gsc_mysql_real_escape_string();
 		
 		case 150: return gsc_mysql_stmt_init();
 		case 151: return gsc_mysql_stmt_close();
