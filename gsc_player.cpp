@@ -55,326 +55,155 @@
 	#define PLAYERSTATE_VELOCITY(playerid) 0
 #endif
 
-int gsc_player_velocity_set()
-{
-	int playerid;
-	float velocity_x, velocity_y, velocity_z;
-	
-	if (stackGetNumberOfParams() < 5) // function, playerid, x, y, z
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamFloat(2, &velocity_x))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"velocity_x\"[2] has to be an float!\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamFloat(3, &velocity_y))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"velocity_y\"[3] has to be an float!\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamFloat(4, &velocity_z))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"velocity_z\"[4] has to be an float!\n");
-		return stackReturnInt(0);
-	}
-	//int currentPlayer = playerStates + playerid * sizeOfPlayer;
+void gsc_player_velocity_set(int id) {
+	float velocity[3];
 
-	float *player_0_velocity_x = (float *)(PLAYERSTATE_VELOCITY(playerid) + 0);
-	float *player_0_velocity_y = (float *)(PLAYERSTATE_VELOCITY(playerid) + 4);
-	float *player_0_velocity_z = (float *)(PLAYERSTATE_VELOCITY(playerid) + 8);
+	if ( ! stackGetParams("v", &velocity)) {
+		printf("scriptengine> wrongs args for gsc_player_velocity_add(vector velocity);\n");
+		stackPushUndefined();
+		return;
+	}
+
+	float *player_0_velocity_x = (float *)(PLAYERSTATE_VELOCITY(id) + 0);
+	float *player_0_velocity_y = (float *)(PLAYERSTATE_VELOCITY(id) + 4);
+	float *player_0_velocity_z = (float *)(PLAYERSTATE_VELOCITY(id) + 8);
 	
-	*player_0_velocity_x = velocity_x;
-	*player_0_velocity_y = velocity_y;
-	*player_0_velocity_z = velocity_z;
+	*player_0_velocity_x = velocity[0];
+	*player_0_velocity_y = velocity[1];
+	*player_0_velocity_z = velocity[2];
 	
-	// todo: let it fail if no player...
-	return stackReturnInt(1);
+	stackReturnInt(1);
 }
 
+void gsc_player_velocity_add(int id) {
+	float velocity[3];
 
-int gsc_player_velocity_add()
-{
-	int playerid;
-	float velocity_x, velocity_y, velocity_z;
-	
-	if (stackGetNumberOfParams() < 5) // function, playerid, x, y, z
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamFloat(2, &velocity_x))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"velocity_x\"[2] has to be an float!\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamFloat(3, &velocity_y))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"velocity_y\"[3] has to be an float!\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamFloat(4, &velocity_z))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"velocity_z\"[4] has to be an float!\n");
-		return stackReturnInt(0);
+	if ( ! stackGetParams("v", &velocity)) {
+		printf("scriptengine> wrongs args for gsc_player_velocity_add(vector velocity);\n");
+		stackPushUndefined();
+		return;
 	}
 
-	float *player_0_velocity_x = (float *)(PLAYERSTATE_VELOCITY(playerid) + 0);
-	float *player_0_velocity_y = (float *)(PLAYERSTATE_VELOCITY(playerid) + 4);
-	float *player_0_velocity_z = (float *)(PLAYERSTATE_VELOCITY(playerid) + 8);
+	float *player_0_velocity_x = (float *)(PLAYERSTATE_VELOCITY(id) + 0);
+	float *player_0_velocity_y = (float *)(PLAYERSTATE_VELOCITY(id) + 4);
+	float *player_0_velocity_z = (float *)(PLAYERSTATE_VELOCITY(id) + 8);
 
-	//int currentPlayer = playerStates + playerid * sizeOfPlayer;
-	//float *player_0_velocity_x = (float *)(currentPlayer + 40);
-	//float *player_0_velocity_y = (float *)(currentPlayer + 44);
-	//float *player_0_velocity_z = (float *)(currentPlayer + 48);
-	//printf("z:%.2f\n", *player_0_velocity_z);
-	
-	*player_0_velocity_x += velocity_x;
-	*player_0_velocity_y += velocity_y;
-	*player_0_velocity_z += velocity_z;
-	
-	// todo: let it fail if no player...
-	return stackReturnInt(1);
+	*player_0_velocity_x += velocity[0];
+	*player_0_velocity_y += velocity[1];
+	*player_0_velocity_z += velocity[2];
+
+	stackReturnInt(1);
 }
 
-int gsc_player_velocity_get()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	//int currentPlayer = playerStates + playerid * sizeOfPlayer;
-
-	float *vectorVelocity = (float *)PLAYERSTATE_VELOCITY(playerid); // (currentPlayer + 0x20);
-	return stackReturnVector(vectorVelocity);
-	
-	// todo: return undefined if no player
-	// return stackReturnInt(1);
+void gsc_player_velocity_get(int id) {
+	//int currentPlayer = playerStates + id * sizeOfPlayer;
+	float *vectorVelocity = (float *)PLAYERSTATE_VELOCITY(id); // (currentPlayer + 0x20);
+	stackReturnVector(vectorVelocity);	
 }
 
 // aimButtonPressed (toggleads or +speed/-speed)
-int gsc_player_button_ads()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	int currentPlayer = playerStates + playerid * sizeOfPlayer;
-
+void gsc_player_button_ads(int id) {
+	int currentPlayer = playerStates + id * sizeOfPlayer;
 	unsigned char *aim_address = (unsigned char *)(currentPlayer + 0x26CD);
 	int aimButtonPressed = *aim_address & 0xF0; // just the first 4 bits tell the state
-	return stackReturnInt(aimButtonPressed);
-	// todo: return undefined if no player
-	// return stackReturnInt(1);
+	stackReturnInt(aimButtonPressed);
 }
 
-int gsc_player_button_left()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-
+void gsc_player_button_left(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26FD);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26FD);
 	#elif COD_VERSION == COD4_1_7
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FA7);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FA7);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
 		unsigned char *aim_address = (unsigned char *)(NULL);
 	#endif
 	int leftButtonPressed = (*aim_address & 0x81)==0x81;
-	return stackReturnInt(leftButtonPressed);
+	stackReturnInt(leftButtonPressed);
 }
-int gsc_player_button_right()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
 
+void gsc_player_button_right(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26FD);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26FD);
 	#elif COD_VERSION == COD4_1_7
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FA7);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FA7);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
 		unsigned char *aim_address = (unsigned char *)(NULL);
 	#endif
 
 	int rightButtonPressed = (*aim_address & 0x7F)==0x7F;
-	return stackReturnInt(rightButtonPressed);
+	stackReturnInt(rightButtonPressed);
 }
-int gsc_player_button_forward()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	
+
+void gsc_player_button_forward(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26FC);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26FC);
 	#elif COD_VERSION == COD4_1_7
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FA6);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FA6);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
 		unsigned char *aim_address = (unsigned char *)(NULL);
 	#endif
 
 	int forwardButtonPressed = (*aim_address & 0x7F)==0x7F;
-	return stackReturnInt(forwardButtonPressed);
+	stackReturnInt(forwardButtonPressed);
 }
-int gsc_player_button_back()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	
+
+void gsc_player_button_back(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26FC);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26FC);
 	#elif COD_VERSION == COD4_1_7
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FA6);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FA6);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
 		unsigned char *aim_address = (unsigned char *)(NULL);
 	#endif
 	
 	int backButtonPressed = (*aim_address & 0x81)==0x81;
-	return stackReturnInt(backButtonPressed);
+	stackReturnInt(backButtonPressed);
 }
-int gsc_player_button_leanleft()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
 
+void gsc_player_button_leanleft(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26E8);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26E8);
 	#elif COD_VERSION == COD4_1_7
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FB4);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FB4);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
 		unsigned char *aim_address = (unsigned char *)(NULL);
 	#endif
-	
-	
+
 	int leanleftButtonPressed = (*aim_address & 0x40)==0x40;
-	return stackReturnInt(leanleftButtonPressed);
+	stackReturnInt(leanleftButtonPressed);
 }
-int gsc_player_button_leanright()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	
+
+void gsc_player_button_leanright(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26E8);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26E8);
 	#elif COD_VERSION == COD4_1_7
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FB4);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FB4);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
 		unsigned char *aim_address = (unsigned char *)(NULL);
 	#endif
 	
 	int leanrightButtonPressed = (*aim_address & 0x80)==0x80;
-	return stackReturnInt(leanrightButtonPressed);
+	stackReturnInt(leanrightButtonPressed);
 }
-int gsc_player_button_jump()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	
+
+void gsc_player_button_jump(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x26E9);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26E9);
 	#elif COD_VERSION == COD4_1_7
-		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(playerid) + 0x2FB5);
+		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FB5);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
 		unsigned char *aim_address = (unsigned char *)(NULL);
 	#endif
 	
 	int jumpButtonPressed = (*aim_address & 0x04)==0x04;
-	return stackReturnInt(jumpButtonPressed);
+	stackReturnInt(jumpButtonPressed);
 }
 
 /*
@@ -389,70 +218,27 @@ CoD4 = 2FB4 == leanleft:40 leanright:80
 CoD4 = 2FB5 == jump:04
 */
 
-int gsc_player_state_alive_set() // as in isAlive?
-{
-	int playerid;
-	int isAlive;
-	if (stackGetNumberOfParams() < 3) // function, playerid, isAlive
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(2, &isAlive))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"isAlive\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	
-	
-	*(char *)(gentities + gentities_size*playerid + 353) = isAlive;
-
-	
-	return stackReturnInt(0);
-}
-
-int gsc_player_stance_get()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackReturnInt(0);
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackReturnInt(0);
-	}
-	int entity = gentities + playerid * gentities_size;
-
+void gsc_player_stance_get(int id) {
+	int entity = gentities + id * gentities_size;
 	unsigned char *stance_address = (unsigned char *)(entity + 8);
-	int stance = *stance_address & 0x0F; // just the last 4 bits tell the state
-	return stackReturnInt(stance);
-	// todo: return undefined if no player
-	// return stackReturnInt(1);
+	int code = *stance_address & 0x0F; // just the last 4 bits tell the state
+
+	char *stance = "";
+	switch (code) {
+		case  0: stance = "stand"; break; // also in spec
+		case  2: stance = "stand"; break;
+		case  4: stance = "duck"; break;
+		case  6: stance = "duck"; break;
+		case  8: stance = "lie"; break;
+		case 10: stance = "lie"; break;
+		default: printf("unknown stance for player id=%d, code=%d\n", id, code);
+	}
+
+	stackPushString(stance);
 }
 
-int gsc_player_spectatorclient_get()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
-		return stackPushUndefined();
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackPushUndefined();
-	}
-	int entity = playerStates + playerid * sizeOfPlayer;
-
+void gsc_player_spectatorclient_get(int id) {
+	int entity = playerStates + id * sizeOfPlayer;
 	int spectatorClient = *(unsigned char *)(entity + 0xCC);
 	
 	//printf("spectator client: %x=%d\n", entity, spectatorClient);
@@ -462,26 +248,10 @@ int gsc_player_spectatorclient_get()
 	//if ( ! spectatorClient)
 	//	return stackPushUndefined();
 	
-	return stackPushEntity(gentities + spectatorClient * gentities_size);
+	stackPushEntity(gentities + spectatorClient * gentities_size);
 }
 
-
-
-
-int gsc_player_getip()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_player_getip()\n");
-		return stackPushUndefined();
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackPushUndefined();
-	}
-	
+void gsc_player_getip(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0
 		int info_base = *(int *)0x0841FB0C;
 		int info_size = 0x78F14;
@@ -505,7 +275,7 @@ int gsc_player_getip()
 		int info_port_offset = 0x0;
 	#endif
 	
-	int info_player = info_base + playerid * info_size;
+	int info_player = info_base + id * info_size;
 
 	int ip_a = *(unsigned char *)(info_player + info_ip_offset + 0);
 	int ip_b = *(unsigned char *)(info_player + info_ip_offset + 1); // dafuq, its +1 but in IDA its +4 step :S
@@ -517,24 +287,10 @@ int gsc_player_getip()
 	snprintf(tmp, 64, "%d.%d.%d.%d", ip_a, ip_b, ip_c, ip_d);
 	//snprintf(tmp, 64, "%d.%d.%d.%d:%d", ip_a, ip_b, ip_c, ip_d, port);
 	
-	return stackPushString(tmp);
+	stackPushString(tmp);
 }
 
-
-int gsc_player_getping()
-{
-	int playerid;
-	if (stackGetNumberOfParams() < 2) // function, playerid
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_player_getip()\n");
-		return stackPushUndefined();
-	}
-	if (!stackGetParamInt(1, &playerid))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
-		return stackPushUndefined();
-	}
-	
+void gsc_player_getping(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0
 		int info_base = *(int *)0x0841FB0C;
 		int info_size = 0x78F14;
@@ -558,8 +314,105 @@ int gsc_player_getping()
 		int info_port_offset = 0x0;
 	#endif
 	
-	int info_player = info_base + playerid * info_size;
+	int info_player = info_base + id * info_size;
 	int ping = *(unsigned int *)(info_player + info_port_offset);
-	return stackPushInt(ping);
+	stackPushInt(ping);
 }
+
+void gsc_player_ClientCommand(int id) {
+	stackPushInt(ClientCommand(id));
+}
+
+void gsc_player_getLastConnectTime(int id) {
+	#if COD2_VERSION == COD2_VERSION_1_0
+		int info_start = *(int *)0x0841FB04;
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+		int info_connecttime_offset = 0x20D14;
+	#elif COD2_VERSION == COD2_VERSION_1_2
+		int info_start = *(int *)0x08422004;
+		int info_base = *(int *)0x0842200C;
+		int info_size = 0x79064;
+		int info_connecttime_offset = 0x20E24;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+		int info_start = *(int *)0x08423084;
+		int info_base = *(int *)0x0842308C;
+		int info_size = 0xB1064;
+		int info_connecttime_offset = 0x20E24;
+	#else
+		#warning gsc_player_getLastConnectTime() got no working addresses
+		int info_start = *(int *)0x0;
+		int info_base = *(int *)0x0;
+		int info_size = 0x0;
+		int info_connecttime_offset = 0x0;
+	#endif
+
+	int info_player = info_base + id * info_size;
+	int lastconnect = info_start - *(unsigned int *)(info_player + info_connecttime_offset);
+	stackPushInt(lastconnect);
+}
+
+void gsc_player_getLastMSG(int id) {
+	#if COD2_VERSION == COD2_VERSION_1_0
+		int info_start = *(int *)0x0841FB04;
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+		int info_lastmsg_offset = 0x20D10;
+	#elif COD2_VERSION == COD2_VERSION_1_2
+		int info_start = *(int *)0x08422004;
+		int info_base = *(int *)0x0842200C;
+		int info_size = 0x79064;
+		int info_lastmsg_offset = 0x20E20;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+		int info_start = *(int *)0x08423084;
+		int info_base = *(int *)0x0842308C;
+		int info_size = 0xB1064;
+		int info_lastmsg_offset = 0x20E20;
+	#else
+		#warning gsc_player_getlastmsg() got no working addresses
+		int info_start = *(int *)0x0;
+		int info_base = *(int *)0x0;
+		int info_size = 0x0;
+		int info_lastmsg_offset = 0x0;
+	#endif
+
+	int info_player = info_base + id * info_size;
+	int lastmsg = info_start - *(unsigned int *)(info_player + info_lastmsg_offset);
+	stackPushInt(lastmsg);
+}
+
+// entity functions (could be in own file, but atm not many pure entity functions)
+
+void gsc_entity_setalive(int id) { // as in isAlive?
+	int isAlive;
+
+	if ( ! stackGetParams("i", &isAlive)) {
+		printf("scriptengine> ERROR: gsc_player_setalive(): param \"isAlive\"[1] has to be an integer!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	*(char *)(gentities + gentities_size*id + 353) = isAlive;	
+	stackReturnInt(1);
+}
+
+void gsc_entity_setbounds(int id) {
+	float width, height;
+
+	if ( ! stackGetParams("ff", &width, &height)) {
+		printf("scriptengine> ERROR: please specify width and height to gsc_entity_setbounds()\n");
+		stackPushUndefined();
+		return;
+	}
+
+	*(float*)(gentities + gentities_size*id + 280) = height;
+	*(float*)(gentities + gentities_size*id + 276) = width;
+	*(float*)(gentities + gentities_size*id + 272) = width;
+	*(float*)(gentities + gentities_size*id + 264) = -width;
+	*(float*)(gentities + gentities_size*id + 260) = -width;
+	
+	printf("id=%d height=%f width=%f\n", id, height, width);
+	stackReturnInt(1);
+}
+
 #endif

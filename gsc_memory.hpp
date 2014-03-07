@@ -14,11 +14,11 @@ extern "C" {
 #include "gsc.hpp"
 
 #if COMPILE_MEMORY == 1
-int gsc_memory_malloc();
-int gsc_memory_free();
-int gsc_memory_int_get();
-int gsc_memory_int_set();
-int gsc_memory_memset();
+void gsc_memory_malloc();
+void gsc_memory_free();
+void gsc_memory_int_get();
+void gsc_memory_int_set();
+void gsc_memory_memset();
 #endif
 
 #ifdef __cplusplus
