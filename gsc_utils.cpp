@@ -8,6 +8,11 @@ int gsc_utils_disableGlobalPlayerCollision()
 	
 	// well, i could also just write LEAVE,RETN C9,C3 at beginnung of function
 	
+	#if COD_VERSION == COD2_1_0
+		cracking_write_hex(0x080F474A, (char *)"C3");
+		cracking_write_hex(0x080F5199, (char *)"02");
+		cracking_write_hex(0x0805AA0E, (char *)"C3");
+	#endif
 	#if COD_VERSION == COD2_1_2
 	/*
 	//ret = cracking_nop(0x080F6D5A, 0x080F7150);
@@ -94,7 +99,7 @@ int gsc_utils_file_link()
 int gsc_utils_file_unlink()
 {
 	char *file;
-	if (stackGetNumberOfParams() < 2) // function, source, dest
+	if (stackGetNumberOfParams() < 2) // function, file
 	{
 		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_unlink_file()\n");
 		return stackPushUndefined();
@@ -112,7 +117,7 @@ int gsc_utils_FS_LoadDir() // closer(1302, "/home/ns_test", "NsZombiesV4.3");
 {
 	char *path, *dir;
 	
-	if ( ! stackGetParams(" ss", &path, &dir))
+	if ( ! stackGetParams("ss", &path, &dir))
 		return stackPushUndefined();
 	
 	//printf("path %s dir %s \n", path, dir);
@@ -124,11 +129,31 @@ int gsc_utils_fileexists()
 {
 	char *filename;
 	
-	if ( ! stackGetParams(" s", &filename))
+	if ( ! stackGetParams("s", &filename))
 		return stackPushUndefined();
 	
 	if (access(filename, F_OK) == -1)
 		return stackPushInt(0);
+	return stackPushInt(1);
+}
+
+int gsc_utils_RemoveCommand()
+{
+	char *command;
+
+	if (stackGetNumberOfParams() < 2) // function, command
+	{
+		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_utils_RemoveCommand()\n");
+		return stackPushInt(0);
+	}
+
+	if (!stackGetParamString(1, &command))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"command\"[1] has to be a string!\n");
+		return stackPushInt(0);
+	}
+
+	Cmd_RemoveCommand(command);
 	return stackPushInt(1);
 }
 

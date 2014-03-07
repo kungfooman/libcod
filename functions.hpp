@@ -18,6 +18,18 @@ static int trap_Argc()
 	#endif
 }
 
+typedef char * (*Cmd_Argv_t)(int arg);
+#if COD_VERSION == COD2_1_0
+	static Cmd_Argv_t Cmd_Argv = (Cmd_Argv_t)0x0806001C;
+#elif COD_VERSION == COD2_1_2
+	static Cmd_Argv_t Cmd_Argv = (Cmd_Argv_t)0x08060228;
+#elif COD_VERSION == COD2_1_3
+	static Cmd_Argv_t Cmd_Argv = (Cmd_Argv_t)0x08060220;
+#else
+	#warning static Cmd_Argv_t Cmd_Argv = (Cmd_Argv_t)NULL;
+	static Cmd_Argv_t Cmd_Argv = (Cmd_Argv_t)NULL;
+#endif
+
 typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
 #if COD2_VERSION == COD2_VERSION_1_0
 	static trap_Argv_t trap_Argv = (trap_Argv_t)0x08060074;
@@ -30,6 +42,17 @@ typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
 	static trap_Argv_t trap_Argv = (trap_Argv_t)NULL;
 #endif
 
+typedef int (*Cmd_RemoveCommand_t)(const char *cmd_name);
+#if COD_VERSION == COD2_1_0
+	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)0x0806052A;
+#elif COD_VERSION == COD2_1_2
+	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)0x08060736;
+#elif COD_VERSION == COD2_1_3
+	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)0x0806072E;
+#else
+	#warning static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)NULL;
+	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)NULL;
+#endif
 
 typedef int (*ClientCommand_t)(int clientNum);
 #if COD2_VERSION == COD2_VERSION_1_0
@@ -47,6 +70,80 @@ typedef int (*ClientCommand_t)(int clientNum);
 	static ClientCommand_t ClientCommand = (ClientCommand_t)NULL;
 	static int hook_ClientCommand_call = (int)NULL;
 #endif
+
+typedef int (*Cvar_VariableValue_t)(const char *var_name);
+#if COD2_VERSION == COD2_VERSION_1_0
+	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B0BB6;
+#elif COD2_VERSION == COD2_VERSION_1_2
+	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B2E66;
+#elif COD2_VERSION == COD2_VERSION_1_3
+	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B2FAA;
+#else
+	#warning static Cvar_VariableValue_t CvarVariableValue = NULL;
+	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)NULL;
+#endif
+
+typedef char * (*Cvar_VariableString_t)(const char *var_name);
+#if COD_VERSION == COD2_1_0
+	static Cvar_VariableString_t Cvar_VariableString = (Cvar_VariableString_t)0x080B0D96;
+#elif COD_VERSION == COD2_1_2
+	static Cvar_VariableString_t Cvar_VariableString = (Cvar_VariableString_t)0x080B3046;
+#elif COD_VERSION == COD2_1_3
+	static Cvar_VariableString_t Cvar_VariableString = (Cvar_VariableString_t)0x080B318A;
+#else
+	#warning static Cvar_VariableValue_t CvarVariableValue = NULL;
+	static Cvar_VariableString_t Cvar_VariableString = (Cvar_VariableString_t)NULL;
+#endif
+
+typedef int (*FS_ReadFile_t)(const char *qpath, void **buffer);
+#if COD_VERSION == COD2_1_0
+	static FS_ReadFile_t FS_ReadFile = (FS_ReadFile_t)0x0809E892;
+#elif COD_VERSION == COD2_1_2
+	static FS_ReadFile_t FS_ReadFile = (FS_ReadFile_t)0x080A0958;
+#elif COD_VERSION == COD2_1_3
+	static FS_ReadFile_t FS_ReadFile = (FS_ReadFile_t)0x080A0A9C;
+#else
+	#warning static FS_ReadFile_t FS_ReadFile = NULL;
+	static FS_ReadFile_t FS_ReadFile = (FS_ReadFile_t)NULL;
+#endif
+
+// e.g. FS_LoadDir("/home/ns_test", "NsZombiesV4.3");
+typedef int (*FS_LoadDir_t)(char *path, char *dir);
+#if COD_VERSION == COD2_1_0
+	static FS_LoadDir_t FS_LoadDir = (FS_LoadDir_t)0x080A01A4;
+#elif COD_VERSION == COD2_1_2
+	static FS_LoadDir_t FS_LoadDir = (FS_LoadDir_t)0x080A22D8;
+#elif COD_VERSION == COD2_1_3
+	static FS_LoadDir_t FS_LoadDir = (FS_LoadDir_t)0x080A241C;
+#else
+	#warning static FS_LoadDir_t FS_LoadDir = NULL;
+	static FS_LoadDir_t FS_LoadDir = (FS_LoadDir_t)NULL;
+#endif
+
+#if COD_VERSION == COD2_1_0
+	static int hook_findMap_call = 0x0808AD00;
+#elif COD_VERSION == COD2_1_2
+	static int hook_findMap_call = 0x0808BCFC;
+#elif COD_VERSION == COD2_1_3
+	static int hook_findMap_call = 0x0808BDC8;
+#else
+	#warning static int hook_findMap_call = NULL;
+	static int hook_findMap_call = (int)NULL;
+#endif
+
+#if COD_VERSION == COD2_1_0
+	static int hook_AuthorizeState_call = 0x0808C8C0;
+#elif COD_VERSION == COD2_1_2
+	static int hook_AuthorizeState_call = 0x0808DA52;
+#elif COD_VERSION == COD2_1_3
+	static int hook_AuthorizeState_call = 0x0808DB12;
+#else
+	#warning static int hook_AuthorizeState_call = NULL;
+	static int hook_AuthorizeState_call = (int)NULL;
+#endif
+
+typedef int (*SV_BeginDownload_f_t)(int a1);
+static SV_BeginDownload_f_t SV_BeginDownload_f = (SV_BeginDownload_f_t)NULL;
 
 typedef short (*codscript_call_callback_entity_t)(int self, int callback, int params);
 #if COD2_VERSION == COD2_VERSION_1_0

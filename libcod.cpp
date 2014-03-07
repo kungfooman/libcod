@@ -1459,6 +1459,42 @@ void SV_SendServerCommand(/*client_t*/int *client, int bla, const char *fmt, ...
 	printf("client=%08x bla=%08p message=%s\n", client, bla, message);
 }
 
+char * hook_AuthorizeState( int arg )
+{
+	char * s = Cmd_Argv(arg);
+
+	if ((CvarVariableValue == NULL || CvarVariableValue("sv_cracked") == 1) && strcmp (s, "deny") == 0)
+		return "accept";
+
+	return s;
+}
+
+void hook_SV_BeginDownload_f( int a1 ) {
+	char * file = Cmd_Argv(1);
+	int len;
+
+	if((len = strlen(file)) > 3 && !strcmp(file + len - 4, ".iwd"))
+		SV_BeginDownload_f(a1);
+	else
+		printf("Invalid download attempt: %s\n", file);
+}
+
+int hook_findMap(const char *qpath, void **buffer)
+{
+	int read = FS_ReadFile(qpath, buffer);
+
+	if(read != -1)
+		return read;
+
+	char * map = Cmd_Argv(1);
+	char tmp[256];
+	snprintf(tmp, 256, "%s/%s/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), map);
+
+	int exists = access(tmp, F_OK);
+
+	return exists;
+}
+
 /*
 static int BG_AnimationIndexForString( char *string, animModelInfo_t* animModelInfo ) {
 	int i, hash;
@@ -1753,6 +1789,21 @@ class cCallOfDuty2Pro
 		//init_native_interface(); // inits functions and globals in the executable
 
 		//hideargs_thread();
+
+		#if COD_VERSION == COD2_1_0
+			int * addressToDownloadPointer = (int *)0x0815D584;
+		#elif COD_VERSION == COD2_1_2
+			int * addressToDownloadPointer = (int *)0x0817C9E4;
+		#elif COD_VERSION == COD2_1_3
+			int * addressToDownloadPointer = (int *)0x0817DA04;
+		#else
+			#warning int *addressToDownloadPointer = NULL;
+			int *addressToDownloadPointer = NULL;
+		#endif
+
+		printf_hide("> [INFO] value of download=%.8x\n", *addressToDownloadPointer);
+		SV_BeginDownload_f = (SV_BeginDownload_f_t)*addressToDownloadPointer;
+		*addressToDownloadPointer = (int)hook_SV_BeginDownload_f;
 		
 		#if COD_VERSION == COD4_1_7
 			cracking_hook_function(0x0804AB6C, (int)hook_recvfrom);
@@ -1938,9 +1989,6 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x08092D5C, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x0809301C, (int)SV_SendServerCommand);
-
-			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
-			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
@@ -1948,26 +1996,25 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x08094958, (int)SV_SendServerCommand);
 				
 			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
-			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
-			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 			cracking_hook_call(0x8070B1B, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x8070D3F, (int)Scr_GetCustomMethod);
 			
 			hook_MSG_WriteBigString = new cHook(0x0806825E, (int)MSG_WriteBigString);
 			//hook_MSG_WriteBigString->hook();
-		#endif
-		
-		#if COD_VERSION == COD2_1_3
+		#elif COD_VERSION == COD2_1_3
 			if (0)
 				cracking_hook_function(0x08094750, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x080AC5D8, (int)SV_SendServerCommand);
-
-			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
-			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
-			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 			cracking_hook_call(0x8070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x8070E0B, (int)Scr_GetCustomMethod);
+		#endif
+
+		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
+			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
+			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
+			cracking_hook_call(hook_AuthorizeState_call, (int)hook_AuthorizeState);
+			cracking_hook_call(hook_findMap_call, (int)hook_findMap);
 		#endif
 		
 		printf_hide("> [PLUGIN LOADED]\n");

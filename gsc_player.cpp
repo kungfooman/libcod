@@ -395,7 +395,7 @@ int gsc_player_state_alive_set() // as in isAlive?
 	int isAlive;
 	if (stackGetNumberOfParams() < 3) // function, playerid, isAlive
 	{
-		printf_hide("scriptengine> ERROR: please specify atleast 5 arguments to closer()\n");
+		printf_hide("scriptengine> ERROR: please specify atleast 3 arguments to closer()\n");
 		return stackReturnInt(0);
 	}
 	if (!stackGetParamInt(1, &playerid))
@@ -414,6 +414,41 @@ int gsc_player_state_alive_set() // as in isAlive?
 
 	
 	return stackReturnInt(0);
+}
+
+int gsc_player_setbounds()
+{
+	int width, height, entityIndex;
+
+	if (stackGetNumberOfParams() < 4) // function, width, height, entityIndex 
+	{
+		printf_hide("scriptengine> ERROR: please specify atleast 4 arguments to closer()\n");
+		return stackReturnInt(0);
+	}
+
+	if(!stackGetParamInt(1, &width))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"width\"[1] has to be an integer!\n");
+		return stackReturnInt(0);
+	}
+
+	if(!stackGetParamInt(2, &height))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"height\"[1] has to be an integer!\n");
+		return stackReturnInt(0);
+	}
+
+	if(!stackGetParamInt(3, &entityIndex))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"entityIndex\"[1] has to be an integer!\n");
+		return stackReturnInt(0);
+	}
+
+	*(float*)(gentities_size * entityIndex + gentities + 280) = height;
+	*(float*)(gentities_size * entityIndex + gentities + 276) = width;
+	*(float*)(gentities_size * entityIndex + gentities + 272) = width;
+	*(float*)(gentities_size * entityIndex + gentities + 264) = -width;
+	*(float*)(gentities_size * entityIndex + gentities + 260) = -width;
 }
 
 int gsc_player_stance_get()
@@ -520,6 +555,89 @@ int gsc_player_getip()
 	return stackPushString(tmp);
 }
 
+int gsc_player_getLastConnectTime()
+{
+	int playerid;
+	if (stackGetNumberOfParams() < 2) // function, playerid
+	{
+		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_player_getLastConnectTime()\n");
+		return stackPushUndefined();
+	}
+	if (!stackGetParamInt(1, &playerid))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
+		return stackPushUndefined();
+	}
+	
+	#if COD2_VERSION == COD2_VERSION_1_0
+		int info_start = *(int *)0x0841FB04;
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+		int info_connecttime_offset = 0x20D14;
+	#elif COD2_VERSION == COD2_VERSION_1_2
+		int info_start = *(int *)0x08422004;
+		int info_base = *(int *)0x0842200C;
+		int info_size = 0x79064;
+		int info_connecttime_offset = 0x20E24;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+		int info_start = *(int *)0x08423084;
+		int info_base = *(int *)0x0842308C;
+		int info_size = 0xB1064;
+		int info_connecttime_offset = 0x20E24;
+	#else
+		#warning gsc_player_getLastConnectTime() got no working addresses
+		int info_start = *(int *)0x0;
+		int info_base = *(int *)0x0;
+		int info_size = 0x0;
+		int info_connecttime_offset = 0x0;
+	#endif
+	
+	int info_player = info_base + playerid * info_size;
+	int lastconnect = info_start - *(unsigned int *)(info_player + info_connecttime_offset);
+	return stackPushInt(lastconnect);
+}
+
+int gsc_player_getlastmsg()
+{
+	int playerid;
+	if (stackGetNumberOfParams() < 2) // function, playerid
+	{
+		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_player_getlastmsg()\n");
+		return stackPushUndefined();
+	}
+	if (!stackGetParamInt(1, &playerid))
+	{
+		printf_hide("scriptengine> ERROR: closer(): param \"playerid\"[1] has to be an integer!\n");
+		return stackPushUndefined();
+	}
+	
+	#if COD2_VERSION == COD2_VERSION_1_0
+		int info_start = *(int *)0x0841FB04;
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+		int info_lastmsg_offset = 0x20D10;
+	#elif COD2_VERSION == COD2_VERSION_1_2
+		int info_start = *(int *)0x08422004;
+		int info_base = *(int *)0x0842200C;
+		int info_size = 0x79064;
+		int info_lastmsg_offset = 0x20E20;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+		int info_start = *(int *)0x08423084;
+		int info_base = *(int *)0x0842308C;
+		int info_size = 0xB1064;
+		int info_lastmsg_offset = 0x20E20;
+	#else
+		#warning gsc_player_getlastmsg() got no working addresses
+		int info_start = *(int *)0x0;
+		int info_base = *(int *)0x0;
+		int info_size = 0x0;
+		int info_lastmsg_offset = 0x0;
+	#endif
+	
+	int info_player = info_base + playerid * info_size;
+	int lastmsg = info_start - *(unsigned int *)(info_player + info_lastmsg_offset);
+	return stackPushInt(lastmsg);
+}
 
 int gsc_player_getping()
 {
@@ -551,7 +669,7 @@ int gsc_player_getping()
 		int info_ip_offset = 0x6E6D8;
 		int info_port_offset = 0x6E6B4;
 	#else
-		#warning gsc_player_getip() got no working addresses
+		#warning gsc_player_getping() got no working addresses
 		int info_base = *(int *)0x0;
 		int info_size = 0x0;
 		int info_ip_offset = 0x0;

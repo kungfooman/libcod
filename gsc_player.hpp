@@ -27,6 +27,7 @@ int gsc_player_button_leanright();
 int gsc_player_button_jump();
 
 int gsc_player_state_alive_set();
+int gsc_player_setbounds();
 
 int gsc_player_stance_get();
 
@@ -34,6 +35,8 @@ int gsc_player_spectatorclient_get();
 
 int gsc_player_getip();
 int gsc_player_getping();
+int gsc_player_getlastmsg();
+int gsc_player_getLastConnectTime();
 
 #ifdef __cplusplus
 }

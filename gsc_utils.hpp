@@ -24,6 +24,7 @@ int gsc_utils_file_link();
 int gsc_utils_file_unlink();
 int gsc_utils_FS_LoadDir();
 int gsc_utils_fileexists();
+int gsc_utils_RemoveCommand();
 
 #ifdef __cplusplus
 }
