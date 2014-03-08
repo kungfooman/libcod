@@ -1486,7 +1486,7 @@ int hook_findMap(const char *qpath, void **buffer)
 	if(read != -1)
 		return read;
 
-	char * map = Cmd_Argv(1);
+	char *map = Cmd_Argv(1);
 	char tmp[256];
 	snprintf(tmp, 256, "%s/%s/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), map);
 

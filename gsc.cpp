@@ -6,11 +6,16 @@
 */
 
 #if COD_VERSION == COD2_1_2
-Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117B56;
-Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x8117C8E;
+	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117B56;
+	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x8117C8E;
 #elif COD_VERSION == COD2_1_3
-Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117CB2;
-Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x8117DEA;
+	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117CB2;
+	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x8117DEA;
+#else
+	#warning Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)NULL;
+	#warning Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)NULL;
+	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)NULL;
+	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)NULL;
 #endif
 
 char *stackGetParamTypeAsString(int param) {
@@ -143,6 +148,7 @@ Scr_Function scriptFunctions[] = {
 	{"getType"                     , gsc_utils_getType                     , 0},
 	{"stringToFloat"               , gsc_utils_stringToFloat               , 0},
 	{"rundll"                      , gsc_utils_rundll                      , 0},
+	{"RemoveCommand"               , gsc_utils_RemoveCommand               , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
@@ -1251,6 +1257,7 @@ int sub_80853B6(int key) // setKeyInArray
 	//printf_hide("blub\n");
 }
 
+/*
 // e.g. FS_LoadDir("/home/ns_test", "NsZombiesV4.3");
 int FS_LoadDir(char *path, char *dir)
 {
@@ -1258,6 +1265,7 @@ int FS_LoadDir(char *path, char *dir)
 	*(int *)&signature = 0x080A22D8;
 	return signature(path, dir);
 }
+*/
 
 int cdecl_injected_closer()
 {

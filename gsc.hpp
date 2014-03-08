@@ -198,7 +198,7 @@ int sub_8101B40(int self, int eInflictor, int eAttacker, float *vDir, float *vPo
 int cdecl_cod2_player_damage_new(int self, int eInflictor, int eAttacker, float *vDir, float *vPoint, int iDamage, int iDFlags, int iMeansOfDeath, int iHitLoc, int psOffsetTime);
 
 // might put it in an extra file later, but atm its just one FS function
-int FS_LoadDir(char *path, char *dir);
+// int FS_LoadDir(char *path, char *dir);
 
 
 // real functions and methods

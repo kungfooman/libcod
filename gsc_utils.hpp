@@ -26,7 +26,7 @@ void gsc_utils_FS_LoadDir();
 void gsc_utils_getType();
 void gsc_utils_stringToFloat();
 void gsc_utils_rundll();
-int gsc_utils_RemoveCommand();
+void gsc_utils_RemoveCommand();
 
 #ifdef __cplusplus
 }

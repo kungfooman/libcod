@@ -151,24 +151,17 @@ void gsc_utils_rundll() {
 	stackPushInt(1);
 }
 
-int gsc_utils_RemoveCommand()
-{
+void gsc_utils_RemoveCommand() {
 	char *command;
 
-	if (stackGetNumberOfParams() < 2) // function, command
-	{
-		printf_hide("scriptengine> ERROR: please specify atleast 2 arguments to gsc_utils_RemoveCommand()\n");
-		return stackPushInt(0);
-	}
-
-	if (!stackGetParamString(1, &command))
-	{
-		printf_hide("scriptengine> ERROR: closer(): param \"command\"[1] has to be a string!\n");
-		return stackPushInt(0);
+	if ( ! stackGetParams("s", &command)) {
+		printf("scriptengine> ERROR: wrong args to gsc_utils_RemoveCommand(command)\n");
+		stackPushUndefined();
+		return;
 	}
 
 	Cmd_RemoveCommand(command);
-	return stackPushInt(1);
+	stackPushInt(1);
 }
 
 #endif
