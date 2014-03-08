@@ -21,7 +21,7 @@ void gsc_utils_disableGlobalPlayerCollision() {
 		cracking_write_hex(0x080F77AD, (char *)"02");
 		cracking_write_hex(0x0805AC1A, (char *)"C3");
 	
-		//cracking_hook_function(0x80F6D5A, (int)utils_hook_player_eject);
+		cracking_hook_function(0x80F6D5A, (int)utils_hook_player_eject);
 		cracking_hook_function(0x80F553E, (int)utils_hook_player_eject); //g_setclientcontents
 		#if 0
 			//just a quick snippet for if u want to switch to turn it on or off
@@ -36,7 +36,7 @@ void gsc_utils_disableGlobalPlayerCollision() {
 		cracking_write_hex(0x080F78F1, (char *)"02");
 		cracking_write_hex(0x0805AC12, (char *)"C3");
 	
-		//cracking_hook_function(0x80F6E9E, (int)utils_hook_player_eject);
+		cracking_hook_function(0x80F6E9E, (int)utils_hook_player_eject);
 		cracking_hook_function(0x80F5682, (int)utils_hook_player_eject); //g_setclientcontents
 	#endif
 	stackPushUndefined();
