@@ -13,7 +13,100 @@ Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117CB2;
 Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x8117DEA;
 #endif
 
+char *stackGetParamTypeAsString(int param) {
+	aStackElement *scriptStack = *(aStackElement**)getStack();
+	aStackElement *arg = scriptStack - param;
+	
+	char *type = "UNKNOWN TYPE!";
+	switch (arg->type) {
+		case  0: type = "UNDEFINED"; break;
+		case  1: type = "OBJECT"; break;
+		case  2: type = "STRING"; break;
+		case  3: type = "LOCALIZED_STRING"; break;
+		case  4: type = "VECTOR"; break;
+		case  5: type = "FLOAT"; break;
+		case  6: type = "INT"; break;
+		case  7: type = "CODEPOS"; break;
+		case  8: type = "PRECODEPOS"; break;
+		case  9: type = "FUNCTION"; break;
+		case 10: type = "STACK"; break;
+		case 11: type = "ANIMATION"; break;
+		case 12: type = "DEVELOPER_CODEPOS"; break;
+		case 13: type = "INCLUDE_CODEPOS"; break;
+		case 14: type = "THREAD_LIST"; break;
+		case 15: type = "THREAD_1"; break;
+		case 16: type = "THREAD_2"; break;
+		case 17: type = "THREAD_3"; break;
+		case 18: type = "THREAD_4"; break;
+		case 19: type = "STRUCT"; break;
+		case 20: type = "REMOVED_ENTITY"; break;
+		case 21: type = "ENTITY"; break;
+		case 22: type = "ARRAY"; break;
+		case 23: type = "REMOVED_THREAD"; break;
+	}
+	return type;
+}
+
+int stackPrintParam(int param) {
+	if (param >= stackGetNumberOfParams())
+		return 0;
+		
+	switch (stackGetParamType(param)) {
+		case STACK_STRING:
+			char *str;
+			stackGetParamString(param, &str); // no error checking, since we know it's a string
+			printf("%s", str);
+			return 1;
+		case STACK_VECTOR:
+			float vec[3];
+			stackGetParamVector(param, vec);
+			printf("(%.2f, %.2f, %.2f)", vec[0], vec[1], vec[2]);
+			return 1;
+		case STACK_FLOAT:
+			float tmp_float;
+			stackGetParamFloat(param, &tmp_float);
+			printf("%.3f", tmp_float); // need a way to define precision
+			return 1;
+		case STACK_INT:
+			int tmp_int;
+			stackGetParamInt(param, &tmp_int);
+			printf("%d", tmp_int);
+			return 1;
+	}
+	printf("(%s)", stackGetParamTypeAsString(param));
+	return 0;
+}
+
+void gsc_utils_printf() {
+	char *str;
+	if ( ! stackGetParams("s", &str)) {
+		printf("scriptengine> WARNING: printf undefined argument!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	int param = 1; // maps to first %
+	int len = strlen(str);
+
+	for (int i=0; i<len; i++) {
+		if (str[i] == '%')
+			stackPrintParam(param++);
+		else
+			putchar(str[i]);
+	}
+		
+	stackPushInt(1);
+}
+void gsc_utils_printfline() {
+	gsc_utils_printf();
+	printf("\n");
+}
+
 Scr_Function scriptFunctions[] = {
+	{"printf", gsc_utils_printf, 0},
+	{"printfline", gsc_utils_printfline, 0}, // adds \n at end
+	
+	#if COMPILE_MYSQL == 1
 	{"mysql_init"              , gsc_mysql_init              , 0},
 	{"mysql_real_connect"      , gsc_mysql_real_connect      , 0},
 	{"mysql_close"             , gsc_mysql_close             , 0},
@@ -29,7 +122,37 @@ Scr_Function scriptFunctions[] = {
 	{"mysql_fetch_row"         , gsc_mysql_fetch_row         , 0},
 	{"mysql_free_result"       , gsc_mysql_free_result       , 0},
 	{"mysql_real_escape_string", gsc_mysql_real_escape_string, 0},
+	#endif
+	
+	#if COMPILE_MEMORY == 1
+	{"memory_malloc" , gsc_memory_malloc , 0},
+	{"memory_free"   , gsc_memory_free   , 0},
+	{"memory_int_get", gsc_memory_int_get, 0},
+	{"memory_int_set", gsc_memory_int_set, 0},
+	{"memory_memset" , gsc_memory_memset , 0},
+	#endif
 
+	#if COMPILE_UTILS == 1
+	{"disableGlobalPlayerCollision", gsc_utils_disableGlobalPlayerCollision, 0},
+	{"getAscii"                    , gsc_utils_getAscii                    , 0},
+	{"system"                      , gsc_utils_system                      , 0},
+	{"file_link"                   , gsc_utils_file_link                   , 0},
+	{"file_unlink"                 , gsc_utils_file_unlink                 , 0},
+	{"file_exists"                 , gsc_utils_file_exists                 , 0},
+	{"FS_LoadDir"                  , gsc_utils_FS_LoadDir                  , 0},
+	{"getType"                     , gsc_utils_getType                     , 0},
+	{"stringToFloat"               , gsc_utils_stringToFloat               , 0},
+	{"rundll"                      , gsc_utils_rundll                      , 0},
+	#endif
+	
+	#if COMPILE_TCC == 1
+	{"tcc_new"             , gsc_tcc_new             , 0},
+	{"tcc_add_include_path", gsc_tcc_add_include_path, 0},
+	{"tcc_add_file"        , gsc_tcc_add_file        , 0},
+	{"tcc_run"             , gsc_tcc_run             , 0},
+	{"tcc_delete"          , gsc_tcc_delete          , 0},
+	#endif
+	
 	{NULL, NULL, 0}
 };
 
@@ -40,7 +163,7 @@ Scr_FunctionCall Scr_GetCustomFunction(const char **fname, int *fdev) {
 		return m;
 	
 	for (int i=0; scriptFunctions[i].name; i++) {
-		if (strcmp(*fname, scriptFunctions[i].name))
+		if (strcasecmp(*fname, scriptFunctions[i].name))
 			continue;
 		Scr_Function func = scriptFunctions[i];
 		*fname = func.name;
@@ -56,7 +179,31 @@ void gsc_player_printf(int id) {
 }
 
 Scr_Method scriptMethods[] = {
-	{"printf", gsc_player_printf, 0},
+	{"printf", gsc_player_printf, 0}, // rather use sprintf() to re-use iprintlnbold() etc.?
+	
+	#if COMPILE_PLAYER == 1
+	{"getStance"             , gsc_player_stance_get         , 0},
+	{"setVelocity"           , gsc_player_velocity_set       , 0},
+	{"addVelocity"           , gsc_player_velocity_add       , 0},
+	{"getVelocity"           , gsc_player_velocity_get       , 0},
+	{      "aimButtonPressed", gsc_player_button_ads         , 0},
+	{     "leftButtonPressed", gsc_player_button_left        , 0},
+	{    "rightButtonPressed", gsc_player_button_right       , 0},
+	{  "forwardButtonPressed", gsc_player_button_forward     , 0},
+	{     "backButtonPressed", gsc_player_button_back        , 0},
+	{ "leanleftButtonPressed", gsc_player_button_leanleft    , 0},
+	{"leanrightButtonPressed", gsc_player_button_leanright   , 0},
+	{     "jumpButtonPressed", gsc_player_button_jump        , 0},
+	{"getIP"                 , gsc_player_getip              , 0},
+	{"getPing"               , gsc_player_getping            , 0},
+	{"getSpectatorClient"    , gsc_player_spectatorclient_get, 0},
+	{"ClientCommand"         , gsc_player_ClientCommand      , 0},
+	{"getLastConnectTime"    , gsc_player_getLastConnectTime , 0},
+	{"getLastMSG"            , gsc_player_getLastMSG         , 0},
+	{"setAlive"              , gsc_entity_setalive           , 0},
+	{"setBounds"             , gsc_entity_setbounds          , 0},
+	#endif
+	
 	{NULL, NULL, 0}
 };
 
@@ -67,7 +214,7 @@ Scr_MethodCall Scr_GetCustomMethod(const char **fname, int *fdev) {
 		return m;
 	
 	for (int i=0; scriptMethods[i].name; i++) {
-		if (strcmp(*fname, scriptMethods[i].name))
+		if (strcasecmp(*fname, scriptMethods[i].name))
 			continue;
 		Scr_Method func = scriptMethods[i];
 		*fname = func.name;
@@ -147,17 +294,31 @@ int stackGetParams(char *params, ...)
 				break;
 			case 'i': {
 				int *tmp = va_arg(args, int *);
-				if ( ! stackGetParamInt(i, tmp))
-				{
+				if ( ! stackGetParamInt(i, tmp)) {
 					printf("Param %d needs to be an int, %s=%d given! NumParams=%d\n", i, ">make function for this<", stackGetParamType(i), stackGetNumberOfParams());
+					errors++;
+				}
+				break;
+			}
+			case 'v': {
+				float *tmp = va_arg(args, float *);
+				if ( ! stackGetParamVector(i, tmp)) {
+					printf("Param %d needs to be a vector, %s=%d given! NumParams=%d\n", i, ">make function for this<", stackGetParamType(i), stackGetNumberOfParams());
+					errors++;
+				}
+				break;
+			}
+			case 'f': {
+				float *tmp = va_arg(args, float *);
+				if ( ! stackGetParamFloat(i, tmp)) {
+					printf("Param %d needs to be a float, %s=%d given! NumParams=%d\n", i, ">make function for this<", stackGetParamType(i), stackGetNumberOfParams());
 					errors++;
 				}
 				break;
 			}
 			case 's': {
 				char **tmp = va_arg(args, char **);
-				if ( ! stackGetParamString(i, tmp))
-				{
+				if ( ! stackGetParamString(i, tmp)) {
 					printf("Param %d needs to be a string, %s=%d given! NumParams=%d\n", i, ">make function for this<", stackGetParamType(i), stackGetNumberOfParams());
 					errors++;
 				}
@@ -1098,18 +1259,6 @@ int FS_LoadDir(char *path, char *dir)
 	return signature(path, dir);
 }
 
-/*
-	functions:
-	0 == setVelocity
-	1 == getVelocity
-	2 == aimButtonPressed
-	3 == forwardButtonPressed
-	4 == backButtonPressed
-	5 == moveleftButtonPressed
-	6 == moverightButtonPressed
-	7 == setAlive(isAlive)
-*/
-
 int cdecl_injected_closer()
 {
 	int function;
@@ -1198,21 +1347,16 @@ int cdecl_injected_closer()
 		closer(200, "shall be 3rd:" + closer(4003)[2] + "\n"); // 3rd
 		closer(200, "shall be 3:" + closer(4004 )[2] + "\n"); // 3rd
 	*/
-	switch (function)
-	{
+	switch (function) {
 		case 4001:
 			printf("4001!\n");
 			return stackPushInt(666);
-		
-		case 4002:
-		{
+		case 4002: {
 			printf("4002!\n");
 			float vec[3] = {1, 33, 7};
 			return stackPushVector(vec);
 		}
-		
-		case 4003:
-		{
+		case 4003: {
 			printf("4003!\n");
 			int ret = stackPushArray();
 			stackPushString((char *)"1st");
@@ -1220,13 +1364,10 @@ int cdecl_injected_closer()
 			stackPushString((char *)"2nd");
 			stackPushArrayLast();
 			stackPushString((char *)"3rd");
-			stackPushArrayLast();
-			
+			stackPushArrayLast();	
 			return ret;
 		}
-		
-		case 4004:
-		{
+		case 4004: {
 			printf("4004!\n");
 			int ret = stackPushArray();
 			stackPushFloat(1);
@@ -1235,7 +1376,6 @@ int cdecl_injected_closer()
 			stackPushArrayLast();
 			stackPushFloat(3);
 			stackPushArrayLast();
-			
 			return ret;
 		}
 	}
@@ -1247,16 +1387,8 @@ int cdecl_injected_closer()
 	int playerStates = 0x087a2500;
 	int sizeOfPlayer = 0x28A4;
 	
-	switch (function)
-	{
-		#if COMPILE_PLAYER == 1
-		case 0: return gsc_player_velocity_set(); // todo: stackGetParamVector
-		case 1: return gsc_player_velocity_get();
-		case 2: return gsc_player_button_ads();
-		case 7: return gsc_player_state_alive_set();
-		#endif 
-		
-		#if COMPILE_ASTAR == 1
+	#if COMPILE_ASTAR == 1
+	switch (function) {
 		case 8: return gsc_graph_new();
 		case 9: return gsc_graph_add_edge();
 		case 10: return gsc_graph_add_vertex();
@@ -1266,8 +1398,8 @@ int cdecl_injected_closer()
 		//if (function == 14) { return gsc_tracefraction...;
 		case 15: return gsc_graph_get_nearest_edge();
 		//if (function == 16) { return gsc_math_nearest_point_on_linesegment();
-		#endif
 	}
+	#endif
 
 	#if COMPILE_ASTAR == 1
 	if (function == 16)
@@ -1316,24 +1448,7 @@ int cdecl_injected_closer()
 	}
 	
 	#if COMPILE_MYSQL == 1
-	switch (function)
-	{
-		//case 100: return gsc_mysql_init();
-		//case 101: return gsc_mysql_real_connect();
-		//case 102: return gsc_mysql_close();
-		//case 103: return gsc_mysql_query();
-		//case 104: return gsc_mysql_errno();
-		//case 105: return gsc_mysql_error();
-		//case 106: return gsc_mysql_affected_rows();
-		//case 107: return gsc_mysql_store_result();
-		//case 108: return gsc_mysql_num_rows();
-		//case 109: return gsc_mysql_num_fields();
-		//case 110: return gsc_mysql_field_seek();
-		//case 111: return gsc_mysql_fetch_field();
-		//case 112: return gsc_mysql_fetch_row();
-		//case 113: return gsc_mysql_free_result();
-		//case 114: return gsc_mysql_real_escape_string();
-		
+	switch (function) {
 		case 150: return gsc_mysql_stmt_init();
 		case 151: return gsc_mysql_stmt_close();
 		case 152: return gsc_mysql_stmt_get_stmt_id();
@@ -1355,28 +1470,12 @@ int cdecl_injected_closer()
 	#endif
 	
 	/*
-		200: printf
 		201: int alloc_object_and_push_to_array()
 		202: int stackSetKeyInArray(int precachedStringOffset)
 		203: push_previous_var_in_array_sub()
 	*/
 	switch (function)
 	{
-		case 200:
-		{
-			char *msg;
-			int helper = 0;
-			helper += stackGetParamString(1, &msg); // todo: is string?
-			if (helper < 1)
-			{
-				printf_hide("scriptengine> wrongs args for: printf_hide(msg): at least 1 arg\n");
-				return stackReturnInt(0);
-			}
-			setbuf(stdout, NULL); // linux: either force no-buffering or fflush(stdout);
-			printf("%s", msg);
-			//printf_hide("testtesttesttest");
-			return stackReturnInt(1);
-		}
 		case 201:
 		{
 			printf_hide("int alloc_object_and_push_to_array()\n");
@@ -1434,153 +1533,7 @@ int cdecl_injected_closer()
 			//return stackReturnInt(1);
 			return ret;
 		}
-		case 205:
-		{
-			aStackElement *scriptStack = *(aStackElement**)getStack();
-			aStackElement *arg = scriptStack - 1; // 0th param = function_id
-			
-			char *type = (char *)"UNKNOWN TYPE!";
-			
-			switch (arg->type)
-			{
-				case  0: type = (char *)"UNDEFINED"; break;
-				case  1: type = (char *)"OBJECT"; break;
-				case  2: type = (char *)"STRING"; break;
-				case  3: type = (char *)"LOCALIZED_STRING"; break;
-				case  4: type = (char *)"VECTOR"; break;
-				case  5: type = (char *)"FLOAT"; break;
-				case  6: type = (char *)"INT"; break;
-				case  7: type = (char *)"CODEPOS"; break;
-				case  8: type = (char *)"PRECODEPOS"; break;
-				case  9: type = (char *)"FUNCTION"; break;
-				case 10: type = (char *)"STACK"; break;
-				case 11: type = (char *)"ANIMATION"; break;
-				case 12: type = (char *)"DEVELOPER_CODEPOS"; break;
-				case 13: type = (char *)"INCLUDE_CODEPOS"; break;
-				case 14: type = (char *)"THREAD_LIST"; break;
-				case 15: type = (char *)"THREAD_1"; break;
-				case 16: type = (char *)"THREAD_2"; break;
-				case 17: type = (char *)"THREAD_3"; break;
-				case 18: type = (char *)"THREAD_4"; break;
-				case 19: type = (char *)"STRUCT"; break;
-				case 20: type = (char *)"REMOVED_ENTITY"; break;
-				case 21: type = (char *)"ENTITY"; break;
-				case 22: type = (char *)"ARRAY"; break;
-				case 23: type = (char *)"REMOVED_THREAD"; break;
-			}
-			
-			/*
-				char * stringToLower(char *string) {
-					int i;
-					int len = strlen(string);
-					for(i=0; i<len; i++) {
-						if(string[i] >= 'A' && string[i] <= 'Z') {
-							string[i] += 32;
-						}
-					}
-					return string;
-				}			
-			*/
-			
-			// Segmentation fault  -.-
-			/*
-			int i;
-			int len = strlen(type);
-			printf("len=%s\n", type);
-			for(i=0; i<len; i++) {
-				if(type[i] >= 'A' && type[i] <= 'Z') {
-					type[i] += 32;
-				}
-			}
-			printf("len=%s\n", type);
-			*/
-			return stackPushString(type);
-		}
 	}
-	
-	#if COMPILE_MEMORY == 1
-	// MEMORY FUNCTIONS
-	switch (function)
-	{
-		case 300: return gsc_memory_malloc();
-		case 301: return gsc_memory_free();
-		case 302: return gsc_memory_int_get();
-		case 303: return gsc_memory_int_set();
-		case 304: return gsc_memory_memset();
-	}
-	#endif
-	
-	
-	#if COMPILE_PLAYER == 1
-	// PLAYER FUNCTIONS (cleaning up the 1,2,3,4...-mess at start)
-	switch (function)
-	{
-		case 400: return gsc_player_stance_get();
-		case 410: return gsc_player_velocity_set(); // todo: stackGetParamVector
-		case 411: return gsc_player_velocity_add(); // todo: stackGetParamVector
-		case 412: return gsc_player_velocity_get();
-		case 420: return gsc_player_button_ads();
-		case 421: return gsc_player_button_left();
-		case 422: return gsc_player_button_right();
-		case 423: return gsc_player_button_forward();
-		case 424: return gsc_player_button_back();
-		case 425: return gsc_player_button_leanleft();
-		case 426: return gsc_player_button_leanright();
-		case 427: return gsc_player_button_jump();
-		
-		case 430: return gsc_player_getip();
-		case 431: return gsc_player_getping();
-		
-		case 450: return gsc_player_spectatorclient_get();
-	}
-		// case 7: return gsc_player_state_alive_set(); // general entity function not player
-	#endif
-	
-	// closer 500,print.so,test_print
-	switch (function)
-	{
-		case 500:
-			char *arg_library;
-			char *arg_function;
-			int helper = 0;
-			
-			helper += stackGetParamString(1, &arg_library);
-			helper += stackGetParamString(2, &arg_function);
-			if (helper < 2)
-			{
-				printf_hide("scriptengine> wrongs args for: dlcall(library, function): at least 2 args\n");
-				return stackPushUndefined();
-			}
-			
-			printf_hide("%s -> %s\n", arg_library, arg_function);
-			
-			//void *handle = dlopen(arg_library, RTLD_GLOBAL); // crashes
-			// void *handle = dlopen(arg_library, RTLD_LOCAL); // crashes
-			//void *handle = dlopen(arg_library, RTLD_NOW); // crashes
-			void *handle = dlopen(arg_library, RTLD_LAZY);
-
-			if (!handle)
-			{
-				printf_hide("ERROR: dlopen(\"%s\") failed!\n", arg_library);
-				return stackPushInt(0);
-			}
-				
-			printf_hide("dlopen(\"%s\") returned: %.8x\n", arg_library, handle);
-			
-			void (*func)();
-			//*((void *)&func) = dlsym(handle, arg_function);
-			*(int *)&func = (int)dlsym(handle, arg_function);
-			if (!func)
-			{
-				printf_hide("ERROR: dlsym(\"%s\") failed!\n", arg_function);
-				return stackPushInt(0);
-			}
-			
-			printf_hide("function-name=%s -> address=%.8x\n", arg_function, func);
-			func();
-			dlclose(handle);
-			return stackPushInt(1);
-	}	
 
 	#if COMPILE_CAR == 1
 	switch (function)
@@ -1747,13 +1700,6 @@ typedef struct aSearchPath_t{
 	//#if COMPILE_UTILS == 1
 	switch (function)
 	{
-		case 900: return gsc_utils_disableGlobalPlayerCollision();
-		case 901: return gsc_utils_ClientCommand();
-		case 902: return gsc_utils_getAscii();
-		case 903: return gsc_utils_system();
-		case 904: return gsc_utils_file_link();
-		case 905: return gsc_utils_file_unlink();
-		
 		case 906: {
 			/*
 				svs_clients = svs_clients_842200C;
@@ -1812,20 +1758,7 @@ typedef struct aSearchPath_t{
 			return stackPushInt(1);
 		}
 	}
-	
-	
-	
-	#if COMPILE_TCC == 1
-	switch (function)
-	{
-		case 1000: return gsc_tcc_new();
-		case 1001: return gsc_tcc_add_include_path();
-		case 1002: return gsc_tcc_add_file();
-		case 1003: return gsc_tcc_run();
-		case 1004: return gsc_tcc_delete();
-	}
-	#endif
-	
+
 	int (*BG_PlayAnim)(int ps, int animIndex, int bodyPart, int is_0, int setTimer, int isContinue, int force);
 	*(int *)&BG_PlayAnim = 0x080D8F92;
 	if (0) printf("newAnim=%.8p %.8p %.8p\n",
@@ -1867,7 +1800,6 @@ typedef struct aSearchPath_t{
 	}
 	
 	/*
-
 BG_PlayAnim: ps=0x08705480 animIndex=0x00000085 bodyPart=0x00000003 is_0:0x00000037 setTimer=0x00000001, isContinue=(nil) force=0x00000001
 Bad rcon from 127.0.0.1:-12058:
 status
@@ -1897,9 +1829,6 @@ BG_PlayAnim: ps=0x08705480 animIndex=0x00000080 bodyPart=0x00000003 is_0:0x00000
 			printf("FS_AddGameDirectory=%d\n", ret);
 			return stackReturnInt(1);
 		}
-		
-		case 1302: return gsc_utils_FS_LoadDir();
-		case 1303: return gsc_utils_fileexists();
 	}
 	
 	// todo: analyse getentarray():

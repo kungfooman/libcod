@@ -4,117 +4,82 @@
 	#warning gsc_memory.cpp is not compiled
 #else
 
-
-int gsc_memory_malloc()
-{
+void gsc_memory_malloc() {
 	int bytes;
 	
-	int helper = 0;
-	helper += stackGetParamInt(1, &bytes);
-	
-	printf_hide("GANZ NORMALES ASD");
-	
-	
+	if ( ! stackGetParams("i", &bytes)) {
+		printf_hide("scriptengine> wrongs args for gsc_memory_malloc(bytes);\n");
+		stackPushUndefined();
+		return;
+	}
 	#if DEBUG_MEMORY
 	printf("gsc_memory_malloc(bytes=%d)\n", bytes);
 	#endif
-	
-	if (helper != 1)
-	{
-		printf_hide("scriptengine> wrongs args for gsc_memory_malloc(bytes);\n");
-		return stackReturnInt(0);
-	}
 
-	int ret = (int) malloc(bytes);
-	return stackReturnInt(ret);
+	stackReturnInt((int) malloc(bytes));
 }
 
-int gsc_memory_free()
-{
+void gsc_memory_free() {
 	int memory;
-	
-	int helper = 0;
-	helper += stackGetParamInt(1, &memory);
-	
+
+	if ( ! stackGetParams("i", &memory)) {
+		printf_hide("scriptengine> wrongs args for gsc_memory_free(memory);\n");
+		stackPushUndefined();
+		return;
+	}
 	#if DEBUG_MEMORY
 	printf("gsc_memory_free(memory=%d)\n", memory);
 	#endif
-	
-	if (helper != 1)
-	{
-		printf_hide("scriptengine> wrongs args for gsc_memory_free(memory);\n");
-		return stackReturnInt(0);
-	}
 
 	free((void*)memory);
-	return stackReturnInt(0);
+	stackReturnInt(0);
 }
 
-int gsc_memory_int_get()
-{
+void gsc_memory_int_get() {
 	int memory;
-	
-	int helper = 0;
-	helper += stackGetParamInt(1, &memory);
-	
+
+	if ( ! stackGetParams("i", &memory)) {
+		printf_hide("scriptengine> wrongs args for gsc_memory_int_get(memory);\n");
+		stackPushUndefined();
+		return;
+	}
 	#if DEBUG_MEMORY
 	printf("gsc_memory_int_get(memory=%d)\n", memory);
 	#endif
-	
-	if (helper != 1)
-	{
-		printf_hide("scriptengine> wrongs args for gsc_memory_int_get(memory);\n");
-		return stackReturnInt(0);
-	}
 
-	int ret = *(int*)memory;
-	return stackReturnInt(ret);
+	stackReturnInt(*(int*)memory);
 }
-int gsc_memory_int_set()
-{
-	int memory;
-	int value;
-	
-	int helper = 0;
-	helper += stackGetParamInt(1, &memory);
-	helper += stackGetParamInt(2, &value);
-	
+
+void gsc_memory_int_set() {
+	int memory, value;
+
+	if ( ! stackGetParams("ii", &memory, &value)) {
+		printf_hide("scriptengine> wrongs args for gsc_memory_int_set(memory, value);\n");
+		stackPushUndefined();
+		return;
+	}
 	#if DEBUG_MEMORY
 	printf("gsc_memory_int_set(memory=%d, value=%d)\n", memory, value);
 	#endif
 	
-	if (helper != 2)
-	{
-		printf_hide("scriptengine> wrongs args for gsc_memory_int_set(memory, value);\n");
-		return stackReturnInt(0);
-	}
-
 	*(int*)memory = value;
-	return stackReturnInt(1);
+	stackReturnInt(1);
 }
-int gsc_memory_memset()
-{
-	int memory;
-	int value;
-	int bytes;
-	
-	int helper = 0;
-	helper += stackGetParamInt(1, &memory);
-	helper += stackGetParamInt(2, &value);
-	helper += stackGetParamInt(3, &bytes);
-	
+
+void gsc_memory_memset() {
+	int memory, value, bytes;
+
+	if ( ! stackGetParams("iii", &memory, &value, &bytes)) {
+		printf_hide("scriptengine> wrongs args for gsc_memory_memset(memory, value, bytes);\n");
+		stackPushUndefined();
+		return;
+	}
 	#if DEBUG_MEMORY
 	printf("gsc_memory_memset(memory=%d, value=%d, bytes=%d)\n", memory, value, bytes);
 	#endif
-	
-	if (helper != 3)
-	{
-		printf_hide("scriptengine> wrongs args for gsc_memory_memset(memory, value, bytes);\n");
-		return stackReturnInt(0);
-	}
 
 	memset((void*)memory, value, bytes);
-	return stackReturnInt(1);
+	stackReturnInt(1);
 }
 
 #endif

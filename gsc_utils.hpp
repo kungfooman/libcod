@@ -16,14 +16,16 @@ extern "C" {
 /* link unlink */
 #include <unistd.h>
 
-int gsc_utils_disableGlobalPlayerCollision();
-int gsc_utils_ClientCommand();
-int gsc_utils_getAscii();
-int gsc_utils_system();
-int gsc_utils_file_link();
-int gsc_utils_file_unlink();
-int gsc_utils_FS_LoadDir();
-int gsc_utils_fileexists();
+void gsc_utils_disableGlobalPlayerCollision();
+void gsc_utils_getAscii();
+void gsc_utils_system();
+void gsc_utils_file_link();
+void gsc_utils_file_unlink();
+void gsc_utils_file_exists();
+void gsc_utils_FS_LoadDir();
+void gsc_utils_getType();
+void gsc_utils_stringToFloat();
+void gsc_utils_rundll();
 int gsc_utils_RemoveCommand();
 
 #ifdef __cplusplus

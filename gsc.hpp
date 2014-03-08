@@ -164,6 +164,7 @@ typedef struct
 	int type;
 } aStackElement;
 
+int getStack();
 int stackNew();
 int stackPushUndefined();
 
@@ -173,6 +174,7 @@ int stackGetParamVector(int param, float value[3]);
 int stackGetParamFloat(int param, float *value);
 int stackGetNumberOfParams();
 int stackGetParamType(int param);
+char *stackGetParamTypeAsString(int param);
 int stackGetParams(char *params, ...);
 
 int cdecl_injected_closer_stack_debug();
