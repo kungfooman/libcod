@@ -158,16 +158,14 @@ void gsc_utils_rundll() {
 	stackPushInt(1);
 }
 
-void gsc_utils_RemoveCommand() {
-	char *command;
-
-	if ( ! stackGetParams("s", &command)) {
-		printf("scriptengine> ERROR: wrong args to gsc_utils_RemoveCommand(command)\n");
+void gsc_utils_ExecuteString() {
+	char *str;
+	if ( ! stackGetParams((char *)"s", &str)) {
 		stackPushUndefined();
 		return;
 	}
 
-	Cmd_RemoveCommand(command);
+	Cmd_ExecuteString(str);
 	stackPushInt(1);
 }
 

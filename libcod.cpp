@@ -1989,6 +1989,9 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x08092D5C, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x0809301C, (int)SV_SendServerCommand);
+
+			cracking_hook_call(0x807059F, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x80707C3, (int)Scr_GetCustomMethod);
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);

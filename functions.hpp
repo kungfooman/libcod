@@ -42,16 +42,23 @@ typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
 	static trap_Argv_t trap_Argv = (trap_Argv_t)NULL;
 #endif
 
-typedef int (*Cmd_RemoveCommand_t)(const char *cmd_name);
+/*
+	search for '\"%s\" is: \"%s^7\" default: \"%s^7\"\n'
+	Now see code ref. Now you need find a function that only calls that function
+*/
+typedef int (*Cmd_ExecuteString_t)(const char *text);
+
 #if COD_VERSION == COD2_1_0
-	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)0x0806052A;
+	static Cmd_ExecuteString_t Cmd_ExecuteString = (Cmd_ExecuteString_t)0x08060754;
 #elif COD_VERSION == COD2_1_2
-	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)0x08060736;
+	static Cmd_ExecuteString_t Cmd_ExecuteString = (Cmd_ExecuteString_t)0x080609D4;
 #elif COD_VERSION == COD2_1_3
-	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)0x0806072E;
+	static Cmd_ExecuteString_t Cmd_ExecuteString = (Cmd_ExecuteString_t)0x080609CC;
+#elif COD_VERSION == COD4_1_7
+	static Cmd_ExecuteString_t Cmd_ExecuteString = (Cmd_ExecuteString_t)0x08111F32;
 #else
-	#warning static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)NULL;
-	static Cmd_RemoveCommand_t Cmd_RemoveCommand = (Cmd_RemoveCommand_t)NULL;
+	static Cmd_ExecuteString_t Cmd_ExecuteString = (Cmd_ExecuteString_t)NULL;
+	#warning Cmd_ExecuteString_t Cmd_ExecuteString = NULL;
 #endif
 
 typedef int (*ClientCommand_t)(int clientNum);

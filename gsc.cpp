@@ -5,7 +5,10 @@
 	CoD1 search for "parameter count exceeds 256" or "unknown (builtin) function '%s'" and go upwards
 */
 
-#if COD_VERSION == COD2_1_2
+#if COD_VERSION == COD2_1_0
+	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8115824;
+	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x811595C;
+#elif COD_VERSION == COD2_1_2
 	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117B56;
 	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x8117C8E;
 #elif COD_VERSION == COD2_1_3
@@ -148,7 +151,7 @@ Scr_Function scriptFunctions[] = {
 	{"getType"                     , gsc_utils_getType                     , 0},
 	{"stringToFloat"               , gsc_utils_stringToFloat               , 0},
 	{"rundll"                      , gsc_utils_rundll                      , 0},
-	{"RemoveCommand"               , gsc_utils_RemoveCommand               , 0},
+	{"Cmd_ExecuteString"           , gsc_utils_ExecuteString               , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
@@ -252,26 +255,6 @@ int getStack()
 		return 0x08c055b0;
 	#else
 		#warning int getStack() return NULL;
-		return (int)NULL;
-	#endif
-}
-
-/*
-	search for '\"%s\" is: \"%s^7\" default: \"%s^7\"\n'
-	Now see code ref. Now you need find a function that only calls that function
-*/
-int getExecuteString()
-{
-	#if COD_VERSION == COD2_1_0
-		return 0x08060754;
-	#elif COD_VERSION == COD2_1_2
-		return 0x080609D4;
-	#elif COD_VERSION == COD2_1_3
-		return 0x080609CC;
-	#elif COD_VERSION == COD4_1_7
-		return 0x08111F32;
-	#else
-		#warning int getExecuteString() return NULL;
 		return (int)NULL;
 	#endif
 }
@@ -1739,14 +1722,6 @@ typedef struct aSearchPath_t{
 
 		case 1204:
 		{
-			#if COD_VERSION == COD4_1_7
-				void (*Cmd_ExecuteString)(int a1, int a2, const char *text);
-			#else
-				void (*Cmd_ExecuteString)(const char *text);
-			#endif
-
-			(*(int *)&Cmd_ExecuteString) = getExecuteString();
-
 			char *msg;
 			int helper = 0;
 			helper += stackGetParamString(1, &msg); // todo: is string?
@@ -1757,11 +1732,7 @@ typedef struct aSearchPath_t{
 				return stackReturnInt(0);
 			}
 
-			#if COD_VERSION == COD4_1_7
-				Cmd_ExecuteString(0, 0, msg); // idk what first 2 numbers do
-			#else
-				Cmd_ExecuteString(msg);
-			#endif
+			Cmd_ExecuteString(msg);
 
 			return stackPushInt(1);
 		}
