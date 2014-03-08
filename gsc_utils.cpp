@@ -2,36 +2,43 @@
 
 #if COMPILE_UTILS == 1
 
+
+// 1.2 0x080F6D5A
+int utils_hook_player_eject(int player) { // player 0 = 0x08679380 + 0x11c = 0x0867949c
+	//printf("int hook_player_eject(int player=%.8x)\n", player);
+	return 0;
+}
 void gsc_utils_disableGlobalPlayerCollision() {
 	// well, i could also just write LEAVE,RETN C9,C3 at beginnung of function
-	
-	#if COD_VERSION == COD2_1_0
+	#  if COD_VERSION == COD2_1_0
 		cracking_write_hex(0x080F474A, (char *)"C3");
 		cracking_write_hex(0x080F5199, (char *)"02");
 		cracking_write_hex(0x0805AA0E, (char *)"C3");
+	#elif COD_VERSION == COD2_1_2
+		////ret = cracking_nop(0x080F6D5A, 0x080F7150);
+		//ret = cracking_nop(0x080F6E82, 0x080F7150); // requires setcontents(0) hack and brushmodels arent working
+		cracking_write_hex(0x080F6D5A, (char *)"C3");
+		cracking_write_hex(0x080F77AD, (char *)"02");
+		cracking_write_hex(0x0805AC1A, (char *)"C3");
+	
+		//cracking_hook_function(0x80F6D5A, (int)utils_hook_player_eject);
+		cracking_hook_function(0x80F553E, (int)utils_hook_player_eject); //g_setclientcontents
+		#if 0
+			//just a quick snippet for if u want to switch to turn it on or off
+			unsigned char on[5] = {0x90};
+			unsigned char off[5] = {0xe8, 0xbd, 0xf5, 0xff, 0xff};
+			memcmp((void*)0x80F6D5A, on, 5);
+		#endif
+	#elif COD_VERSION == COD2_1_3
+		//ret = cracking_nop(0x080F6E9E, 0x080F7294);
+		//ret = cracking_nop(0x080F6FC6, 0x080F7294);
+		cracking_write_hex(0x080F6E9E, (char *)"C3");
+		cracking_write_hex(0x080F78F1, (char *)"02");
+		cracking_write_hex(0x0805AC12, (char *)"C3");
+	
+		//cracking_hook_function(0x80F6E9E, (int)utils_hook_player_eject);
+		cracking_hook_function(0x80F5682, (int)utils_hook_player_eject); //g_setclientcontents
 	#endif
-	#if COD_VERSION == COD2_1_2
-	/*
-	//ret = cracking_nop(0x080F6D5A, 0x080F7150);
-	ret = cracking_nop(0x080F6E82, 0x080F7150); // requires setcontents(0) hack and brushmodels arent working
-	*/
-	
-	cracking_write_hex(0x080F6D5A, (char *)"C3");
-	cracking_write_hex(0x080F77AD, (char *)"02");
-	cracking_write_hex(0x0805AC1A, (char *)"C3");
-	
-	#endif
-	#if COD_VERSION == COD2_1_3
-	//ret = cracking_nop(0x080F6E9E, 0x080F7294);
-	//ret = cracking_nop(0x080F6FC6, 0x080F7294);
-	
-	
-	cracking_write_hex(0x080F6E9E, (char *)"C3");
-	cracking_write_hex(0x080F78F1, (char *)"02");
-	cracking_write_hex(0x0805AC12, (char *)"C3");
-	
-	#endif
-	
 	stackPushUndefined();
 }
 
