@@ -22,21 +22,21 @@ extern "C" {
 
 #define HIDDEN
 
-/*HIDDEN*/ int gsc_mysql_init();
-/*HIDDEN*/ int gsc_mysql_real_connect();
-/*HIDDEN*/ int gsc_mysql_close();
-/*HIDDEN*/ int gsc_mysql_query();
-/*HIDDEN*/ int gsc_mysql_errno();
-/*HIDDEN*/ int gsc_mysql_error();
-/*HIDDEN*/ int gsc_mysql_affected_rows();
-/*HIDDEN*/ int gsc_mysql_store_result();
-/*HIDDEN*/ int gsc_mysql_num_rows();
-/*HIDDEN*/ int gsc_mysql_num_fields();
-/*HIDDEN*/ int gsc_mysql_field_seek();
-/*HIDDEN*/ int gsc_mysql_fetch_field();
-/*HIDDEN*/ int gsc_mysql_fetch_row();
-/*HIDDEN*/ int gsc_mysql_free_result();
-int gsc_mysql_real_escape_string();
+void gsc_mysql_init();
+void gsc_mysql_real_connect();
+void gsc_mysql_close();
+void gsc_mysql_query();
+void gsc_mysql_errno();
+void gsc_mysql_error();
+void gsc_mysql_affected_rows();
+void gsc_mysql_store_result();
+void gsc_mysql_num_rows();
+void gsc_mysql_num_fields();
+void gsc_mysql_field_seek();
+void gsc_mysql_fetch_field();
+void gsc_mysql_fetch_row();
+void gsc_mysql_free_result();
+void gsc_mysql_real_escape_string();
 
 /*HIDDEN*/ int gsc_mysql_stmt_init();
 /*HIDDEN*/ int gsc_mysql_stmt_close();

@@ -49,3 +49,6 @@ Little overview of added functions:
 - disableGlobalPlayerCollision() 
 	
 Community / Help: http://killtube.org/forum.php
+
+Porting *libcod* to a new Call Of Duty:
+```find . -name '*.c*' | xargs grep -n _VERSION```

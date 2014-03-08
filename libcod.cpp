@@ -1486,7 +1486,7 @@ int hook_findMap(const char *qpath, void **buffer)
 	if(read != -1)
 		return read;
 
-	char * map = Cmd_Argv(1);
+	char *map = Cmd_Argv(1);
 	char tmp[256];
 	snprintf(tmp, 256, "%s/%s/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), map);
 
@@ -1651,6 +1651,30 @@ int FS_LoadIWD(char *a, char *b)
 {
 	printf("FS_LoadIWD(char *a=%s, char *b=%s)\n", a, b);
 	return 1;
+}
+
+static int size_all = 0;
+static int i = 0;
+cHook *hook_MSG_WriteBigString;
+void MSG_WriteBigString(int *MSG, char *s)
+{
+
+	int len;
+
+	len = strlen(s);
+	printf("i=%d size_all=%d len=%d MSG=%.8p %s\n", i, size_all, len, MSG, s);
+
+	size_all += len;
+	i++;
+	
+	hook_MSG_WriteBigString->unhook();
+	
+	void (*sig)(int *MSG, char *s);
+	*(int *)&sig = 0x0806825E;
+	sig(MSG, s);
+	
+	hook_MSG_WriteBigString->hook();
+	
 }
 
 #define TOSTRING2(str) #str
@@ -1965,16 +1989,29 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x08092D5C, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x0809301C, (int)SV_SendServerCommand);
+
+
+            cracking_hook_call(0x807059F, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x80707C3, (int)Scr_GetCustomMethod);
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x08094958, (int)SV_SendServerCommand);
+				
+			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
+			cracking_hook_call(0x8070B1B, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x8070D3F, (int)Scr_GetCustomMethod);
+			
+			hook_MSG_WriteBigString = new cHook(0x0806825E, (int)MSG_WriteBigString);
+			//hook_MSG_WriteBigString->hook();
 		#elif COD_VERSION == COD2_1_3
 			if (0)
 				cracking_hook_function(0x08094750, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x080AC5D8, (int)SV_SendServerCommand);
+			cracking_hook_call(0x8070BE7, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x8070E0B, (int)Scr_GetCustomMethod);
 		#endif
 
 		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
