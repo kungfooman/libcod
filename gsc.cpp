@@ -162,6 +162,9 @@ Scr_Function scriptFunctions[] = {
 	{"tcc_delete"          , gsc_tcc_delete          , 0},
 	#endif
 	
+	{"sqrt"   , gsc_math_sqrt,    0},
+	{"sqrtInv", gsc_math_sqrtInv, 0},
+	
 	{NULL, NULL, 0}
 };
 
@@ -1660,33 +1663,6 @@ typedef struct aSearchPath_t{
 		}
 	}
 	//#endif
-
-	
-	
-	//#if COMPILE_MATH == 1
-	switch (function)
-	{
-		case 800:
-			float arg;
-			if ( ! stackGetParamFloat(1, &arg))
-				return stackPushUndefined();
-			return stackPushFloat(sqrt(arg));
-		case 801:
-			float x;
-			if ( ! stackGetParamFloat(1, &x))
-				return stackPushUndefined();
-				
-			// http://www.beyond3d.com/content/articles/8/
-			float xhalf = 0.5f*x;
-			int i = *(int*)&x;
-			i = 0x5f3759df - (i>>1);
-			x = *(float*)&i;
-			x = x*(1.5f - xhalf*x*x);
-	
-			return stackPushFloat(sqrt(x));
-	}
-	//#endif
-	
 
 	//#if COMPILE_UTILS == 1
 	switch (function)

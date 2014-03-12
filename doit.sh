@@ -56,6 +56,8 @@ if [ "$1" == "" ] || [ "$1" == "base" ]; then
 	$cc $options -c gsc_memory.cpp -o objects_normal/gsc_memory.opp
 	echo "##### COMPILE cracking.CPP #####"
 	$cc $options -c cracking.cpp -o objects_normal/cracking.opp
+	echo "##### COMPILE GSC_MATH.CPP #####"
+	$cc $options -o objects_normal/gsc_math.opp -c gsc_math.cpp
 fi
 
 if [ "$1" == "" ] || [ "$1" == "clean" ]; then

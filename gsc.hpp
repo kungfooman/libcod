@@ -52,6 +52,7 @@ extern "C" {
 #include "gsc_car.hpp"
 #include "gsc_tcc.hpp"
 #include "gsc_utils.hpp"
+#include "gsc_math.hpp"
 
 
 #include "cracking.hpp" // closer 900: nop
