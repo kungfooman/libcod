@@ -2,6 +2,7 @@
 
 #if COMPILE_UTILS == 1
 
+#include <dirent.h> // dir stuff
 
 // 1.2 0x080F6D5A
 int utils_hook_player_eject(int player) { // player 0 = 0x08679380 + 0x11c = 0x0867949c
@@ -167,6 +168,27 @@ void gsc_utils_ExecuteString() {
 
 	Cmd_ExecuteString(str);
 	stackPushInt(1);
+}
+
+void gsc_utils_scandir() {
+	char *dirname;
+	if ( ! stackGetParams((char *)"s", &dirname)) {
+		stackPushUndefined();
+		return;
+	}
+	DIR *dir;
+	struct dirent *dir_ent;
+	dir = opendir(dirname);
+	if ( ! dir) {
+		stackPushUndefined();
+		return;
+	}
+	stackPushArray();
+	while (dir_ent = readdir(dir)) {
+		stackPushString(dir_ent->d_name);
+		stackPushArrayLast();
+	}
+	closedir(dir);
 }
 
 #endif

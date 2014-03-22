@@ -187,13 +187,14 @@ int stackPushVector(float *ret);
 int stackPushFloat(float ret);
 int stackPushString(char *toPush);
 int stackPushEntity(int arg);
+int stackPushArray();
+int stackPushArrayLast();
 
 int stackCallScriptFunction(int self, int scriptFunction, int numberOfArgs);
-int alloc_object_and_push_to_array();
+int alloc_object_and_push_to_array(); // obsolete, use stackPushArray
 int stackSetKeyInArray(int precachedStringOffset);
-int push_previous_var_in_array_sub();
+int push_previous_var_in_array_sub(); // obsolete, use stackPushArrayLast
 int cdecl_injected_closer();
-
 
 int sub_8101B40(int self, int eInflictor, int eAttacker, float *vDir, float *vPoint, int iDamage, int iDFlags, int iMeansOfDeath, int iHitLoc, int psOffsetTime);
 int cdecl_cod2_player_damage_new(int self, int eInflictor, int eAttacker, float *vDir, float *vPoint, int iDamage, int iDFlags, int iMeansOfDeath, int iHitLoc, int psOffsetTime);

@@ -152,6 +152,7 @@ Scr_Function scriptFunctions[] = {
 	{"stringToFloat"               , gsc_utils_stringToFloat               , 0},
 	{"rundll"                      , gsc_utils_rundll                      , 0},
 	{"Cmd_ExecuteString"           , gsc_utils_ExecuteString               , 0},
+	{"scandir"                     , gsc_utils_scandir                     , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
