@@ -153,6 +153,10 @@ Scr_Function scriptFunctions[] = {
 	{"rundll"                      , gsc_utils_rundll                      , 0},
 	{"Cmd_ExecuteString"           , gsc_utils_ExecuteString               , 0},
 	{"scandir"                     , gsc_utils_scandir                     , 0},
+	{"fopen"                       , gsc_utils_fopen                       , 0},
+	{"fread"                       , gsc_utils_fread                       , 0},
+	{"fwrite"                      , gsc_utils_fwrite                      , 0},
+	{"fclose"                      , gsc_utils_fclose                      , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1

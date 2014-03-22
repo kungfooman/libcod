@@ -3,6 +3,7 @@
 #if COMPILE_UTILS == 1
 
 #include <dirent.h> // dir stuff
+#include <assert.h>
 
 // 1.2 0x080F6D5A
 int utils_hook_player_eject(int player) { // player 0 = 0x08679380 + 0x11c = 0x0867949c
@@ -161,7 +162,7 @@ void gsc_utils_rundll() {
 
 void gsc_utils_ExecuteString() {
 	char *str;
-	if ( ! stackGetParams((char *)"s", &str)) {
+	if ( ! stackGetParams("s", &str)) {
 		stackPushUndefined();
 		return;
 	}
@@ -172,7 +173,7 @@ void gsc_utils_ExecuteString() {
 
 void gsc_utils_scandir() {
 	char *dirname;
-	if ( ! stackGetParams((char *)"s", &dirname)) {
+	if ( ! stackGetParams("s", &dirname)) {
 		stackPushUndefined();
 		return;
 	}
@@ -189,6 +190,54 @@ void gsc_utils_scandir() {
 		stackPushArrayLast();
 	}
 	closedir(dir);
+}
+
+void gsc_utils_fopen() {
+	char *filename, *mode;
+	if ( ! stackGetParams("ss", &filename, &mode)) {
+		stackPushUndefined();
+		return;
+	}
+	FILE *file = fopen(filename, mode);
+	stackPushInt((int)file);
+}
+void gsc_utils_fread() {
+	FILE *file;
+	if ( ! stackGetParams("i", &file)) {
+		stackPushUndefined();
+		return;
+	}
+	assert(file);
+	char buffer[256];
+	int ret = fread(buffer, 1, 255, file);
+	if ( ! ret) {
+		stackPushUndefined();
+		return;
+	}
+	buffer[ret] = '\0';
+	stackPushString(buffer);
+}
+
+void gsc_utils_fwrite() {
+	FILE *file;
+	char *buffer;
+	if ( ! stackGetParams("is", &file, &buffer)) {
+		stackPushUndefined();
+		return;
+	}
+	assert(file);
+	int bytesWritten = fwrite(buffer, 1, strlen(buffer), file);
+	stackPushInt(bytesWritten);
+}
+
+void gsc_utils_fclose() {
+	FILE *file;
+	if ( ! stackGetParams("i", &file)) {
+		stackPushUndefined();
+		return;
+	}
+	assert(file);
+	stackPushInt( fclose(file) );
 }
 
 #endif
