@@ -130,6 +130,12 @@ Scr_Function scriptFunctions[] = {
 	{"mysql_fetch_row"         , gsc_mysql_fetch_row         , 0},
 	{"mysql_free_result"       , gsc_mysql_free_result       , 0},
 	{"mysql_real_escape_string", gsc_mysql_real_escape_string, 0},
+	{"mysql_async_create_query", gsc_mysql_async_create_query, 0},
+	{"mysql_async_create_query_nosave", gsc_mysql_async_create_query_nosave, 0},
+	{"mysql_async_getdone_list", gsc_mysql_async_getdone_list, 0},
+	{"mysql_async_getresult_and_free", gsc_mysql_async_getresult_and_free, 0},
+	{"mysql_async_initializer" , gsc_mysql_async_initializer , 0},
+	
 	#endif
 	
 	#if COMPILE_MEMORY == 1
