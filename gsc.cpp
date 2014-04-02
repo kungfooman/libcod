@@ -168,6 +168,7 @@ Scr_Function scriptFunctions[] = {
 	{"fread"                       , gsc_utils_fread                       , 0},
 	{"fwrite"                      , gsc_utils_fwrite                      , 0},
 	{"fclose"                      , gsc_utils_fclose                      , 0},
+	{"sprintf"                     , gsc_utils_sprintf                     , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
