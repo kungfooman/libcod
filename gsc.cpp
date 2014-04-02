@@ -98,7 +98,12 @@ void gsc_utils_printf() {
 
 	for (int i=0; i<len; i++) {
 		if (str[i] == '%')
-			stackPrintParam(param++);
+		{
+			if(str[i + 1] == '%')
+				putchar('%');
+			else
+				stackPrintParam(param++);
+		}
 		else
 			putchar(str[i]);
 	}
