@@ -12,7 +12,6 @@
 #include <mysql/mysql.h>
 #include <thread>
 #include <unistd.h>
-#define COD2_MAX_STRINGLENGTH 1024
 
 struct mysql_async_task
 {
@@ -282,6 +281,8 @@ void gsc_mysql_real_connect() {
 	#endif
 
 	mysql = (int) mysql_real_connect((MYSQL *)mysql, host, user, pass, db, port, NULL, 0);
+	my_bool reconnect = true;
+	mysql_options((MYSQL*)mysql, MYSQL_OPT_RECONNECT, &reconnect);
 	stackReturnInt(mysql);
 }
 

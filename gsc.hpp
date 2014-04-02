@@ -1,5 +1,6 @@
 #ifndef _GSC_HPP_
 #define _GSC_HPP_
+#define COD2_MAX_STRINGLENGTH 1024
 
 #ifdef __cplusplus
 extern "C" {

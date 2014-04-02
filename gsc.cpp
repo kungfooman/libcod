@@ -98,7 +98,12 @@ void gsc_utils_printf() {
 
 	for (int i=0; i<len; i++) {
 		if (str[i] == '%')
-			stackPrintParam(param++);
+		{
+			if(str[i + 1] == '%')
+				putchar('%');
+			else
+				stackPrintParam(param++);
+		}
 		else
 			putchar(str[i]);
 	}
@@ -163,6 +168,7 @@ Scr_Function scriptFunctions[] = {
 	{"fread"                       , gsc_utils_fread                       , 0},
 	{"fwrite"                      , gsc_utils_fwrite                      , 0},
 	{"fclose"                      , gsc_utils_fclose                      , 0},
+	{"sprintf"                     , gsc_utils_sprintf                     , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
