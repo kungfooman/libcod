@@ -42,6 +42,7 @@ void gsc_mysql_async_create_query_nosave();
 void gsc_mysql_async_getdone_list();
 void gsc_mysql_async_getresult_and_free();
 void gsc_mysql_async_initializer();
+void gsc_mysql_reuse_connection();
 
 /*HIDDEN*/ int gsc_mysql_stmt_init();
 /*HIDDEN*/ int gsc_mysql_stmt_close();
