@@ -212,6 +212,12 @@ void gsc_mysql_async_getresult_and_free() //same as above, but takes the id of a
 
 void gsc_mysql_async_initializer()//returns array with mysql connection handlers
 {
+	if(first_async_connection != NULL)
+	{
+		printf("scriptengine> Async mysql already initialized. Returning before adding additional connections\n");
+		stackPushUndefined();
+		return;
+	}
 	int port, connection_count;
 	char *host, *user, *pass, *db;
 
