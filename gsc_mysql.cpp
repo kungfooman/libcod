@@ -22,7 +22,7 @@ struct mysql_async_task
 	bool done;
 	bool started;
 	bool save;
-	char query[COD2_MAX_STRINGLENGTH];
+	char query[COD2_MAX_STRINGLENGTH + 1];
 };
 
 struct mysql_async_connection
