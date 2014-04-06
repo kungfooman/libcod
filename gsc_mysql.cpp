@@ -35,6 +35,7 @@ struct mysql_async_connection
 
 mysql_async_connection *first_async_connection = NULL;
 mysql_async_task *first_async_task = NULL;
+MYSQL *cod_mysql_connection = NULL;
 
 void mysql_async_execute_query(mysql_async_task *q, mysql_async_connection *c) //cannot be called from gsc, is threaded.
 {
@@ -273,6 +274,20 @@ void gsc_mysql_init() {
 	stackReturnInt((int) my);
 }
 
+void gsc_mysql_reuse_connection()
+{
+	if(cod_mysql_connection == NULL)
+	{
+		stackPushUndefined();
+		return;
+	}
+	else
+	{
+		stackPushInt((int) cod_mysql_connection);
+		return;
+	}
+}
+
 void gsc_mysql_real_connect() {
 	int mysql, port;
 	char *host, *user, *pass, *db;
@@ -289,6 +304,8 @@ void gsc_mysql_real_connect() {
 	mysql = (int) mysql_real_connect((MYSQL *)mysql, host, user, pass, db, port, NULL, 0);
 	my_bool reconnect = true;
 	mysql_options((MYSQL*)mysql, MYSQL_OPT_RECONNECT, &reconnect);
+	if(cod_mysql_connection == NULL)
+		cod_mysql_connection = (MYSQL*) mysql;
 	stackReturnInt(mysql);
 }
 

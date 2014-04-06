@@ -140,6 +140,7 @@ Scr_Function scriptFunctions[] = {
 	{"mysql_async_getdone_list", gsc_mysql_async_getdone_list, 0},
 	{"mysql_async_getresult_and_free", gsc_mysql_async_getresult_and_free, 0},
 	{"mysql_async_initializer" , gsc_mysql_async_initializer , 0},
+	{"mysql_reuse_connection"  , gsc_mysql_reuse_connection  , 0},
 	
 	#endif
 	
