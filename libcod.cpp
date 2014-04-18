@@ -5,8 +5,10 @@
 #include <sys/mman.h> // mprotect
 #include <execinfo.h> // stacktrace
 
+#include "cracking.hpp"
 #include "gsc.hpp" /* cdecl_injected_closer() cdecl_cod2_player_damage_new() */
 #include "server.hpp" /* startServerAsThread() */
+
 
 #pragma GCC visibility push(hidden)
 
@@ -1071,32 +1073,6 @@ int hook_player_eject(int player) // player 0 = 0x08679380 + 0x11c = 0x0867949c
 	return 0;
 }
 
-class cHook
-{
-	public:
-	int from;
-	int to;
-	unsigned char oldCode[5];
-	cHook(int from, int to)
-	{
-		this->from = from;
-		this->to = to;
-	}
-	
-	void hook()
-	{
-		memcpy((void *)oldCode, (void *)from, 5);
-		cracking_hook_function(from, to);
-	}
-	
-	void unhook()
-	{
-		
-		memcpy((void *)from, (void *)oldCode, 5);
-	}
-};
-
-
 #define _DWORD int
 #define __cdecl 
 #if COD_VERSION == COD1_1_5
@@ -1809,80 +1785,19 @@ class cCallOfDuty2Pro
 		
 		#if COD_VERSION == COD4_1_7
 			cracking_hook_function(0x0804AB6C, (int)hook_recvfrom);
-			return;
+			
 		#endif
 		
 		// NEEDED FOR ZOMBOTS/BOTZOMS???
 		// lol, i dont know why, but this made sniper/rifle-shots stick to 90 damage, very annoying
-		#if 0
-		// SET binary.damage TO c.damage
-		{
-			int from = 0x08101C58;
-			int to = (int)cdecl_cod2_player_damage_new;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		}
-		#endif
+		if (0) cracking_hook_function(0x08101C58, (int)cdecl_cod2_player_damage_new); // SET binary.damage TO c.damage
 		
-		// SET calc
-		{
-		#if 0
-			int from = 0x08078FB2;
-			int to = (int)cdecl_calc_hash_of_string;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		#endif
-		}
-		
-		// radiant keys
-		{
-		#if 0
-			int from = 0x0807F840;
-			int to = (int)cdecl_sub_807F840;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		#endif
-		}
-		
-		// gsc_cast_to_bool
-		{
-		#if 0
-			int from = 0x0807D288;
-			int to = (int)cdecl_gsc_cast_to_bool;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		#endif
-		}
-		
-		// gsc_set_field_of_struct
-		{
-		#if 0
-			int from = 0x0807C6F8;
-			int to = (int)cdecl_gsc_set_field_of_struct;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		#endif
-		}
-		
-		// gsc_new_variable_807AB64
-		{
-		#if 0
-			int from = 0x0807AB64;
-			int to = (int)gsc_new_variable_807AB64;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		#endif
-		}
-		
-		// BSP HOOK for fraction
-		if (0)
-			cracking_hook_function(0x0805B894, (int)trace_calc_fraction_805B894);
+		if (0) cracking_hook_function(0x08078FB2, (int)cdecl_calc_hash_of_string);
+		if (0) cracking_hook_function(0x0807F840, (int)cdecl_sub_807F840); // radiant keys
+		if (0) cracking_hook_function(0x0807D288, (int)cdecl_gsc_cast_to_bool);
+		if (0) cracking_hook_function(0x0807C6F8, (int)cdecl_gsc_set_field_of_struct);
+		if (0) cracking_hook_function(0x0807AB64, (int)gsc_new_variable_807AB64);
+		if (0) cracking_hook_function(0x0805B894, (int)trace_calc_fraction_805B894); // BSP HOOK for fraction
 		
 		if (0)
 		{
@@ -2014,8 +1929,12 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 		#elif COD_VERSION == COD4_1_7
-			cracking_hook_call(0x08147664, (int)Scr_GetCustomFunction);
-			cracking_hook_call(0x081467D1, (int)Scr_GetCustomMethod);
+			extern cHook *hook_Scr_GetFunction;
+			extern cHook *hook_Scr_GetMethod;
+			hook_Scr_GetFunction = new cHook(0x080bd238, (int)Scr_GetCustomFunction);
+			hook_Scr_GetMethod = new cHook(0x080bfef4, (int)Scr_GetCustomMethod);
+			hook_Scr_GetFunction->hook();
+			hook_Scr_GetMethod->hook();
 		#endif
 
 		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3

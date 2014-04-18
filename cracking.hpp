@@ -5,18 +5,31 @@
 extern "C" {
 #endif
 
-#include <string.h>
+	#include <string.h>
 
-int cracking_nop(int from, int to);
-void cracking_hook_function(int from, int to);
-void cracking_hook_call(int from, int to);
-int cracking_write_hex(int address, char *hex);
+	int cracking_nop(int from, int to);
+	void cracking_hook_function(int from, int to);
+	void cracking_hook_call(int from, int to);
+	int cracking_write_hex(int address, char *hex);
 
-int singleHexToNumber(char hexchar);
-int hexToBuffer(char *hex, char *buffer, int bufferLen);
+	int singleHexToNumber(char hexchar);
+	int hexToBuffer(char *hex, char *buffer, int bufferLen);
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef __cplusplus
+	class cHook
+	{
+		public:
+		int from;
+		int to;
+		unsigned char oldCode[5];
+		cHook(int from, int to);
+		void hook();
+		void unhook();
+	};
 #endif
 
 #endif

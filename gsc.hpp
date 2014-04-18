@@ -217,7 +217,7 @@ typedef struct {
 
 typedef Scr_FunctionCall (*Scr_GetFunction_t)(const char **fname, int *fdev);
 
-Scr_FunctionCall Scr_GetCustomFunction(const char **fname, int *fdev);
+Scr_FunctionCall Scr_GetCustomFunction(const char **fname, int *fdev); // could be made obsolete to remove the cracking_hook_call()-stuff
 
 // methods
 typedef void (*Scr_MethodCall)(int);
@@ -230,7 +230,7 @@ typedef struct {
 
 typedef Scr_MethodCall (*Scr_GetMethod_t)(const char**, int*);
 
-Scr_MethodCall Scr_GetCustomMethod(const char **fname, int *fdev);
+Scr_MethodCall Scr_GetCustomMethod(const char **fname, int *fdev); // could be made obsolete to remove the cracking_hook_call()-stuff
 
 #ifdef __cplusplus
 }

@@ -15,8 +15,41 @@
 	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x08117CB2;
 	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x08117DEA;
 #elif COD_VERSION == COD4_1_7
-	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x080BD238;
-	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x080BFEF4;
+	//Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x080BD238;
+	//Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x080BFEF4;
+
+	cHook *hook_Scr_GetFunction;
+	cHook *hook_Scr_GetMethod;
+	
+	Scr_FunctionCall Scr_GetFunction(const char **fname, int *fdev) {
+		//printf("CoD4 Scr_GetFunction: fdev=%d fname=%s\n", *fdev, *fname);
+		
+		hook_Scr_GetFunction->unhook();
+		int (*sig)(const char **fname, int *fdev);
+		*(int *)&sig = hook_Scr_GetFunction->from;
+		int m = sig(fname, fdev);
+		hook_Scr_GetFunction->hook();
+	/*
+		when I use the real return-type instead of int (*sig), this errors occurs:
+			##### LINK libcod4_1_7.so #####
+			objects_cod4_1_7/libcod.opp: In function `Scr_GetFunction_CoD4(char const**, int*)':
+			libcod.cpp:(.text+0x132b): undefined reference to `sig(char const**, int*)'
+			/usr/bin/ld: objects_cod4_1_7/libcod.opp: relocation R_386_GOTOFF against undefined hidden symbol `_Z3sigPPKcPi' can not be used when making a shared object
+			/usr/bin/ld: final link failed: Bad value
+			collect2: error: ld returned 1 exit status
+			k_cod4_nodlzom@Debian-70-wheezy-64-LAMP:~/libcod$ rm objects_cod4_1_7/libcod.opp
+	*/
+		return (Scr_FunctionCall)m;
+	}
+	Scr_MethodCall Scr_GetMethod(const char **fname, int *fdev) {
+		//printf("CoD4 Scr_GetMethod: fdev=%d fname=%s\n", *fdev, *fname);
+		hook_Scr_GetMethod->unhook();
+		int (*sig)(const char **fname, int *fdev);
+		*(int *)&sig = hook_Scr_GetMethod->from;
+		int m = sig(fname, fdev);
+		hook_Scr_GetMethod->hook();
+		return (Scr_MethodCall)m;
+	}
 #else
 	#warning Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)NULL;
 	#warning Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)NULL;
