@@ -1801,9 +1801,11 @@ class cCallOfDuty2Pro
 			int *addressToDownloadPointer = NULL;
 		#endif
 
-		printf_hide("> [INFO] value of download=%.8x\n", *addressToDownloadPointer);
-		SV_BeginDownload_f = (SV_BeginDownload_f_t)*addressToDownloadPointer;
-		*addressToDownloadPointer = (int)hook_SV_BeginDownload_f;
+		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
+			printf_hide("> [INFO] value of download=%.8x\n", *addressToDownloadPointer);
+			SV_BeginDownload_f = (SV_BeginDownload_f_t)*addressToDownloadPointer;
+			*addressToDownloadPointer = (int)hook_SV_BeginDownload_f;
+		#endif
 		
 		#if COD_VERSION == COD4_1_7
 			cracking_hook_function(0x0804AB6C, (int)hook_recvfrom);
@@ -2009,8 +2011,11 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x08094750, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x080AC5D8, (int)SV_SendServerCommand);
-			cracking_hook_call(0x8070BE7, (int)Scr_GetCustomFunction);
-			cracking_hook_call(0x8070E0B, (int)Scr_GetCustomMethod);
+			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
+		#elif COD_VERSION == COD4_1_7
+			cracking_hook_call(0x08147664, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x081467D1, (int)Scr_GetCustomMethod);
 		#endif
 
 		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
