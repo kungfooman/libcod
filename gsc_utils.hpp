@@ -27,6 +27,13 @@ void gsc_utils_getType();
 void gsc_utils_stringToFloat();
 void gsc_utils_rundll();
 void gsc_utils_ExecuteString();
+void gsc_utils_scandir();
+
+void gsc_utils_fopen();
+void gsc_utils_fread();
+void gsc_utils_fwrite();
+void gsc_utils_fclose();
+void gsc_utils_sprintf();
 
 #ifdef __cplusplus
 }

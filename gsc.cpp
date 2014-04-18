@@ -98,7 +98,12 @@ void gsc_utils_printf() {
 
 	for (int i=0; i<len; i++) {
 		if (str[i] == '%')
-			stackPrintParam(param++);
+		{
+			if(str[i + 1] == '%')
+				putchar('%');
+			else
+				stackPrintParam(param++);
+		}
 		else
 			putchar(str[i]);
 	}
@@ -130,6 +135,13 @@ Scr_Function scriptFunctions[] = {
 	{"mysql_fetch_row"         , gsc_mysql_fetch_row         , 0},
 	{"mysql_free_result"       , gsc_mysql_free_result       , 0},
 	{"mysql_real_escape_string", gsc_mysql_real_escape_string, 0},
+	{"mysql_async_create_query", gsc_mysql_async_create_query, 0},
+	{"mysql_async_create_query_nosave", gsc_mysql_async_create_query_nosave, 0},
+	{"mysql_async_getdone_list", gsc_mysql_async_getdone_list, 0},
+	{"mysql_async_getresult_and_free", gsc_mysql_async_getresult_and_free, 0},
+	{"mysql_async_initializer" , gsc_mysql_async_initializer , 0},
+	{"mysql_reuse_connection"  , gsc_mysql_reuse_connection  , 0},
+	
 	#endif
 	
 	#if COMPILE_MEMORY == 1
@@ -152,6 +164,12 @@ Scr_Function scriptFunctions[] = {
 	{"stringToFloat"               , gsc_utils_stringToFloat               , 0},
 	{"rundll"                      , gsc_utils_rundll                      , 0},
 	{"Cmd_ExecuteString"           , gsc_utils_ExecuteString               , 0},
+	{"scandir"                     , gsc_utils_scandir                     , 0},
+	{"fopen"                       , gsc_utils_fopen                       , 0},
+	{"fread"                       , gsc_utils_fread                       , 0},
+	{"fwrite"                      , gsc_utils_fwrite                      , 0},
+	{"fclose"                      , gsc_utils_fclose                      , 0},
+	{"sprintf"                     , gsc_utils_sprintf                     , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
@@ -161,6 +179,9 @@ Scr_Function scriptFunctions[] = {
 	{"tcc_run"             , gsc_tcc_run             , 0},
 	{"tcc_delete"          , gsc_tcc_delete          , 0},
 	#endif
+	
+	{"sqrt"   , gsc_math_sqrt,    0},
+	{"sqrtInv", gsc_math_sqrtInv, 0},
 	
 	{NULL, NULL, 0}
 };
@@ -1660,33 +1681,6 @@ typedef struct aSearchPath_t{
 		}
 	}
 	//#endif
-
-	
-	
-	//#if COMPILE_MATH == 1
-	switch (function)
-	{
-		case 800:
-			float arg;
-			if ( ! stackGetParamFloat(1, &arg))
-				return stackPushUndefined();
-			return stackPushFloat(sqrt(arg));
-		case 801:
-			float x;
-			if ( ! stackGetParamFloat(1, &x))
-				return stackPushUndefined();
-				
-			// http://www.beyond3d.com/content/articles/8/
-			float xhalf = 0.5f*x;
-			int i = *(int*)&x;
-			i = 0x5f3759df - (i>>1);
-			x = *(float*)&i;
-			x = x*(1.5f - xhalf*x*x);
-	
-			return stackPushFloat(sqrt(x));
-	}
-	//#endif
-	
 
 	//#if COMPILE_UTILS == 1
 	switch (function)

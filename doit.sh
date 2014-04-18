@@ -17,7 +17,7 @@ mkdir -p objects_normal
 cc="gcc"
 
 #options="-I. -m32 -fPIC -fvisibility=hidden -O1"
-options="-I. -m32 -fPIC -Wno-write-strings"
+options="-I. -m32 -fPIC -Wno-write-strings -std=gnu++11"
 
 #objects_tcc="build/gsc_tcc.opp /home/kung/tcc/tcc-0.9.25/libtcc.a"
 	
@@ -56,6 +56,8 @@ if [ "$1" == "" ] || [ "$1" == "base" ]; then
 	$cc $options -c gsc_memory.cpp -o objects_normal/gsc_memory.opp
 	echo "##### COMPILE cracking.CPP #####"
 	$cc $options -c cracking.cpp -o objects_normal/cracking.opp
+	echo "##### COMPILE GSC_MATH.CPP #####"
+	$cc $options -o objects_normal/gsc_math.opp -c gsc_math.cpp
 fi
 
 if [ "$1" == "" ] || [ "$1" == "clean" ]; then

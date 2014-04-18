@@ -9,25 +9,262 @@
 	Now its undefined, and i shall test it every time
 */
 
-/*
-	100 == mysql_init()
-	101 == mysql_real_connect(mysql, host, user, pass, db, port)
-	102 == mysql_close(mysql)
-	103 == mysql_query(mysql, query)
-	104 == mysql_errno(mysql)
-	105 == mysql_error(mysql)
-	106 == mysql_affected_rows(mysql)
-	107 == mysql_store_result(mysql)
-	108 == mysql_num_rows(result)
-	109 == mysql_num_fields(result)
-	110 == mysql_field_seek(result, position)
-	111 == mysql_fetch_field()
-	112 == mysql_fetch_row(result)
-	113 == mysql_free_result(result)
-*/
-
-
 #include <mysql/mysql.h>
+#include <thread>
+#include <unistd.h>
+
+struct mysql_async_task
+{
+	mysql_async_task *prev;
+	mysql_async_task *next;
+	int id;
+	MYSQL_RES *result;
+	bool done;
+	bool started;
+	bool save;
+	char query[COD2_MAX_STRINGLENGTH + 1];
+};
+
+struct mysql_async_connection
+{
+	mysql_async_connection *prev;
+	mysql_async_connection *next;
+	bool in_use;
+	MYSQL *connection;
+};
+
+mysql_async_connection *first_async_connection = NULL;
+mysql_async_task *first_async_task = NULL;
+MYSQL *cod_mysql_connection = NULL;
+
+void mysql_async_execute_query(mysql_async_task *q, mysql_async_connection *c) //cannot be called from gsc, is threaded.
+{
+	int res = mysql_query(c->connection, q->query);
+	if(res)
+			printf("scriptengine> Error in MySQL connection for async query. Cannot recover\n"); //keep mysql connection available for now, might recover in the future?
+	else
+	{
+		if(q->save)
+		{
+			MYSQL_RES *result = mysql_store_result(c->connection);
+			q->result = result;
+		}
+		c->in_use = false;
+		q->done = true;
+	}
+}
+
+void mysql_async_query_handler() //is threaded after initialize
+{
+	static bool started = false;
+	if(started)
+	{
+		printf("scriptengine> async handler already started. Returning\n");
+		return;
+	}
+	started = true;
+	mysql_async_connection *c = first_async_connection;
+	if(c == NULL)
+	{
+		printf("scriptengine> async handler started before any connection was initialized\n"); //this should never happen
+		started = false;
+		return;
+	}
+	mysql_async_task *q;
+	while(true)
+	{
+		q = first_async_task;
+		c = first_async_connection;
+		while(q != NULL)
+		{
+			if(!q->started)
+			{
+				while(c != NULL && c->in_use)
+					c = c->next;
+				if(c == NULL)
+				{
+					//out of free connections
+					break;
+				}
+				q->started = true;
+				c->in_use = true;
+				std::thread async_query(mysql_async_execute_query, q, c);
+				async_query.detach();
+				c = c->next;
+			}
+			q = q->next;
+		}
+		usleep(10000);
+	}
+}
+
+int mysql_async_query_initializer(char *sql, bool save) //cannot be called from gsc, helper function
+{
+	static int id = 0;
+	id++;
+	mysql_async_task *current = first_async_task;
+	while(current != NULL && current->next != NULL)
+		current = current->next;
+	mysql_async_task *newtask = new mysql_async_task;
+	newtask->id = id;
+	strncpy(newtask->query, sql, COD2_MAX_STRINGLENGTH);
+	newtask->prev = current;
+	newtask->result = NULL;
+	newtask->save = save;
+	newtask->done = false;
+	newtask->next = NULL;
+	newtask->started = false;
+	if(current != NULL)
+		current->next = newtask;
+	else
+		first_async_task = newtask;
+	stackPushInt(id);
+	return id;
+}
+
+void gsc_mysql_async_create_query_nosave()
+{
+	char *sql;
+	if ( ! stackGetParams("s", &sql))
+	{
+		printf("scriptengine> wrongs args for create_mysql_async_query(...);\n");
+		stackPushUndefined();
+		return;
+	}
+	int id = mysql_async_query_initializer(sql, false);
+	stackPushInt(id);
+	return;
+}
+
+void gsc_mysql_async_create_query()
+{
+	char *sql;
+	if ( ! stackGetParams("s", &sql))
+	{
+		printf("scriptengine> wrongs args for create_mysql_async_query(...);\n");
+		stackPushUndefined();
+		return;
+	}
+	int id = mysql_async_query_initializer(sql, true);
+	stackPushInt(id);
+	return;
+}
+
+void gsc_mysql_async_getdone_list()
+{
+	mysql_async_task *current = first_async_task;
+	stackPushArray();
+	while(current != NULL)
+	{
+		if(current->done)
+		{
+			stackPushInt((int)current->id);
+			stackPushArrayLast();
+		}
+		current = current->next;
+	}
+}
+
+void gsc_mysql_async_getresult_and_free() //same as above, but takes the id of a function instead and returns 0 (not done), undefined (not found) or the mem address of result
+{
+	int id;
+	if(!stackGetParams("i", &id))
+	{
+		printf("scriptengine> wrong args for mysql_async_getresult_and_free_id\n");
+		stackPushUndefined();
+		return;
+	}
+	mysql_async_task *c = first_async_task;
+	if(c != NULL)
+	{
+		while(c != NULL && c->id != id)
+			c = c->next;
+	}
+	if(c != NULL)
+	{
+		if(!c->done)
+		{
+			stackPushUndefined(); //not done yet
+			return;
+		}
+		if(c->next != NULL)
+			c->next->prev = c->prev;
+		if(c->prev != NULL)
+			c->prev->next = c->next;
+		else
+			first_async_task = c->next;
+		if(c->save)
+		{
+			int ret = (int)c->result;
+			stackPushInt(ret);
+		}
+		else
+			stackPushInt(0);
+		delete c;
+		return;
+	}
+	else
+	{
+		printf("scriptengine> mysql async query id not found\n");
+		stackPushUndefined();
+		return;
+	}
+}
+
+void gsc_mysql_async_initializer()//returns array with mysql connection handlers
+{
+	if(first_async_connection != NULL)
+	{
+		printf("scriptengine> Async mysql already initialized. Returning before adding additional connections\n");
+		stackPushUndefined();
+		return;
+	}
+	int port, connection_count;
+	char *host, *user, *pass, *db;
+
+	if ( ! stackGetParams("ssssii", &host, &user, &pass, &db, &port, &connection_count))
+	{ 
+		printf("scriptengine> wrongs args for mysql_async_initializer(...);\n");
+		stackPushUndefined();
+		return;
+	}
+	if(connection_count <= 0)
+	{
+		printf("Need a positive connection_count in mysql_async_initializer\n");
+		stackPushUndefined();
+		return;
+	}
+	int i;
+	stackPushArray();
+	mysql_async_connection *current = first_async_connection;
+	for(i = 0; i < connection_count; i++)
+	{
+		mysql_async_connection *newconnection = new mysql_async_connection;
+		newconnection->next = NULL;
+		newconnection->connection = mysql_init(NULL);
+		newconnection->connection = mysql_real_connect((MYSQL*)newconnection->connection, host, user, pass, db, port, NULL, 0);
+		my_bool reconnect = true;
+		mysql_options(newconnection->connection, MYSQL_OPT_RECONNECT, &reconnect);
+		newconnection->in_use = false;
+		if(current == NULL)
+		{
+			newconnection->prev = NULL;
+			first_async_connection = newconnection;
+		}
+		else
+		{
+			while(current->next != NULL)
+				current = current->next;
+			current->next = newconnection;
+			newconnection->prev = current;
+		}
+		current = newconnection;
+		stackPushInt((int)newconnection->connection);
+		stackPushArrayLast();
+	}
+	std::thread async_query(mysql_async_query_handler);
+	async_query.detach();
+}
 
 void gsc_mysql_init() {
 	#if DEBUG_MYSQL
@@ -35,6 +272,20 @@ void gsc_mysql_init() {
 	#endif
 	MYSQL *my = mysql_init(NULL);
 	stackReturnInt((int) my);
+}
+
+void gsc_mysql_reuse_connection()
+{
+	if(cod_mysql_connection == NULL)
+	{
+		stackPushUndefined();
+		return;
+	}
+	else
+	{
+		stackPushInt((int) cod_mysql_connection);
+		return;
+	}
 }
 
 void gsc_mysql_real_connect() {
@@ -51,6 +302,10 @@ void gsc_mysql_real_connect() {
 	#endif
 
 	mysql = (int) mysql_real_connect((MYSQL *)mysql, host, user, pass, db, port, NULL, 0);
+	my_bool reconnect = true;
+	mysql_options((MYSQL*)mysql, MYSQL_OPT_RECONNECT, &reconnect);
+	if(cod_mysql_connection == NULL)
+		cod_mysql_connection = (MYSQL*) mysql;
 	stackReturnInt(mysql);
 }
 
@@ -271,7 +526,12 @@ void gsc_mysql_free_result() {
 	#if DEBUG_MYSQL
 	printf("gsc_mysql_free_result(result=%d)\n", result);
 	#endif
-	
+	if(result == NULL)
+	{
+		printf("scriptengine> Error in mysql_free_result: input is a NULL-pointer\n");
+		stackPushUndefined();
+		return;
+	}
 	mysql_free_result((MYSQL_RES *)result);
 	stackPushUndefined();
 }
