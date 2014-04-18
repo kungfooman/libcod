@@ -6,14 +6,17 @@
 */
 
 #if COD_VERSION == COD2_1_0
-	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8115824;
-	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x811595C;
+	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x08115824;
+	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x0811595C;
 #elif COD_VERSION == COD2_1_2
-	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117B56;
-	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x8117C8E;
+	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x08117B56;
+	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x08117C8E;
 #elif COD_VERSION == COD2_1_3
-	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x8117CB2;
-	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x8117DEA;
+	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x08117CB2;
+	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x08117DEA;
+#elif COD_VERSION == COD4_1_7
+	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x080BD238;
+	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x080BFEF4;
 #else
 	#warning Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)NULL;
 	#warning Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)NULL;
