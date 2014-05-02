@@ -8,7 +8,7 @@
 #include "cracking.hpp"
 #include "gsc.hpp" /* cdecl_injected_closer() cdecl_cod2_player_damage_new() */
 #include "server.hpp" /* startServerAsThread() */
-
+#include "java_embed.h"
 
 #pragma GCC visibility push(hidden)
 
@@ -1942,6 +1942,10 @@ class cCallOfDuty2Pro
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
 			cracking_hook_call(hook_AuthorizeState_call, (int)hook_AuthorizeState);
 			cracking_hook_call(hook_findMap_call, (int)hook_findMap);
+		#endif
+		
+		#ifdef IS_JAVA_ENABLED
+		embed_java();
 		#endif
 		
 		printf_hide("> [PLUGIN LOADED]\n");
