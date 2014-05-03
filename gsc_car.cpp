@@ -98,7 +98,7 @@ int gsc_car_new()
 	static int first = 1;
 	if (first)
 	{
-		printf_hide("init_pm();\n");
+		printf("init_pm();\n");
 		init_pm();
 		first = 0;
 	}
@@ -118,7 +118,7 @@ int gsc_car_new()
 	
 	if (helper != 3)
 	{
-		printf_hide("scriptengine> wrongs args for gsc_car_new(origin, viewangles, velocity)\n");
+		printf("scriptengine> wrongs args for gsc_car_new(origin, viewangles, velocity)\n");
 		return stackPushUndefined();
 	}
 	
@@ -166,7 +166,7 @@ int gsc_car_update()
 	
 	if (helper != 1)
 	{
-		printf_hide("scriptengine> wrongs args for gsc_car_update(car)\n");
+		printf("scriptengine> wrongs args for gsc_car_update(car)\n");
 		return stackPushUndefined();
 	}
 	
@@ -176,15 +176,15 @@ int gsc_car_update()
 	
 	PM_DebugDynamics(&(car->tBody), &(car->tPoints[0]));
 	
-	int ret = alloc_object_and_push_to_array();
+	int ret = stackPushArray();
 	
 	// ret[0] = origin
 	stackPushVector(car->tBody.r);
-	push_previous_var_in_array_sub();
+	stackPushArrayLast();
 	
 	// ret[1] = forward
 	stackPushVector(car->tBody.forward);
-	push_previous_var_in_array_sub();
+	stackPushArrayLast();
 	
 	return ret;
 }

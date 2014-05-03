@@ -36,7 +36,7 @@ int embed_java() {
 	vmArgs.options = options;
 	vmArgs.ignoreUnrecognized = 0;
 
-	printf("dlsym(\"JNI_CreateJavaVM\") = %.8p\n", dlsym(NULL, "JNI_CreateJavaVM"));
+	//printf("dlsym(\"JNI_CreateJavaVM\") = %.8p\n", dlsym(NULL, "JNI_CreateJavaVM"));
 	
 	JNI_CreateJavaVM(&jvm, (void**)&env, &vmArgs);
 	printf("[JAVA] jvm=%.8p env=%.8p\n", jvm, env);

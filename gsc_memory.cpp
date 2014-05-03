@@ -8,7 +8,7 @@ void gsc_memory_malloc() {
 	int bytes;
 	
 	if ( ! stackGetParams("i", &bytes)) {
-		printf_hide("scriptengine> wrongs args for gsc_memory_malloc(bytes);\n");
+		printf("scriptengine> wrongs args for gsc_memory_malloc(bytes);\n");
 		stackPushUndefined();
 		return;
 	}
@@ -23,7 +23,7 @@ void gsc_memory_free() {
 	int memory;
 
 	if ( ! stackGetParams("i", &memory)) {
-		printf_hide("scriptengine> wrongs args for gsc_memory_free(memory);\n");
+		printf("scriptengine> wrongs args for gsc_memory_free(memory);\n");
 		stackPushUndefined();
 		return;
 	}
@@ -39,7 +39,7 @@ void gsc_memory_int_get() {
 	int memory;
 
 	if ( ! stackGetParams("i", &memory)) {
-		printf_hide("scriptengine> wrongs args for gsc_memory_int_get(memory);\n");
+		printf("scriptengine> wrongs args for gsc_memory_int_get(memory);\n");
 		stackPushUndefined();
 		return;
 	}
@@ -54,7 +54,7 @@ void gsc_memory_int_set() {
 	int memory, value;
 
 	if ( ! stackGetParams("ii", &memory, &value)) {
-		printf_hide("scriptengine> wrongs args for gsc_memory_int_set(memory, value);\n");
+		printf("scriptengine> wrongs args for gsc_memory_int_set(memory, value);\n");
 		stackPushUndefined();
 		return;
 	}
@@ -70,7 +70,7 @@ void gsc_memory_memset() {
 	int memory, value, bytes;
 
 	if ( ! stackGetParams("iii", &memory, &value, &bytes)) {
-		printf_hide("scriptengine> wrongs args for gsc_memory_memset(memory, value, bytes);\n");
+		printf("scriptengine> wrongs args for gsc_memory_memset(memory, value, bytes);\n");
 		stackPushUndefined();
 		return;
 	}

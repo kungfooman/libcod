@@ -68,7 +68,7 @@ int hexToBuffer(char *hex, char *buffer, int bufferLen)
 		len++;
 	}
 	neededBytes = len >> 1; // its like dividing by 2
-	//printf_hide("len=%d neededBytes=%d\n", len, neededBytes);
+	//printf("len=%d neededBytes=%d\n", len, neededBytes);
 	first = 1;
 	pos = 0;
 	for (i=0; i<neededBytes; i++)
@@ -90,7 +90,7 @@ int hexToBuffer(char *hex, char *buffer, int bufferLen)
 			twochars[1] = hex[pos+1];
 			pos += 2;
 		}
-		//printf_hide("twochars=%.2s\n", twochars);
+		//printf("twochars=%.2s\n", twochars);
 		leftPart = singleHexToNumber(twochars[0]);
 		rightPart = singleHexToNumber(twochars[1]);
 		if (leftPart == -1 || rightPart == -1)

@@ -498,7 +498,7 @@ void gsc_mysql_fetch_row() {
 		return;
 	}
 
-	int ret = alloc_object_and_push_to_array();
+	stackPushArray();
 	
 	int numfields = mysql_num_fields((MYSQL_RES *)result);
 	for (int i=0; i<numfields; i++)
@@ -511,7 +511,7 @@ void gsc_mysql_fetch_row() {
 		#if DEBUG_MYSQL
 		printf("row == \"%s\"\n", row[i]);
 		#endif
-		push_previous_var_in_array_sub();
+		stackPushArrayLast();
 	}
 }
 
@@ -550,7 +550,7 @@ void gsc_mysql_real_escape_string() {
 	#endif
 	
 	char *to = (char *) malloc(strlen(str) * 2 + 1);
-	int ret = mysql_real_escape_string((MYSQL *)mysql, to, str, strlen(str));	
+	mysql_real_escape_string((MYSQL *)mysql, to, str, strlen(str));	
 	stackPushString(to);
 	free(to);
 }
@@ -756,7 +756,6 @@ int gsc_mysql_stmt_bind_result()
 int gsc_mysql_stmt_execute()
 {
 	int mysql_stmt;
-	int result;
 	
 	int helper = 0;
 	helper += stackGetParamInt(1, &mysql_stmt);
@@ -777,7 +776,6 @@ int gsc_mysql_stmt_execute()
 int gsc_mysql_stmt_store_result()
 {
 	int mysql_stmt;
-	int result;
 	
 	int helper = 0;
 	helper += stackGetParamInt(1, &mysql_stmt);
@@ -798,7 +796,6 @@ int gsc_mysql_stmt_store_result()
 int gsc_mysql_stmt_fetch()
 {
 	int mysql_stmt;
-	int result;
 	
 	int helper = 0;
 	helper += stackGetParamInt(1, &mysql_stmt);
@@ -959,8 +956,6 @@ int gsc_mysql_test_1()
 		mysql_close(my);
 		return stackReturnInt(0);
 	}
-	
-	int id = 10;
 	
 	{
 		const char *sql = "SELECT 1 + ?,1 UNION SELECT 2+?,1 UNION SELECT 3,2 UNION SELECT 4,3";
