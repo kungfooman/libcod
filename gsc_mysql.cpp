@@ -526,7 +526,7 @@ void gsc_mysql_free_result() {
 	#if DEBUG_MYSQL
 	printf("gsc_mysql_free_result(result=%d)\n", result);
 	#endif
-	if(result == NULL)
+	if(result == 0)
 	{
 		printf("scriptengine> Error in mysql_free_result: input is a NULL-pointer\n");
 		stackPushUndefined();
