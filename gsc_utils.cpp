@@ -21,6 +21,42 @@ char *language_items[MAX_LANGUAGE_ITEMS];
 char *language_references[MAX_LANGUAGES][MAX_LANGUAGE_ITEMS];
 bool language_reference_mallocd[MAX_LANGUAGES][MAX_LANGUAGE_ITEMS];
 
+void gsc_free_slot()
+{
+	#if COD2_VERSION == COD2_VERSION_1_0
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+		int info_ip_offset = 0x6E5C8;
+		int info_port_offset = 0x6E5A4;
+	#elif COD2_VERSION == COD2_VERSION_1_2
+		int info_base = *(int *)0x0842200C;
+		int info_size = 0x79064;
+		int info_ip_offset = 0x6E6D8;
+		int info_port_offset = 0x6E6B4;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+		int info_base = *(int *)0x0842308C;
+		int info_size = 0xB1064;
+		int info_ip_offset = 0x6E6D8;
+		int info_port_offset = 0x6E6B4;
+	#else
+		#warning gsc_player_getip() got no working addresses
+		int info_base = *(int *)0x0;
+		int info_size = 0x0;
+		int info_ip_offset = 0x0;
+		int info_port_offset = 0x0;
+	#endif
+	int id = 0;
+	if(!stackGetParamInt(0, &id))
+	{
+		printf("Param 0 needs to be an int for free_slot\n");
+		stackPushUndefined();
+		return;
+	}
+	int entity = info_base + id * info_size;
+	*(int*)entity = 0; //CS_FREE
+	stackPushUndefined();
+}
+
 void gsc_add_language()
 {
 	char *str;
@@ -503,7 +539,6 @@ void gsc_utils_sprintf()
 	return;
 }
 
-
 void gsc_utils_disableGlobalPlayerCollision() {
 	// well, i could also just write LEAVE,RETN C9,C3 at beginnung of function
 	#  if COD_VERSION == COD2_1_0
@@ -695,6 +730,7 @@ void gsc_utils_fopen() {
 	FILE *file = fopen(filename, mode);
 	stackPushInt((int)file);
 }
+
 void gsc_utils_fread() {
 	FILE *file;
 	if ( ! stackGetParams("i", &file)) {

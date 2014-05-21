@@ -173,6 +173,7 @@ Scr_Function scriptFunctions[] = {
 	{"add_language"                , gsc_add_language                      , 0},
 	{"load_languages"              , gsc_load_languages                    , 0},
 	{"get_language_item"           , gsc_get_language_item                 , 0},
+	{"free_slot"                   , gsc_free_slot                         , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
