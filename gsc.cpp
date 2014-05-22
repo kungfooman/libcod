@@ -206,6 +206,10 @@ Scr_Function scriptFunctions[] = {
 	{"fwrite"                      , gsc_utils_fwrite                      , 0},
 	{"fclose"                      , gsc_utils_fclose                      , 0},
 	{"sprintf"                     , gsc_utils_sprintf                     , 0},
+	{"add_language"                , gsc_add_language                      , 0},
+	{"load_languages"              , gsc_load_languages                    , 0},
+	{"get_language_item"           , gsc_get_language_item                 , 0},
+	{"free_slot"                   , gsc_free_slot                         , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
