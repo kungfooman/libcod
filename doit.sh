@@ -36,7 +36,13 @@ mysql_link="-lmysqlclient"
 java_jdk="/root/helper/openjdk8"
 java_lib=""
 java_header=""
-if [ -d $java_jdk ]; then
+java_enable="false"
+
+# when the JDK is not found, force it to be off
+if [ ! -d $java_jdk ]; then
+	java_enable="false"
+fi
+if [ "$java_enable" == "true" ]; then
 	java_lib="-ljvm -L$java_jdk/jre/lib/i386/server/"
 	java_header="-I$java_jdk/include/ -I$java_jdk/include/linux/"
 	options="$options -DIS_JAVA_ENABLED"
@@ -74,10 +80,10 @@ if [ "$1" == "" ] || [ "$1" == "base" ]; then
 	echo "##### COMPILE GSC_MATH.CPP #####"
 	$cc $options -o objects_normal/gsc_math.opp -c gsc_math.cpp
 	echo "##### COMPILE JAVA_EMBED.C #####"
-	if [ -d $java_jdk ]; then
+	if [ "$java_enable" == "true" ]; then
 		$cc $options -o objects_normal/java_embed.opp -c java_embed.c $java_header
 	else
-		echo "Ignore java_embed.h, because the dir \$java_jdk=$java_jdk does not exist"
+		echo "Ignore java_embed.c, because java_enable==false (e.g. because the dir \$java_jdk=$java_jdk does not exist)"
 	fi
 fi
 
