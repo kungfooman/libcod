@@ -39,19 +39,40 @@ MYSQL *cod_mysql_connection = NULL;
 
 void mysql_async_execute_query(mysql_async_task *q, mysql_async_connection *c) //cannot be called from gsc, is threaded.
 {
-	int res = mysql_query(c->connection, q->query);
-	if(res)
-			printf("scriptengine> Error in MySQL connection for async query. Cannot recover\n"); //keep mysql connection available for now, might recover in the future?
-	else
+	int i = 0;
+	int lastquery = 0;
+	bool goodquery = false;
+	while(q->query[i] != '\0')
 	{
-		if(q->save)
+		if(q->query[i] == ';' && i > 0 && q->query[i - 1] != '\\')
 		{
-			MYSQL_RES *result = mysql_store_result(c->connection);
-			q->result = result;
+			//subquery
+			q->query[i] = '\0';
+			int res = mysql_query(c->connection, &(q->query[lastquery]));
+			q->query[i] = ';';
+			if(res)
+				goodquery = false;
+			else
+				goodquery = true;
+			lastquery = i + 1;
+			while(q->query[lastquery] != '\0' && (q->query[lastquery] == ' ' || q->query[lastquery] == '\t'))
+				lastquery++;
 		}
-		c->in_use = false;
-		q->done = true;
+		i++;
 	}
+	if(i - lastquery > 5)
+	{
+		//this is a query
+		int res = mysql_query(c->connection, &(q->query[lastquery]));
+		if(res)
+			goodquery = false;
+		else
+			goodquery = true;
+	}
+	if(goodquery && q->save)
+		q->result = mysql_store_result(c->connection);
+	c->in_use = false;
+	q->done = true;
 }
 
 void mysql_async_query_handler() //is threaded after initialize
@@ -498,7 +519,7 @@ void gsc_mysql_fetch_row() {
 		return;
 	}
 
-	int ret = alloc_object_and_push_to_array();
+	stackPushArray();
 	
 	int numfields = mysql_num_fields((MYSQL_RES *)result);
 	for (int i=0; i<numfields; i++)
@@ -511,7 +532,7 @@ void gsc_mysql_fetch_row() {
 		#if DEBUG_MYSQL
 		printf("row == \"%s\"\n", row[i]);
 		#endif
-		push_previous_var_in_array_sub();
+		stackPushArrayLast();
 	}
 }
 
@@ -526,7 +547,7 @@ void gsc_mysql_free_result() {
 	#if DEBUG_MYSQL
 	printf("gsc_mysql_free_result(result=%d)\n", result);
 	#endif
-	if(result == NULL)
+	if(result == 0)
 	{
 		printf("scriptengine> Error in mysql_free_result: input is a NULL-pointer\n");
 		stackPushUndefined();
@@ -550,7 +571,7 @@ void gsc_mysql_real_escape_string() {
 	#endif
 	
 	char *to = (char *) malloc(strlen(str) * 2 + 1);
-	int ret = mysql_real_escape_string((MYSQL *)mysql, to, str, strlen(str));	
+	mysql_real_escape_string((MYSQL *)mysql, to, str, strlen(str));	
 	stackPushString(to);
 	free(to);
 }
@@ -756,7 +777,6 @@ int gsc_mysql_stmt_bind_result()
 int gsc_mysql_stmt_execute()
 {
 	int mysql_stmt;
-	int result;
 	
 	int helper = 0;
 	helper += stackGetParamInt(1, &mysql_stmt);
@@ -777,7 +797,6 @@ int gsc_mysql_stmt_execute()
 int gsc_mysql_stmt_store_result()
 {
 	int mysql_stmt;
-	int result;
 	
 	int helper = 0;
 	helper += stackGetParamInt(1, &mysql_stmt);
@@ -798,7 +817,6 @@ int gsc_mysql_stmt_store_result()
 int gsc_mysql_stmt_fetch()
 {
 	int mysql_stmt;
-	int result;
 	
 	int helper = 0;
 	helper += stackGetParamInt(1, &mysql_stmt);
@@ -959,8 +977,6 @@ int gsc_mysql_test_1()
 		mysql_close(my);
 		return stackReturnInt(0);
 	}
-	
-	int id = 10;
 	
 	{
 		const char *sql = "SELECT 1 + ?,1 UNION SELECT 2+?,1 UNION SELECT 3,2 UNION SELECT 4,3";

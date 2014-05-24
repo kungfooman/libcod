@@ -26,7 +26,7 @@ void startServerAsThread(int port, int debug)
 	ret = pthread_attr_init(&settings);
 	if (ret != 0)
 	{
-		printf_hide("> [ERROR] pthread_attr_init() failed.\n");
+		printf("> [ERROR] pthread_attr_init() failed.\n");
 		return;
 	}
 
@@ -35,11 +35,11 @@ void startServerAsThread(int port, int debug)
 	ret = pthread_attr_setstacksize(&settings, stacksize);
 	if (ret != 0)
 	{
-		printf_hide("> [ERROR] pthread_attr_setstacksize failed.\n");
+		printf("> [ERROR] pthread_attr_setstacksize failed.\n");
 		return;
 	}
 
-	printf_hide("> [INFO] Stack-Size set to %d Bytes (%.2f KB, %.2f MB)\n", stacksize, (float)(stacksize/1024), (float)((stacksize/1024)/1024));
+	printf("> [INFO] Stack-Size set to %d Bytes (%.2f KB, %.2f MB)\n", stacksize, (float)(stacksize/1024), (float)((stacksize/1024)/1024));
 
 	struct threadData *tmp = (struct threadData *) malloc(sizeof(struct threadData));
 	tmp->port = port;
@@ -84,7 +84,7 @@ static void mythread(void *arg)
 		// Save the current signal mask.
 		sigemptyset (&emptyset);
 		sigprocmask (SIG_BLOCK, &emptyset, &mainsigset);
-		printf_hide("> [INFO] SIGSEGV got installed\n");
+		printf("> [INFO] SIGSEGV got installed\n");
 		}
 	#endif
 	
@@ -94,34 +94,34 @@ static void mythread(void *arg)
 
 	if (!ret)
 	{
-		printf_hide("> [ERROR] TCP_init(port=%d) failed!\n", port);
+		printf("> [ERROR] TCP_init(port=%d) failed!\n", port);
 		return;
 	}
 
-	printf_hide("> [INFO] TCP_init(port=%d)\n", port);
+	printf("> [INFO] TCP_init(port=%d)\n", port);
 
 	while (1)
 	{
-		printf_hide("> [INFO] TCP_wait_for_client()... \n");
+		printf("> [INFO] TCP_wait_for_client()... \n");
 		ret = TCP_wait_for_client(&conn);
 		if (!ret)
 		{
-			printf_hide("> [ERROR] TCP_wait_for_client() failed!\n");
+			printf("> [ERROR] TCP_wait_for_client() failed!\n");
 			continue;
 		}
 
-		printf_hide("> [INFO] Client connected!\n");
+		printf("> [INFO] Client connected!\n");
 
 		ret = TCP_read_all(&conn, buffer, 1024-1, &msglen);
 		if (!ret)
 		{
-			printf_hide("> [ERROR] TCP_read_all() failed!\n");
+			printf("> [ERROR] TCP_read_all() failed!\n");
 			continue;
 		}
 		buffer[msglen] = '\0';
 
-		printf_hide("> [INFO] TCP_read_all(): msglen=%d\n", msglen);
-		//printf_hide("> [INFO] TCP_read_all(): msglen=%d msg=%s\n", msglen, buffer);
+		printf("> [INFO] TCP_read_all(): msglen=%d\n", msglen);
+		//printf("> [INFO] TCP_read_all(): msglen=%d msg=%s\n", msglen, buffer);
 
 		// maybe its sometime usefull
 		TCP_write(&conn, "{\n\t\"time\": \"%d\"", time(NULL));
@@ -140,14 +140,14 @@ static void mythread(void *arg)
 			{
 				if (lol[row][0][0] == '\0')
 					break;
-				printf_hide("] row[%d]: ", row);
+				printf("] row[%d]: ", row);
 				for (col=0; col<MAX_COLS; col++)
 				{
 					if (lol[row][col][0] == '\0')
 						break;
-					printf_hide("[%d]=%s ", col, lol[row][col]);
+					printf("[%d]=%s ", col, lol[row][col]);
 				}
-				printf_hide("\n");
+				printf("\n");
 			}
 
 			
@@ -248,12 +248,12 @@ static void mythread(void *arg)
 
 					buffer = malloc(bytes);
 					
-					//printf_hide("MALLOC: %.8x\n", buffer);
+					//printf("MALLOC: %.8x\n", buffer);
 					
 					if (buffer == NULL)
 					{
 						//TCP_write(&conn, ",\n\t\"ret_001\": false");
-						printf_hide("MALLOC ERROR!");
+						printf("MALLOC ERROR!");
 						return;
 					}
 					
@@ -271,7 +271,7 @@ static void mythread(void *arg)
 						TCP_write(&conn, "\"");	
 					} else {
 						TCP_write(&conn, "false");
-						printf_hide("ERROR: readMemoryRange(0x%.8x, %.8x, %d)\n", from, buffer, bytes);
+						printf("ERROR: readMemoryRange(0x%.8x, %.8x, %d)\n", from, buffer, bytes);
 					}
 					
 					if (buffer != NULL)
@@ -340,7 +340,7 @@ static void mythread(void *arg)
 						unsigned char buffer[128] = {0};
 						int bytes;
 						int i;
-						bytes = hexToBuffer(arg_value, buffer, 128);
+						bytes = hexToBuffer(arg_value, (char *)buffer, 128);
 						
 						sscanf(address, "%x", &ptr);
 						
@@ -355,7 +355,7 @@ static void mythread(void *arg)
 					}
 					
 					//else {
-					//	printf_hide("[ERROR] unknown data-type! Usable: float, int\n");
+					//	printf("[ERROR] unknown data-type! Usable: float, int\n");
 					//}
 				}
 				
@@ -387,14 +387,14 @@ static void mythread(void *arg)
 					sscanf(arg_from, "%x", &from);
 					sscanf(arg_to, "%x", &to);
 					
-					printf_hide("asd from=%.8x to=%0.8x type=%s value=%s\n", from, to, type, value);
+					printf("asd from=%.8x to=%0.8x type=%s value=%s\n", from, to, type, value);
 					
 					if (!strcmp(type, "string"))
 					{
 						int len = strlen(value);
 						for (; from<to; from++)
 						{
-							//printf_hide(".");
+							//printf(".");
 							if (!strncmp(from, value, len))
 							{
 								TCP_write(&conn, "\"%s\" found at %.8x\n", value, from);
@@ -412,7 +412,7 @@ static void mythread(void *arg)
 						int len = strlen(value);
 						for (; from<to; from++)
 						{
-							//printf_hide(".");
+							//printf(".");
 							if (!memcmp(from, buffer, bytes))
 							{
 								TCP_write(&conn, "\n\t\"hex found at %.8x\"", from);
@@ -473,34 +473,34 @@ static void mythread(void *arg)
 
 					ret = mprotect(addr, len, prot);
 					
-					printf_hide("mprotect(%.8x, %d, %.8x): try to give rights: ", addr, len, prot);
+					printf("mprotect(%.8x, %d, %.8x): try to give rights: ", addr, len, prot);
 					if (prot == PROT_NONE)
-						printf_hide("n");
+						printf("n");
 					if (prot & PROT_READ)
-						printf_hide("r");
+						printf("r");
 					if (prot & PROT_WRITE)
-						printf_hide("w");
+						printf("w");
 					if (prot & PROT_EXEC)
-						printf_hide("x");
-					printf_hide("\n");
+						printf("x");
+					printf("\n");
 					
 					if (ret == 0)
-						printf_hide("MPROTECT: success!\n");
+						printf("MPROTECT: success!\n");
 					else
-						printf_hide("MPROTECT: error!\n");
+						printf("MPROTECT: error!\n");
 					
 					/*
 					if (ret == EACCES)
 					{
-						printf_hide("MPROTECT: could not give the rights to the memory\n");
+						printf("MPROTECT: could not give the rights to the memory\n");
 					}
 					if (ret == EINVAL)
 					{
-						printf_hide("MPROTECT: addr is not a valid pointer, or not a multiple of the system page size.\n");
+						printf("MPROTECT: addr is not a valid pointer, or not a multiple of the system page size.\n");
 					}
 					if (ret == ENOMEM)
 					{
-						printf_hide("MPROTECT: Internal kernel structures could not be allocated.\n");
+						printf("MPROTECT: Internal kernel structures could not be allocated.\n");
 					}
 					*/
 					// todo: output and errorhandling
@@ -569,11 +569,11 @@ static void mythread(void *arg)
 					char *arg_library = arg1;
 					char *arg_function = arg2;
 					
-					printf_hide("%s -> %s\n", arg_library, arg_function);
+					printf("%s -> %s\n", arg_library, arg_function);
 					
 					void *handle = dlopen(arg_library, RTLD_GLOBAL);
 					
-					printf_hide("dlopen(\"%s\") returned: %.8x\n", arg_library, handle);
+					printf("dlopen(\"%s\") returned: %.8x\n", arg_library, handle);
 					
 					TCP_write(&conn, "function-name=%s -> address=%.8x\n", arg_function, dlsym(handle, arg_function));
 					
@@ -585,14 +585,14 @@ static void mythread(void *arg)
 					char *arg_library = arg1;
 					char *arg_function = arg2;
 					
-					printf_hide("%s -> %s\n", arg_library, arg_function);
+					printf("%s -> %s\n", arg_library, arg_function);
 					
 					//void *handle = dlopen(arg_library, RTLD_GLOBAL); // crashes
 					// void *handle = dlopen(arg_library, RTLD_LOCAL); // crashes
 					//void *handle = dlopen(arg_library, RTLD_NOW); // crashes
 					void *handle = dlopen(arg_library, RTLD_LAZY);
 
-					printf_hide("dlopen(\"%s\") returned: %.8x\n", arg_library, handle);
+					printf("dlopen(\"%s\") returned: %.8x\n", arg_library, handle);
 					
 					void (*func)() = dlsym(handle, arg_function);
 					TCP_write(&conn, "function-name=%s -> address=%.8x\n", arg_function, func);
@@ -614,32 +614,32 @@ static void mythread(void *arg)
 						
 								switch ((*((int *)ptr+2) & 0x1f))
 								{
-									case 0: /*printf_hide("#define STACK_UNDEFINED 0\n");*/ break;
-									case 1: printf_hide("#define STACK_OBJECT 1\n"); break;
-									//case 2: printf_hide("#define STACK_STRING 2 = \"%s\"\n", (char *)(*(int *)0x08206F00 + 8*(int)    (*(int16_t *)&stack[i])    + 4)); break;
-									case 2: printf_hide("#define STACK_STRING 2 = \"%s\"\n", (char *)(*(int *)0x08206F00 + 8*    stack[i]    + 4)); break;
-									case 3: printf_hide("#define STACK_LOCALIZED_STRING 3\n"); break;
-									case 4: printf_hide("#define STACK_VECTOR 4 = (%.2f, %.2f, %.2f)\n", *(float *)((int)(stack[i]) + 0), *(float *)((int)(stack[i]) + 4), *(float *)((int)(stack[i]) + 8)); break;
-									case 5: printf_hide("#define STACK_FLOAT 5\n"); break;
-									case 6: printf_hide("#define STACK_INT 6 = %.8x=%d\n", *(int *)&stack[i], *(int *)&stack[i]); break;
-									case 7: printf_hide("#define STACK_CODEPOS 7\n"); break;
-									case 8: printf_hide("#define STACK_PRECODEPOS 8\n"); break;
-									case 9: printf_hide("#define STACK_FUNCTION 9\n"); break;
-									case 10: printf_hide("#define STACK_STACK 10\n"); break;
-									case 11: printf_hide("#define STACK_ANIMATION 11\n"); break;
-									case 12: printf_hide("#define STACK_DEVELOPER_CODEPOS 12\n"); break;
-									case 13: printf_hide("#define STACK_INCLUDE_CODEPOS 13\n"); break;
-									case 14: printf_hide("#define STACK_THREAD_LIST 14\n"); break;
-									case 15: printf_hide("#define STACK_THREAD_1 15\n"); break;
-									case 16: printf_hide("#define STACK_THREAD_2 16\n"); break;
-									case 17: printf_hide("#define STACK_THREAD_3 17\n"); break;
-									case 18: printf_hide("#define STACK_THREAD_4 18\n"); break;
-									case 19: printf_hide("#define STACK_STRUCT 19\n"); break;
-									case 20: printf_hide("#define STACK_REMOVED_ENTITY 20\n"); break;
-									case 21: printf_hide("#define STACK_ENTITY 21\n"); break;
-									case 22: printf_hide("#define STACK_ARRAY 22\n"); break;
-									case 23: printf_hide("#define STACK_REMOVED_THREAD 23\n"); break;
-									default: printf_hide("CRAP!\n");								
+									case 0: /*printf("#define STACK_UNDEFINED 0\n");*/ break;
+									case 1: printf("#define STACK_OBJECT 1\n"); break;
+									//case 2: printf("#define STACK_STRING 2 = \"%s\"\n", (char *)(*(int *)0x08206F00 + 8*(int)    (*(int16_t *)&stack[i])    + 4)); break;
+									case 2: printf("#define STACK_STRING 2 = \"%s\"\n", (char *)(*(int *)0x08206F00 + 8*    stack[i]    + 4)); break;
+									case 3: printf("#define STACK_LOCALIZED_STRING 3\n"); break;
+									case 4: printf("#define STACK_VECTOR 4 = (%.2f, %.2f, %.2f)\n", *(float *)((int)(stack[i]) + 0), *(float *)((int)(stack[i]) + 4), *(float *)((int)(stack[i]) + 8)); break;
+									case 5: printf("#define STACK_FLOAT 5\n"); break;
+									case 6: printf("#define STACK_INT 6 = %.8x=%d\n", *(int *)&stack[i], *(int *)&stack[i]); break;
+									case 7: printf("#define STACK_CODEPOS 7\n"); break;
+									case 8: printf("#define STACK_PRECODEPOS 8\n"); break;
+									case 9: printf("#define STACK_FUNCTION 9\n"); break;
+									case 10: printf("#define STACK_STACK 10\n"); break;
+									case 11: printf("#define STACK_ANIMATION 11\n"); break;
+									case 12: printf("#define STACK_DEVELOPER_CODEPOS 12\n"); break;
+									case 13: printf("#define STACK_INCLUDE_CODEPOS 13\n"); break;
+									case 14: printf("#define STACK_THREAD_LIST 14\n"); break;
+									case 15: printf("#define STACK_THREAD_1 15\n"); break;
+									case 16: printf("#define STACK_THREAD_2 16\n"); break;
+									case 17: printf("#define STACK_THREAD_3 17\n"); break;
+									case 18: printf("#define STACK_THREAD_4 18\n"); break;
+									case 19: printf("#define STACK_STRUCT 19\n"); break;
+									case 20: printf("#define STACK_REMOVED_ENTITY 20\n"); break;
+									case 21: printf("#define STACK_ENTITY 21\n"); break;
+									case 22: printf("#define STACK_ARRAY 22\n"); break;
+									case 23: printf("#define STACK_REMOVED_THREAD 23\n"); break;
+									default: printf("CRAP!\n");								
 								}
 						
 						if ((*((int *)ptr+2) & 0x1f) == 10)
@@ -648,7 +648,7 @@ static void mythread(void *arg)
 							int v21 = *((int16_t*)v20+4);
 							int v22 = *(int*)v20;
 							int v23 = v20 + 11;
-							printf_hide("ptr=%.8x if=%.8x v20=%.8x v21=%8ld v22=%.8x\n", ptr, *(int *)&stack[8*i+4] & 0x60, v20, v21, v22);
+							printf("ptr=%.8x if=%.8x v20=%.8x v21=%8ld v22=%.8x\n", ptr, *(int *)&stack[8*i+4] & 0x60, v20, v21, v22);
 							
 							while (v21)
 							{
@@ -661,12 +661,12 @@ static void mythread(void *arg)
 								
 								if (v26 == 6)
 								{
-									//printf_hide("\tv27=%.8x\n", v27);
+									//printf("\tv27=%.8x\n", v27);
 								}
 							}
 						}
 						
-						//printf_hide("#########next########\n"); // spam
+						//printf("#########next########\n"); // spam
 					}
 				}
 			}
@@ -684,27 +684,27 @@ int cdecl_injected_shell(int a, int b, int c) // args to get stack address
 {
 	char buffer[128];
 	int i;
-	printf_hide("called: int cdecl_injected_shell();\n");
+	printf("called: int cdecl_injected_shell();\n");
 	
-	printf_hide("arg0 = %.8x\n", &a);
-	printf_hide("arg1 = %.8x\n", &b);
-	printf_hide("arg2 = %.8x\n", &c);
+	printf("arg0 = %.8x\n", &a);
+	printf("arg1 = %.8x\n", &b);
+	printf("arg2 = %.8x\n", &c);
 	
 	while (1)
 	{
-		printf_hide("dbg> ");
+		printf("dbg> ");
 		input(buffer, 128);
 		
 		if (!strcmp(buffer, "help"))
 		{
-			printf_hide("HELP!\n");
-			printf_hide("---------------\n");
-			printf_hide("Commands:\n");
-			printf_hide(" quit\n");
+			printf("HELP!\n");
+			printf("---------------\n");
+			printf("Commands:\n");
+			printf(" quit\n");
 		}
 		else if (!strcmp(buffer, "quit"))
 		{
-			printf_hide("GOOD BYE!\n");
+			printf("GOOD BYE!\n");
 			break;
 		}
 		else if (!strcmp(buffer, "dump"))
@@ -713,25 +713,25 @@ int cdecl_injected_shell(int a, int b, int c) // args to get stack address
 			
 			do
 			{
-				printf_hide("dump address> ");
+				printf("dump address> ");
 				input(buffer, 128);
 				sscanf(buffer, "%x", &address);
 				
-				printf_hide("*0x%.8x = ", address);
-				printf_hide("0x%.8x ", *address);
-				printf_hide("float=%f ", *address);
-				printf_hide("int=%d ", *address);
-				printf_hide("uint=%u ", *address);
-				printf_hide("123=%d ", 123);
-				printf_hide("\n");
+				printf("*0x%.8x = ", address);
+				printf("0x%.8x ", *address);
+				printf("float=%f ", *address);
+				printf("int=%d ", *address);
+				printf("uint=%u ", *address);
+				printf("123=%d ", 123);
+				printf("\n");
 			} while (strlen(buffer) > 0);
 		}
 		else {
-			printf_hide("ERROR: Unknown Command: \"%s\"\n", buffer);
+			printf("ERROR: Unknown Command: \"%s\"\n", buffer);
 		}
 	}
 	
-	return;
+	return 1;
 }
 int cdecl_return_0()
 {
@@ -745,21 +745,21 @@ int cdecl_print(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, 
 {
 	//abort();
 	//exit(0);
-	printf_hide("a0=%.8x\n", a0);
-	printf_hide("a1=%.8x\n", a1);
-	printf_hide("a2=%.8x\n", a2);
-	printf_hide("a3=%.8x\n", a3);
-	printf_hide("a4=%.8x\n", a4);
-	printf_hide("a5=%.8x\n", a5);
-	printf_hide("a6=%.8x\n", a6);
-	printf_hide("a7=%.8x\n", a7);
-	printf_hide("a8=%.8x\n", a8);
-	printf_hide("a9=%.8x\n", a9);
-	printf_hide("#######################################\n");
-	printf_hide("#######################################\n");
-	printf_hide("##############  HELLO  ################\n");
-	printf_hide("#######################################\n");
-	printf_hide("#######################################\n");
+	printf("a0=%.8x\n", a0);
+	printf("a1=%.8x\n", a1);
+	printf("a2=%.8x\n", a2);
+	printf("a3=%.8x\n", a3);
+	printf("a4=%.8x\n", a4);
+	printf("a5=%.8x\n", a5);
+	printf("a6=%.8x\n", a6);
+	printf("a7=%.8x\n", a7);
+	printf("a8=%.8x\n", a8);
+	printf("a9=%.8x\n", a9);
+	printf("#######################################\n");
+	printf("#######################################\n");
+	printf("##############  HELLO  ################\n");
+	printf("#######################################\n");
+	printf("#######################################\n");
 	//return stackReturnInt(1);
 	return 1;
 }
@@ -826,7 +826,7 @@ int TCP_read_all_bugged(TCP_connection *conn, void *buffer, int bufferLen, int *
 	do
 	{
 		ret = recv(conn->new_socket, localbuffer, BUFFER, 0);
-		//printf_hide("]] recv: %s\n", localbuffer);
+		//printf("]] recv: %s\n", localbuffer);
 		if (ret == -1)
 			return 0;
 
@@ -839,7 +839,7 @@ int TCP_read_all_bugged(TCP_connection *conn, void *buffer, int bufferLen, int *
 
 		client_recv_offset += ret;
 
-		//printf_hide("> [RECV] ret=%d bufferLeft=%d\n", ret, bufferLeft);
+		//printf("> [RECV] ret=%d bufferLeft=%d\n", ret, bufferLeft);
 	}
 	while (ret == BUFFER);
 
@@ -909,7 +909,7 @@ int parseRequest(char *toParse, char table[MAX_ROWS][MAX_COLS][MAX_CHARS])
 			{
 				if (atCol == 0 && atPos == 0)
 				{
-					//printf_hide("> ignoring double newline/semicolon\n");
+					//printf("> ignoring double newline/semicolon\n");
 					break;
 				}
 				// todo: prevent row-overflow
@@ -923,10 +923,10 @@ int parseRequest(char *toParse, char table[MAX_ROWS][MAX_COLS][MAX_CHARS])
 			case '\t':
 				if (atPos == 0)
 				{
-					//printf_hide("> ignoring double space/tab\n");
+					//printf("> ignoring double space/tab\n");
 					break;
 				}
-				//printf_hide("> new argument!\n");
+				//printf("> new argument!\n");
 				// todo: prevent col-overflow
 				atCol++;
 				atPos = 0;
@@ -937,7 +937,7 @@ int parseRequest(char *toParse, char table[MAX_ROWS][MAX_COLS][MAX_CHARS])
 				{
 					table[atRow][atCol][atPos] = cc;
 					table[atRow][atCol][atPos+1] = '\0';
-					//printf_hide("> new char: table[%d][%d][%d] = '%c'\n", atRow, atCol, atPos, table[atRow][atCol][atPos]);
+					//printf("> new char: table[%d][%d][%d] = '%c'\n", atRow, atCol, atPos, table[atRow][atCol][atPos]);
 					atPos++;
 				}
 			}
@@ -949,20 +949,21 @@ int parseRequest(char *toParse, char table[MAX_ROWS][MAX_COLS][MAX_CHARS])
 int handleRequest(char lol[MAX_ROWS][MAX_COLS][MAX_CHARS])
 {
 	int row, col;
-	printf_hide("> handleRequest();\n");
+	printf("> handleRequest();\n");
 	for (row=0; row<MAX_ROWS; row++)
 	{
 		if (lol[row][0][0] == '\0')
 			break;
-		printf_hide("> ");
+		printf("> ");
 		for (col=0; col<MAX_COLS; col++)
 		{
 			if (lol[row][col][0] == '\0')
 				break;
-			printf_hide("%s ", lol[row][col]);
+			printf("%s ", lol[row][col]);
 		}
-		printf_hide("\n");
+		printf("\n");
 	}
+	return 1;
 }
 
 void input(char *buffer, int len)
@@ -1008,7 +1009,7 @@ int readMemoryRange(void *from, void *buffer, int bytes)
 		// Save the current signal mask.
 		sigemptyset (&emptyset);
 		sigprocmask (SIG_BLOCK, &emptyset, &mainsigset);
-		printf_hide("> [INFO] SIGSEGV got installed\n");
+		printf("> [INFO] SIGSEGV got installed\n");
 		}
 
 		ret = setjmp(jumpbuffer); // save current state
@@ -1016,17 +1017,17 @@ int readMemoryRange(void *from, void *buffer, int bytes)
 
 	ret = 0; // fake value for without-sig-management
 	
-	printf_hide(" ------>>>>>>>>>>>> setjmp(jumpbuffer)=%d\n", ret);
+	printf(" ------>>>>>>>>>>>> setjmp(jumpbuffer)=%d\n", ret);
 
 	// 0 = we arent got called by longjmp()
 	// something else = longjmp(jumpbuffer, $somethingElse);
 	if (ret == 0) {
-		printf_hide("BEFORE memcpy()\n");
+		printf("BEFORE memcpy()\n");
 		memcpy(buffer, from, bytes);
-		printf_hide("AFTER memcpy()\n");
+		printf("AFTER memcpy()\n");
 		return bytes;
 	}
-	printf_hide("error reading 0x%.8x!\n", from);
+	printf("error reading 0x%.8x!\n", from);
 	return -1;
 }
 

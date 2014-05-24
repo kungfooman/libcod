@@ -58,7 +58,7 @@ extern "C" {
 
 #include "cracking.hpp" // closer 900: nop
 
-
+/*
 static void printf_hide(const char *str, ...)
 {
 	#if DEBUG_PRINTF == 1
@@ -68,7 +68,7 @@ static void printf_hide(const char *str, ...)
 	va_end(args);
 	#endif
 }
-
+*/
 
 /*
 	just search in winhex for "localized string" in the binary and go-to-fileoffset in IDA
@@ -179,7 +179,6 @@ int stackGetParamType(int param);
 char *stackGetParamTypeAsString(int param);
 int stackGetParams(char *params, ...);
 
-int cdecl_injected_closer_stack_debug();
 
 int stackReturnInt(int ret); // obsolete
 int stackPushInt(int ret);
@@ -192,10 +191,9 @@ int stackPushArray();
 int stackPushArrayLast();
 
 int stackCallScriptFunction(int self, int scriptFunction, int numberOfArgs);
-int alloc_object_and_push_to_array(); // obsolete, use stackPushArray
 int stackSetKeyInArray(int precachedStringOffset);
-int push_previous_var_in_array_sub(); // obsolete, use stackPushArrayLast
 int cdecl_injected_closer();
+int cdecl_injected_closer_stack_debug();
 
 int sub_8101B40(int self, int eInflictor, int eAttacker, float *vDir, float *vPoint, int iDamage, int iDFlags, int iMeansOfDeath, int iHitLoc, int psOffsetTime);
 int cdecl_cod2_player_damage_new(int self, int eInflictor, int eAttacker, float *vDir, float *vPoint, int iDamage, int iDFlags, int iMeansOfDeath, int iHitLoc, int psOffsetTime);
@@ -217,7 +215,7 @@ typedef struct {
 
 typedef Scr_FunctionCall (*Scr_GetFunction_t)(const char **fname, int *fdev);
 
-Scr_FunctionCall Scr_GetCustomFunction(const char **fname, int *fdev);
+Scr_FunctionCall Scr_GetCustomFunction(const char **fname, int *fdev); // could be made obsolete to remove the cracking_hook_call()-stuff
 
 // methods
 typedef void (*Scr_MethodCall)(int);
@@ -230,7 +228,7 @@ typedef struct {
 
 typedef Scr_MethodCall (*Scr_GetMethod_t)(const char**, int*);
 
-Scr_MethodCall Scr_GetCustomMethod(const char **fname, int *fdev);
+Scr_MethodCall Scr_GetCustomMethod(const char **fname, int *fdev); // could be made obsolete to remove the cracking_hook_call()-stuff
 
 #ifdef __cplusplus
 }

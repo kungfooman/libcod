@@ -15,8 +15,41 @@
 	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x08117CB2;
 	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x08117DEA;
 #elif COD_VERSION == COD4_1_7
-	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x080BD238;
-	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x080BFEF4;
+	//Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x080BD238;
+	//Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x080BFEF4;
+
+	cHook *hook_Scr_GetFunction;
+	cHook *hook_Scr_GetMethod;
+	
+	Scr_FunctionCall Scr_GetFunction(const char **fname, int *fdev) {
+		//printf("CoD4 Scr_GetFunction: fdev=%d fname=%s\n", *fdev, *fname);
+		
+		hook_Scr_GetFunction->unhook();
+		int (*sig)(const char **fname, int *fdev);
+		*(int *)&sig = hook_Scr_GetFunction->from;
+		int m = sig(fname, fdev);
+		hook_Scr_GetFunction->hook();
+	/*
+		when I use the real return-type instead of int (*sig), this errors occurs:
+			##### LINK libcod4_1_7.so #####
+			objects_cod4_1_7/libcod.opp: In function `Scr_GetFunction_CoD4(char const**, int*)':
+			libcod.cpp:(.text+0x132b): undefined reference to `sig(char const**, int*)'
+			/usr/bin/ld: objects_cod4_1_7/libcod.opp: relocation R_386_GOTOFF against undefined hidden symbol `_Z3sigPPKcPi' can not be used when making a shared object
+			/usr/bin/ld: final link failed: Bad value
+			collect2: error: ld returned 1 exit status
+			k_cod4_nodlzom@Debian-70-wheezy-64-LAMP:~/libcod$ rm objects_cod4_1_7/libcod.opp
+	*/
+		return (Scr_FunctionCall)m;
+	}
+	Scr_MethodCall Scr_GetMethod(const char **fname, int *fdev) {
+		//printf("CoD4 Scr_GetMethod: fdev=%d fname=%s\n", *fdev, *fname);
+		hook_Scr_GetMethod->unhook();
+		int (*sig)(const char **fname, int *fdev);
+		*(int *)&sig = hook_Scr_GetMethod->from;
+		int m = sig(fname, fdev);
+		hook_Scr_GetMethod->hook();
+		return (Scr_MethodCall)m;
+	}
 #else
 	#warning Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)NULL;
 	#warning Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)NULL;
@@ -173,6 +206,10 @@ Scr_Function scriptFunctions[] = {
 	{"fwrite"                      , gsc_utils_fwrite                      , 0},
 	{"fclose"                      , gsc_utils_fclose                      , 0},
 	{"sprintf"                     , gsc_utils_sprintf                     , 0},
+	{"add_language"                , gsc_add_language                      , 0},
+	{"load_languages"              , gsc_load_languages                    , 0},
+	{"get_language_item"           , gsc_get_language_item                 , 0},
+	{"free_slot"                   , gsc_free_slot                         , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
@@ -401,9 +438,9 @@ int stackGetParamString(int param, char **value) // as in the sub-functions in g
 	if (arg->type != STACK_STRING)
 		return 0;
 	//*value = "bla";
-	//printf_hide("offsetData=%.8x ", arg->offsetData);
+	//printf("offsetData=%.8x ", arg->offsetData);
 	// lnxded 1.3: get_string_stack_element_by_id_sub_8078ec8(int id)
-	//printf_hide("datatable + 8*%d = %.8x \"%s\"\n", arg->offsetData, *(int *)0x08206F00 + 8*(int)arg->offsetData, *(int *)0x08206F00 + 8*(int)arg->offsetData + 4);
+	//printf("datatable + 8*%d = %.8x \"%s\"\n", arg->offsetData, *(int *)0x08206F00 + 8*(int)arg->offsetData, *(int *)0x08206F00 + 8*(int)arg->offsetData + 4);
 	
 	#  if COD_VERSION == COD2_1_0
 		*value = (char *)(*(int *)0x08283E80 + 8*(int)arg->offsetData + 4);
@@ -475,17 +512,17 @@ int cdecl_injected_closer_stack_debug()
 	int numberOfParams = *(int *)0x83D8A9C;
 	aStackElement *scriptStack = *(aStackElement**)0x83D8A90;
 	
-	printf_hide("numberOfParams=%d\n", numberOfParams);
+	printf("numberOfParams=%d\n", numberOfParams);
 	for (i=0; i<numberOfParams; i++)
 	{
 		aStackElement *stackPtr = scriptStack - i;
-		printf_hide("i=%d offsetData=%.8x type=%d\n", i, stackPtr->offsetData, stackPtr->type);
+		printf("i=%d offsetData=%.8x type=%d\n", i, stackPtr->offsetData, stackPtr->type);
 		
 		switch (stackPtr->type)
 		{
 			case STACK_OBJECT:
 			{
-				printf_hide("type=object with: ");
+				printf("type=object with: ");
 				
 				int object_table = 0x8297500; // int16
 				
@@ -493,13 +530,14 @@ int cdecl_injected_closer_stack_debug()
 				
 				int type = *(int *)(object_table + 2*((int)stackPtr->offsetData * 8) + 4) % 31;
 				
-				printf_hide("offsetData:%.8p type:%.8p\n", offsetData, type);
+				printf("offsetData:%.8p type:%.8p\n", offsetData, type);
 				
 				break;
 			}
 		}
 		
 	}
+	return 1;
 }
 
 /* THE BEGINNING of generalizing the push-value-functions! */
@@ -536,13 +574,13 @@ int stackPushUndefined()
 	
 	scriptStack = *(aStackElement**)getStack();
 	#if DEBUG_GSC
-	printf_hide("stackPushUndefined(): type=%d value=%.8x\n", scriptStack->type, scriptStack->offsetData);
+	printf("stackPushUndefined(): type=%d value=%.8x\n", scriptStack->type, scriptStack->offsetData);
 	#endif
 	int ret = stackNew();
 	
 	scriptStack = *(aStackElement**)getStack();
 	#if DEBUG_GSC
-	printf_hide("stackPushUndefined(): type=%d value=%.8x\n", scriptStack->type, scriptStack->offsetData);
+	printf("stackPushUndefined(): type=%d value=%.8x\n", scriptStack->type, scriptStack->offsetData);
 	#endif
 	
 	//aStackElement *scriptStack = *(aStackElement**)getStack();
@@ -723,10 +761,8 @@ int stackCallScriptFunction(int self, int scriptFunction, int numberOfArgs)
 }
 int stackCallbackPlayerDamage = 0x0884D718;
 
-
 // as in bullettrace
-int alloc_object_and_push_to_array() // use stackPushArray() now
-{
+int stackPushArray() {
 	int (*signature)();
 	
 	#  if COD_VERSION == COD2_1_0
@@ -738,15 +774,11 @@ int alloc_object_and_push_to_array() // use stackPushArray() now
 	#elif COD_VERSION == COD4_1_7
 		*((int *)(&signature)) = 0x0815ED6A;
 	#else
-		#warning int alloc_object_and_push_to_array() *((int *)(&signature)) = NULL;
+		#warning int stackPushArray() *((int *)(&signature)) = NULL;
 		*((int *)(&signature)) = (int)NULL;
 	#endif
 	
 	return signature();
-}
-int stackPushArray()
-{
-	return alloc_object_and_push_to_array();
 }
 
 int stackSetKeyInArray(int precachedStringOffset) // TODOOOOOO
@@ -756,8 +788,7 @@ int stackSetKeyInArray(int precachedStringOffset) // TODOOOOOO
 	return signature(precachedStringOffset);
 }
 
-int push_previous_var_in_array_sub() // stackPushArrayLast()
-{
+int stackPushArrayLast() {
 	int (*signature)();
 	
 	#  if COD_VERSION == COD2_1_0
@@ -769,15 +800,11 @@ int push_previous_var_in_array_sub() // stackPushArrayLast()
 	#elif COD_VERSION == COD4_1_7
 		*((int *)(&signature)) = 0x0815D5A0;
 	#else
-		#warning int push_previous_var_in_array_sub() *((int *)(&signature)) = NULL;
+		#warning int stackPushArrayLast() *((int *)(&signature)) = NULL;
 		*((int *)(&signature)) = (int)NULL;
 	#endif
 	
 	return signature();
-}
-int stackPushArrayLast()
-{
-	return push_previous_var_in_array_sub();
 }
 
 int sub_807BCA8()
@@ -792,14 +819,14 @@ int sub_807BCA8()
 	
 	var = sub_807B9F8(); // make new variable
 	
-	printf_hide("var=%ld\n", var);
+	printf("var=%ld\n", var);
 	ptr = &startStack[4*var];
 	startStack[4 * var + 2] = 96;
 	*(ptr + 2) |= 22;
 	*((int16_t*)ptr + 2) = 0;
 	*((int16_t*)ptr + 3) = 0;
-	printf_hide("(int16_t*)ptr + 2) = %.8x\n", (int16_t*)ptr + 2);
-	printf_hide("(int16_t*)ptr + 3) = %.8x\n", (int16_t*)ptr + 3);
+	printf("(int16_t*)ptr + 2) = %.8x\n", (int16_t*)ptr + 2);
+	printf("(int16_t*)ptr + 3) = %.8x\n", (int16_t*)ptr + 3);
 	
 	/*
 	var=640
@@ -818,27 +845,27 @@ int sub_807BCA8()
 // all infos easy SEARCHABLE, like... enter 4 letters of function -> find all saved graphs of it
 // doesnt even need to be "normalized", just TEXT-seach in DB
 int level = 0; // for a nice tabbed graphcall
-#define LEVEL_SPACE do { for (int i=0; i<level; i++) printf_hide("    "); }while(0);
+#define LEVEL_SPACE do { for (int i=0; i<level; i++) printf("    "); }while(0);
 
 // gsc_new_variable
 int sub_807AB64(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1)
 {
-	LEVEL_SPACE; printf_hide("setKeyInArray: int sub_807AB64(void *offsetData=%.8x, int key=%.8x, int a_plus_b_mod_fffd_plus_1=%.8x)\n", offsetData, key, a_plus_b_mod_fffd_plus_1);
-	LEVEL_SPACE; printf_hide("{\n");
+	LEVEL_SPACE; printf("setKeyInArray: int sub_807AB64(void *offsetData=%.8x, int key=%.8x, int a_plus_b_mod_fffd_plus_1=%.8x)\n", offsetData, key, a_plus_b_mod_fffd_plus_1);
+	LEVEL_SPACE; printf("{\n");
 	level++;
 	
 	int ret;
 	
 	#if 1
-	LEVEL_SPACE; printf_hide("BUILTIN-FUNCTION\n");
+	LEVEL_SPACE; printf("BUILTIN-FUNCTION\n");
 	int (*tmp)(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1);
 	*(int *)&tmp = 0x0807AB64;
 	ret = tmp(offsetData, key, a_plus_b_mod_fffd_plus_1);
 	#endif
 	
 
-	//LEVEL_SPACE; printf_hide("setKeyInArray: int sub_807AB64 #####>>>>> ret=%.8x\n", ret); level--;
-	level--; LEVEL_SPACE; printf_hide("} ret=%.8x\n", ret);
+	//LEVEL_SPACE; printf("setKeyInArray: int sub_807AB64 #####>>>>> ret=%.8x\n", ret); level--;
+	level--; LEVEL_SPACE; printf("} ret=%.8x\n", ret);
 	return ret;
 }
 
@@ -857,21 +884,21 @@ int sub_807AB64(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1)
 	
 	void print_aStack(aStack *stack)
 	{
-		printf_hide("a_0=%.4x a_1=%.4x b_0=%.4x b_1=%.4x c=%.8x d_0=%.4x d_1=%.4x ",
+		printf("a_0=%.4x a_1=%.4x b_0=%.4x b_1=%.4x c=%.8x d_0=%.4x d_1=%.4x ",
 			stack->a_0, stack->a_1, stack->b_0, stack->b_1, stack->c, stack->d_0, stack->d_1
 		);
 	}
 	
 int sub_807B064(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1)
 {
-	LEVEL_SPACE; printf_hide("int sub_807B064(void *offsetData=%.8x, int key=%.8x, int a_plus_b_mod_fffd_plus_1=%.8x)\n", offsetData, key, a_plus_b_mod_fffd_plus_1);
-	LEVEL_SPACE; printf_hide("{\n");
+	LEVEL_SPACE; printf("int sub_807B064(void *offsetData=%.8x, int key=%.8x, int a_plus_b_mod_fffd_plus_1=%.8x)\n", offsetData, key, a_plus_b_mod_fffd_plus_1);
+	LEVEL_SPACE; printf("{\n");
 	level++;
 	
 	int ret;
 	
 	#if 0
-	LEVEL_SPACE; printf_hide("BUILTIN-FUNCTION\n");
+	LEVEL_SPACE; printf("BUILTIN-FUNCTION\n");
 	int (*tmp)(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1);
 	*(int *)&tmp = 0x0807B064;
 	ret = tmp(offsetData, key, a_plus_b_mod_fffd_plus_1);
@@ -915,36 +942,36 @@ int sub_807B064(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1)
 	char *v10;
 	
 	//a_plus_b_mod_fffd_plus_1 = (int16_t)a_plus_b_mod_fffd_plus_1;
-	LEVEL_SPACE; printf_hide(">>> 2\n");
+	LEVEL_SPACE; printf(">>> 2\n");
 	int ret_807AB64;
 	/*v4*/ ret_807AB64 = sub_807AB64(offsetData, key, a_plus_b_mod_fffd_plus_1);
 	//a_plus_b_mod_fffd_plus_1 = v4;
 	v6 = stackStart + 4 * (int)offsetData;
 	aStack *v6_2 = &stackStart_2[(int)offsetData];
-	LEVEL_SPACE; printf_hide("v6=%.8x v6_2=%.8x\n", v6, v6_2);
+	LEVEL_SPACE; printf("v6=%.8x v6_2=%.8x\n", v6, v6_2);
 	v7 = *((int16_t*)stackStart + 2 * (int)offsetData + 7);
 	
 	v8 = stackStart + 4 * v7;
 	aStack *v8_2 = &stackStart_2[v7];
-	LEVEL_SPACE; printf_hide("v8=%.8x v8_2=%.8x\n", v8, v8_2);
+	LEVEL_SPACE; printf("v8=%.8x v8_2=%.8x\n", v8, v8_2);
 	
 	v9 = stackStart + 4 * ret_807AB64;
 	aStack *v9_2 = &stackStart_2[ret_807AB64];
-	LEVEL_SPACE; printf_hide("v9=%.8x v9_2=%.8x\n", v9, v9_2);
+	LEVEL_SPACE; printf("v9=%.8x v9_2=%.8x\n", v9, v9_2);
 	
 	v5 = 16 * *((int16_t*)stackStart + 8 * ret_807AB64);
 	int v5_2 = 16 * *(int16_t*) (stackStart + 4 * ret_807AB64);
 	int v5_3 = 16 * *(int16_t*) (&stackStart_2[ret_807AB64]);
 	int v5_4 = 16 * stackStart_2[ret_807AB64].a_0;
 	
-	LEVEL_SPACE; printf_hide("v5=%.8x v5_2=%.8x v5_3=%.8x v5_4=%.8x\n", v5, v5_2, v5_3, v5_4);
+	LEVEL_SPACE; printf("v5=%.8x v5_2=%.8x v5_3=%.8x v5_4=%.8x\n", v5, v5_2, v5_3, v5_4);
 	
 	v10 = (char *)stackStart + v5;
 	int *v10_2 = &stackStart[4 * *((int16_t*)stackStart + 8 * ret_807AB64)];
 	int v10_3 = (int)&stackStart_2[*((int16_t*)stackStart + 8 * ret_807AB64)];
 	int v10_4 = (int)&stackStart_2[stackStart_2[ret_807AB64].a_0];
 	aStack *v10_5 = stackStart_2 + stackStart_2[ret_807AB64].a_0;
-	LEVEL_SPACE; printf_hide("v10=%.8x v10_2=%.8x v10_3=%.8x v10_4=%.8x v10_5=%.8x\n", v10, v10_2, v10_3, v10_4, v10_5);
+	LEVEL_SPACE; printf("v10=%.8x v10_2=%.8x v10_3=%.8x v10_4=%.8x v10_5=%.8x\n", v10, v10_2, v10_3, v10_4, v10_5);
 	
 	*(int16_t*)((char *)stackStart + v5 + 14) = v7;
 	// this:
@@ -952,22 +979,22 @@ int sub_807B064(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1)
 	int bla_1 = (int)   &(stackStart_2 + stackStart_2[ret_807AB64].a_0)->d_1;
 	int bla_2 = (int)   &((stackStart_2 [stackStart_2[ret_807AB64].a_0]).d_1);
 	int bla_3 = (int)   &(v10_5->d_1);
-	LEVEL_SPACE; printf_hide("bla=%.8x bla_1=%.8x bla_2=%.8x bla_3=%.8x\n", bla, bla_1, bla_2, bla_3);
+	LEVEL_SPACE; printf("bla=%.8x bla_1=%.8x bla_2=%.8x bla_3=%.8x\n", bla, bla_1, bla_2, bla_3);
 	
 	*((int16_t*)v8 + 1) = ret_807AB64; //a_plus_b_mod_fffd_plus_1;
 	int foo = (int) (v8+1);
 	int foo_1 = (int) &v8_2->b_0;
-	LEVEL_SPACE; printf_hide("foo=%.8x foo_1=%.8x\n", foo, foo_1);
-	LEVEL_SPACE; printf_hide("*((int16_t*)v8 + 1==%.8x) = ret_807AB64==%.8x;\n", ((int16_t*)v8 + 1), ret_807AB64);
-	LEVEL_SPACE; printf_hide("*((int16_t*)v8 + 1==%.8x) = ret_807AB64==%.8x;\n", &v8_2->a_1, ret_807AB64);
+	LEVEL_SPACE; printf("foo=%.8x foo_1=%.8x\n", foo, foo_1);
+	LEVEL_SPACE; printf("*((int16_t*)v8 + 1==%.8x) = ret_807AB64==%.8x;\n", ((int16_t*)v8 + 1), ret_807AB64);
+	LEVEL_SPACE; printf("*((int16_t*)v8 + 1==%.8x) = ret_807AB64==%.8x;\n", &v8_2->a_1, ret_807AB64);
 	
 	*((int16_t*)v9 + 1) = *((int16_t*)v6 + 6);
-	LEVEL_SPACE; printf_hide("*((int16_t*)v9 + 1==%.8x) = *((int16_t*)v6 + 6==%.8x);\n", ((int16_t*)v9 + 1), ((int16_t*)v6 + 6));
-	LEVEL_SPACE; printf_hide("*((int16_t*)v9 + 1==%.8x) = *((int16_t*)v6 + 6==%.8x);\n", &v9_2->a_1, &v6_2->d_0);
+	LEVEL_SPACE; printf("*((int16_t*)v9 + 1==%.8x) = *((int16_t*)v6 + 6==%.8x);\n", ((int16_t*)v9 + 1), ((int16_t*)v6 + 6));
+	LEVEL_SPACE; printf("*((int16_t*)v9 + 1==%.8x) = *((int16_t*)v6 + 6==%.8x);\n", &v9_2->a_1, &v6_2->d_0);
 	
 	*((int16_t*)v6 + 7) = ret_807AB64; //a_plus_b_mod_fffd_plus_1;	
-	LEVEL_SPACE; printf_hide("*((int16_t*)v6 + 7==%.8x) = ret_807AB64==%.8x;\n", ((int16_t*)v6 + 7), ret_807AB64);
-	LEVEL_SPACE; printf_hide("*((int16_t*)v6 + 7==%.8x) = ret_807AB64==%.8x;\n", &v6_2->d_1, ret_807AB64);
+	LEVEL_SPACE; printf("*((int16_t*)v6 + 7==%.8x) = ret_807AB64==%.8x;\n", ((int16_t*)v6 + 7), ret_807AB64);
+	LEVEL_SPACE; printf("*((int16_t*)v6 + 7==%.8x) = ret_807AB64==%.8x;\n", &v6_2->d_1, ret_807AB64);
 	
 	ret = ret_807AB64/*a_plus_b_mod_fffd_plus_1*/;
 	#endif
@@ -1047,21 +1074,21 @@ int sub_807B064(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1)
 	ret = ret_807AB64;
 	
 	
-	LEVEL_SPACE; printf_hide("v8: "); print_aStack(v8); printf_hide("\n");
-	LEVEL_SPACE; printf_hide("v9: "); print_aStack(v9); printf_hide("\n");
-	LEVEL_SPACE; printf_hide("v6: "); print_aStack(v6); printf_hide("\n");
+	LEVEL_SPACE; printf("v8: "); print_aStack(v8); printf("\n");
+	LEVEL_SPACE; printf("v9: "); print_aStack(v9); printf("\n");
+	LEVEL_SPACE; printf("v6: "); print_aStack(v6); printf("\n");
 	
 	#endif
 	
-	//LEVEL_SPACE; printf_hide("setKeyInArray: int sub_807B064 #####>>>>> ret=%.8x\n", ret); level--;
-	level--; LEVEL_SPACE; printf_hide("} ret=%.8x\n", ret);
+	//LEVEL_SPACE; printf("setKeyInArray: int sub_807B064 #####>>>>> ret=%.8x\n", ret); level--;
+	level--; LEVEL_SPACE; printf("} ret=%.8x\n", ret);
 	
 	return ret;
 }
 int sub_807B1E6(void *offsetData, int key)
 {
-	LEVEL_SPACE; printf_hide("int sub_807B1E6(void *offsetData=%.8x, int key=%.8x)\n", offsetData, key);
-	LEVEL_SPACE; printf_hide("{\n");
+	LEVEL_SPACE; printf("int sub_807B1E6(void *offsetData=%.8x, int key=%.8x)\n", offsetData, key);
+	LEVEL_SPACE; printf("{\n");
 	level++;
 	
 	int ret;
@@ -1076,8 +1103,8 @@ int sub_807B1E6(void *offsetData, int key)
 	ret = sub_807B064(offsetData, key, ((int)offsetData+key) % 0xFFFD + 1);
 	#endif
 	
-	//LEVEL_SPACE; printf_hide("setKeyInArray: int sub_807B1E6 #####>>>>> ret=%.8x\n", ret);
-	level--; LEVEL_SPACE; printf_hide("} ret=%.8x\n", ret);
+	//LEVEL_SPACE; printf("setKeyInArray: int sub_807B1E6 #####>>>>> ret=%.8x\n", ret);
+	level--; LEVEL_SPACE; printf("} ret=%.8x\n", ret);
 	return ret;
 }
 
@@ -1091,8 +1118,8 @@ int sub_807B1E6(void *offsetData, int key)
 
 int sub_807C71C(void *offsetData, int key)
 {
-	LEVEL_SPACE; printf_hide("int sub_807C71C(void *offsetData=%.8x, int key=%.8x)\n", offsetData, key);
-	LEVEL_SPACE; printf_hide("{\n");
+	LEVEL_SPACE; printf("int sub_807C71C(void *offsetData=%.8x, int key=%.8x)\n", offsetData, key);
+	LEVEL_SPACE; printf("{\n");
 	level++;
 	
 	int ret;
@@ -1118,11 +1145,11 @@ int sub_807C71C(void *offsetData, int key)
 	// THIS IS JUST CRASHING THE WHOLE SERVER
 	// IT NEEDS TO BE COMPILED WITH -masm=intel and it compiles, but crashing without execute THESE lines...
 	// BUG IN COMPILER
-	//printf_hide("VOR\n");
+	//printf("VOR\n");
 	/*asm(".intel_syntax noprefix\n");
 	asm("ret\n");
 	asm("ret\n");*/
-	//printf_hide("DANACH\n");
+	//printf("DANACH\n");
 	
 	#if 0
 		int *stackStart = (int*) 0x08297500;
@@ -1133,20 +1160,20 @@ int sub_807C71C(void *offsetData, int key)
 	#endif
 
 	#if 1
-		//LEVEL_SPACE; printf_hide("NEXT TRY\n"); // seen, works, commented out!
+		//LEVEL_SPACE; printf("NEXT TRY\n"); // seen, works, commented out!
 		aStack *stackStart = (aStack*) 0x08297500;
 		ret = stackStart[sub_807B1E6(offsetData, key)].a_0;
 	#endif
 	
 	#if 0
 		int sub = sub_807B1E6(offsetData, key);
-		printf_hide("sub_807B1E6(offsetData, key) = %.8x\n", sub);
+		printf("sub_807B1E6(offsetData, key) = %.8x\n", sub);
 		
-		printf_hide("(int *)0x08297500 = %.8x\n", (int *)0x08297500);
-		printf_hide("*(int *)0x08297500 = %.8x\n", *(int *)0x08297500);
+		printf("(int *)0x08297500 = %.8x\n", (int *)0x08297500);
+		printf("*(int *)0x08297500 = %.8x\n", *(int *)0x08297500);
 		
 		int ret = *(int*)((char *)0x08297500 + 16 * sub);
-		printf_hide("int sub_807C71C(void *offsetData, int key) = %.8x\n", ret);
+		printf("int sub_807C71C(void *offsetData, int key) = %.8x\n", ret);
 		
 		return ret;
 	#endif
@@ -1156,7 +1183,7 @@ int sub_807C71C(void *offsetData, int key)
 		return (int)(*stackStart)[sub_807B1E6(offsetData, key)].offsetData;
 	#endif
 	
-	level--; LEVEL_SPACE; printf_hide("} ret=%.8x\n", ret);
+	level--; LEVEL_SPACE; printf("} ret=%.8x\n", ret);
 	return ret;
 }
 
@@ -1164,8 +1191,8 @@ int sub_807C71C(void *offsetData, int key)
 
 int sub_807CB12(int v2, aStackElement *stackElement)
 {
-	LEVEL_SPACE; printf_hide(/*AT*/ "int sub_807CB12(int v2=%.8x, aStackElement *stackElement=%.8x(type=%d))\n", v2, stackElement, stackElement->type);
-	LEVEL_SPACE; printf_hide("{\n");
+	LEVEL_SPACE; printf(/*AT*/ "int sub_807CB12(int v2=%.8x, aStackElement *stackElement=%.8x(type=%d))\n", v2, stackElement, stackElement->type);
+	LEVEL_SPACE; printf("{\n");
 	level++;
 	
 	int ret;
@@ -1173,7 +1200,7 @@ int sub_807CB12(int v2, aStackElement *stackElement)
 	// CANT IT IT SELF TO WORK!
 	// SO IM USING THE BUILT-IN-FUNCTION
 	#if 1
-	LEVEL_SPACE; printf_hide("BUILTIN-FUNCTION\n");
+	LEVEL_SPACE; printf("BUILTIN-FUNCTION\n");
 	int (*tmp)(int v2, aStackElement *stack);
 	*(int *)&tmp = 0x0807CB12;
 	ret = tmp(v2, stackElement);
@@ -1192,7 +1219,7 @@ int sub_807CB12(int v2, aStackElement *stackElement)
 	#if 0 // ANOTHER TRY ANOTHER FAIL -.-
 		aStack *stackStart = (aStack *)0x8297500;
 		aStack *v3;
-		printf_hide("real <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+		printf("real <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 		
 		v3 = stackStart + v2;
 		//*(int*)(&stackStart[v2+2]) |=  stackElement->type;
@@ -1200,9 +1227,9 @@ int sub_807CB12(int v2, aStackElement *stackElement)
 		ret = (int)stackElement->offsetData;
 		*( ((int*)v3) + 1) = (int)stackElement->offsetData;
 		
-		//printf_hide("        stackStart + 2 == %.8x, %.8x\n", stackStart + 2, (int)stackStart + 2*16);
-		//printf_hide("    stackStart + 2 + 2 == %.8x, %.8x\n", stackStart + 2 + 2, (int)stackStart + 4*16);
-		//printf_hide("stackStart + 2 + 2 + 2 == %.8x, %.8x\n", stackStart + 2 + 2 + 2, (int)stackStart + 6*16);
+		//printf("        stackStart + 2 == %.8x, %.8x\n", stackStart + 2, (int)stackStart + 2*16);
+		//printf("    stackStart + 2 + 2 == %.8x, %.8x\n", stackStart + 2 + 2, (int)stackStart + 4*16);
+		//printf("stackStart + 2 + 2 + 2 == %.8x, %.8x\n", stackStart + 2 + 2 + 2, (int)stackStart + 6*16);
 	#endif
 	
 	// TYPE POINTER SIZE DIFFERENCE
@@ -1213,23 +1240,23 @@ int sub_807CB12(int v2, aStackElement *stackElement)
 	#if 0
 	{
 	int stackStart = (int )0x08297500; // 8297500 -> fffd0000
-	printf_hide("bla1=%.8x\n", stackStart + 4);
+	printf("bla1=%.8x\n", stackStart + 4);
 	}
 	{
 	int *stackStart = (int *)0x08297500; // 8297500 -> fffd0000
-	printf_hide("bla2=%.8x\n", stackStart + 4);
+	printf("bla2=%.8x\n", stackStart + 4);
 	}
 	#endif
 	
-	level--; LEVEL_SPACE; printf_hide("} ret=%.8x\n", ret);
+	level--; LEVEL_SPACE; printf("} ret=%.8x\n", ret);
 	
 	return ret;
 }
 
 int sub_80853B6(int key) // setKeyInArray
 {
-	LEVEL_SPACE; printf_hide("int sub_80853B6(int key=%.8p)\n", key);
-	LEVEL_SPACE; printf_hide("{\n");
+	LEVEL_SPACE; printf("int sub_80853B6(int key=%.8p)\n", key);
+	LEVEL_SPACE; printf("{\n");
 	level++;
 
 	// BEST BEST BEST BEST
@@ -1240,28 +1267,28 @@ int sub_80853B6(int key) // setKeyInArray
 	int *dword_83D8A98 = (int *)0x83D8A98;
 	aStackElement **scriptStack = (aStackElement**)0x83D8A90; // 83D8A90 -> 083d8da0
 	
-	//printf_hide("scriptStack = %.8x\n", scriptStack);
+	//printf("scriptStack = %.8x\n", scriptStack);
 	(*scriptStack)-=1;
 	
 	/*{
 	
 	aStackElement *scriptStack = *(aStackElement**)0x83D8A90;
-	printf_hide("scriptStack = %.8x\n", scriptStack);
+	printf("scriptStack = %.8x\n", scriptStack);
 	}*/
 	
 	(*dword_83D8A98)--;
 	
-	//printf_hide("key = %.8d\n", key);
-	//printf_hide("(*scriptStack)->offsetData = %.8d\n", (*scriptStack)->offsetData);
+	//printf("key = %.8d\n", key);
+	//printf("(*scriptStack)->offsetData = %.8d\n", (*scriptStack)->offsetData);
 	int v2, ret;
 	v2 = sub_807C71C((*scriptStack)->offsetData, key);
 	ret = sub_807CB12(v2, (*scriptStack)+1); // +1=FLOAT
 	
-	level--; LEVEL_SPACE; printf_hide("} ret=%.8x\n", ret);
+	level--; LEVEL_SPACE; printf("} ret=%.8x\n", ret);
 	return ret;
 	
 	
-	//printf_hide("blub\n");
+	//printf("blub\n");
 }
 
 /*
@@ -1280,7 +1307,7 @@ int cdecl_injected_closer()
 	int playerid;
 	
 	// print in debug-modus dynamically the parameters
-	//printf_hide("scriptengine> closer(function=%d, %d, %.2f, %.2f, %.2f)\n", function, playerid, velocity_x, velocity_y, velocity_z);
+	//printf("scriptengine> closer(function=%d, %d, %.2f, %.2f, %.2f)\n", function, playerid, velocity_x, velocity_y, velocity_z);
 
 	
 	#if 0
@@ -1350,7 +1377,7 @@ int cdecl_injected_closer()
 	
 	if (!stackGetParamInt(0, &function))
 	{
-		printf_hide("scriptengine> ERROR: closer(): param \"function\"[0] has to be an integer!\n");
+		printf("scriptengine> ERROR: closer(): param \"function\"[0] has to be an integer!\n");
 		return 0;
 	}
 
@@ -1428,7 +1455,7 @@ int cdecl_injected_closer()
 		helper += stackGetParamVector(3, toPoint);
 		if (helper != 3)
 		{
-			printf_hide("scriptengine> wrongs args for: int MATH_nearest_point_on_linesegment(from, to, toPoint, out_point)\n");
+			printf("scriptengine> wrongs args for: int MATH_nearest_point_on_linesegment(from, to, toPoint, out_point)\n");
 			return stackPushInt(0);
 		}
 		float out_point[3];
@@ -1451,14 +1478,14 @@ int cdecl_injected_closer()
 		helper += stackGetParamVector(2, to);
 		if (helper != 2)
 		{
-			printf_hide("scriptengine> wrongs args for: traceFraction(from, to)\n");
+			printf("scriptengine> wrongs args for: traceFraction(from, to)\n");
 			return stackPushInt(0);
 		}
 	
 		int (*signature)(float *outFraction, float *vectorFrom, float *vectorTo, float *nullVector0, float *nullVector1, int isZero, int mask);
 		*((int *)(&signature)) = 0x0805B894;
 		signature(&fraction, from, to, nullVector, nullVector, 0, 1/*MASK=CONTENTS_SOLID*/);
-		//printf_hide("traceFraction((%.2f, %.2f, %.2f), (%.2f, %.2f, %.2f)) = fraction=%.2f\n", from[0],from[1],from[2], to[0],to[1],to[2], fraction);
+		//printf("traceFraction((%.2f, %.2f, %.2f), (%.2f, %.2f, %.2f)) = fraction=%.2f\n", from[0],from[1],from[2], to[0],to[1],to[2], fraction);
 		return stackPushFloat(fraction);
 	}
 	
@@ -1485,15 +1512,14 @@ int cdecl_injected_closer()
 	#endif
 	
 	/*
-		201: int alloc_object_and_push_to_array()
+		201: int stackPushArray()
 		202: int stackSetKeyInArray(int precachedStringOffset)
-		203: push_previous_var_in_array_sub()
 	*/
 	switch (function)
 	{
 		case 201:
 		{
-			printf_hide("int alloc_object_and_push_to_array()\n");
+			printf("int stackPushArray()\n");
 			
 			//aStackElement *currentStack = (aStackElement *) 0x08297500;
 			
@@ -1527,17 +1553,12 @@ int cdecl_injected_closer()
 		}
 		case 202:
 		{
-			printf_hide("int stackSetKeyInArray(int precachedStringOffset)\n");
-			return stackReturnInt(1);
-		}
-		case 203:
-		{
-			printf_hide("push_previous_var_in_array_sub()\n");
+			printf("int stackSetKeyInArray(int precachedStringOffset)\n");
 			return stackReturnInt(1);
 		}
 		case 204:
 		{
-			printf_hide("script_spawnstruct_808523c()\n");
+			printf("script_spawnstruct_808523c()\n");
 			int ret;
 			
 			int (*tmp)();
@@ -1725,7 +1746,7 @@ typedef struct aSearchPath_t{
 
 			if (helper < 1)
 			{
-				printf_hide("scriptengine> wrongs args for: say(): at least 1 arg\n");
+				printf("scriptengine> wrongs args for: say(): at least 1 arg\n");
 				return stackReturnInt(0);
 			}
 
@@ -1922,43 +1943,43 @@ int cdecl_cod2_player_damage_new(
 	int gentities = 0x08716400;
 	int gentities_size = 560;
 	/*
-	printf_hide("#######################################\n");
-	//printf_hide("self=%d\n", (self - gentities) / gentities_size);
-	printf_hide("self=%d\n", self);
-	printf_hide("eInflictor=%.8x\n", eInflictor);
-	printf_hide("eAttacker=%.8x\n", eAttacker);
+	printf("#######################################\n");
+	//printf("self=%d\n", (self - gentities) / gentities_size);
+	printf("self=%d\n", self);
+	printf("eInflictor=%.8x\n", eInflictor);
+	printf("eAttacker=%.8x\n", eAttacker);
 	if (vDir == NULL)
-		printf_hide("no vDir\n");
+		printf("no vDir\n");
 	else
-		printf_hide("vDir=%.2f %.2f %.2f\n", vDir[0], vDir[1], vDir[2]);
+		printf("vDir=%.2f %.2f %.2f\n", vDir[0], vDir[1], vDir[2]);
 	
 	if (vPoint == NULL)
-		printf_hide("no vPoint\n");
+		printf("no vPoint\n");
 	else
-		printf_hide("vPoint=%.2f %.2f %.2f\n", vPoint[0], vPoint[1], vPoint[2]);
+		printf("vPoint=%.2f %.2f %.2f\n", vPoint[0], vPoint[1], vPoint[2]);
 		
-	printf_hide("damage=%d\n", iDamage);
+	printf("damage=%d\n", iDamage);
 	
-	printf_hide("FLAGS=%.8x\n", iDFlags);
-	printf_hide("means of death=%d\n", iMeansOfDeath);
-	printf_hide("hit loc=%.8X\n", iHitLoc);
-	printf_hide("psOffsetTime=%d\n", psOffsetTime);
+	printf("FLAGS=%.8x\n", iDFlags);
+	printf("means of death=%d\n", iMeansOfDeath);
+	printf("hit loc=%.8X\n", iHitLoc);
+	printf("psOffsetTime=%d\n", psOffsetTime);
 	*/
 	
 	int ret;
 	if (*(int *)(self + 344))
 	{
 		ret = sub_8101B40(self, eInflictor, eAttacker, vDir, vPoint, iDamage, iDFlags, iMeansOfDeath, iHitLoc, psOffsetTime);
-		//printf_hide("+++++++++++is player!+++++++++++\n");
+		//printf("+++++++++++is player!+++++++++++\n");
 	} else {
-		//printf_hide("+++++++++++is NOT a player!+++++++++++\n");
+		//printf("+++++++++++is NOT a player!+++++++++++\n");
 		//sub_8101B40(eAttacker/*self*/, eInflictor, eAttacker, vDir, vPoint, iDamage, iDFlags, iMeansOfDeath, iHitLoc, psOffsetTime);
 		ret = sub_8101B40(self, eInflictor, eAttacker, vDir, vPoint, iDamage, iDFlags, iMeansOfDeath, iHitLoc, psOffsetTime);
 	}
 	
 	
 	
-	//printf_hide("#######################################\n");
+	//printf("#######################################\n");
 	//return stackReturnInt(1);
 	return ret;
 }

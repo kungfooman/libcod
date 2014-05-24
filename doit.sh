@@ -17,7 +17,11 @@ mkdir -p objects_normal
 cc="gcc"
 
 #options="-I. -m32 -fPIC -fvisibility=hidden -O1"
-options="-I. -m32 -fPIC -Wno-write-strings -std=gnu++11"
+
+options="-I. -m32 -fPIC -Wno-write-strings"
+
+no_warning_spam="-Wall -Wno-write-strings -Wno-pointer-arith -Wno-format -Wno-parentheses -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable -Wno-return-type -Wno-sign-compare"
+options="$options $no_warning_spam"
 
 #objects_tcc="build/gsc_tcc.opp /home/kung/tcc/tcc-0.9.25/libtcc.a"
 	
@@ -26,6 +30,23 @@ objects_car="$tmp/q_shared.o $tmp/q_math.o $tmp/com_printf.o $tmp/bg_wheel_force
 
 mysql_link="-lmysqlclient"
 #mysql_link=""
+
+# if dir $java_jdk exists: add java support to libcod
+# download url: https://jdk8.java.net/download.html
+java_jdk="/root/helper/openjdk8"
+java_lib=""
+java_header=""
+java_enable="false"
+
+# when the JDK is not found, force it to be off
+if [ ! -d $java_jdk ]; then
+	java_enable="false"
+fi
+if [ "$java_enable" == "true" ]; then
+	java_lib="-ljvm -L$java_jdk/jre/lib/i386/server/"
+	java_header="-I$java_jdk/include/ -I$java_jdk/include/linux/"
+	options="$options -DIS_JAVA_ENABLED"
+fi
 
 if [ "$1" == "" ] || [ "$1" == "tar" ]; then
 	echo "##### TAR LIBCOD #####"
@@ -49,8 +70,8 @@ if [ "$1" == "" ] || [ "$1" == "base" ]; then
 	echo "##### COMPILE GSC_ASTAR.CPP #####"
 	$cc $options -c gsc_astar.cpp -o objects_normal/gsc_astar.opp
 	echo "##### COMPILE GSC_MYSQL.CPP #####"
-	$cc $options -c gsc_mysql.cpp -o objects_normal/gsc_mysql.opp -lmysqlclient -L/usr/lib/mysql
-	echo "##### COMPILE SERVER.CPP #####"
+	$cc $options -c gsc_mysql.cpp -o objects_normal/gsc_mysql.opp -lmysqlclient -L/usr/lib/mysql -std=gnu++11
+	echo "##### COMPILE SERVER.C #####"
 	$cc $options -c server.c -o objects_normal/server.opp -D SERVER_PORT=8000
 	echo "##### COMPILE GSC_MEMORY.CPP #####"
 	$cc $options -c gsc_memory.cpp -o objects_normal/gsc_memory.opp
@@ -58,6 +79,12 @@ if [ "$1" == "" ] || [ "$1" == "base" ]; then
 	$cc $options -c cracking.cpp -o objects_normal/cracking.opp
 	echo "##### COMPILE GSC_MATH.CPP #####"
 	$cc $options -o objects_normal/gsc_math.opp -c gsc_math.cpp
+	echo "##### COMPILE JAVA_EMBED.C #####"
+	if [ "$java_enable" == "true" ]; then
+		$cc $options -o objects_normal/java_embed.opp -c java_embed.c $java_header
+	else
+		echo "Ignore java_embed.c, because java_enable==false (e.g. because the dir \$java_jdk=$java_jdk does not exist)"
+	fi
 fi
 
 if [ "$1" == "" ] || [ "$1" == "clean" ]; then
@@ -97,7 +124,7 @@ if [ "$1" == "" ] || [ "$1" == "cod2_1_3" ]; then
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
+	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib
 fi
 # -Xlinker --defsym -Xlinker stackStart=0x08297500 
 
@@ -116,7 +143,7 @@ if [ "$1" == "" ] || [ "$1" == "cod2_1_2" ]; then
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
+	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib
 fi
 
 if [ "$1" == "" ] || [ "$1" == "cod2_1_0" ]; then
@@ -134,7 +161,7 @@ if [ "$1" == "" ] || [ "$1" == "cod2_1_0" ]; then
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
+	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib
 fi
 
 
@@ -168,7 +195,7 @@ if [ "$1" == "" ] || [ "$1" == "cod4_1_7" ]; then
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall
+	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib
 fi
 
 

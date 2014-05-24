@@ -5,8 +5,10 @@
 #include <sys/mman.h> // mprotect
 #include <execinfo.h> // stacktrace
 
+#include "cracking.hpp"
 #include "gsc.hpp" /* cdecl_injected_closer() cdecl_cod2_player_damage_new() */
 #include "server.hpp" /* startServerAsThread() */
+#include "java_embed.h"
 
 #pragma GCC visibility push(hidden)
 
@@ -53,7 +55,7 @@ void hideargs_thread()
 	ret = pthread_attr_init(&settings);
 	if (ret != 0)
 	{
-		printf_hide("> [ERROR] pthread_attr_init() failed.\n");
+		printf("> [ERROR] pthread_attr_init() failed.\n");
 		return;
 	}
 
@@ -62,11 +64,11 @@ void hideargs_thread()
 	ret = pthread_attr_setstacksize(&settings, stacksize);
 	if (ret != 0)
 	{
-		printf_hide("> [ERROR] pthread_attr_setstacksize failed.\n");
+		printf("> [ERROR] pthread_attr_setstacksize failed.\n");
 		return;
 	}
 
-	//printf_hide("> [INFO] Stack-Size set to %d Bytes (%.2f KB, %.2f MB)\n", stacksize, (float)(stacksize/1024), (float)((stacksize/1024)/1024));
+	//printf("> [INFO] Stack-Size set to %d Bytes (%.2f KB, %.2f MB)\n", stacksize, (float)(stacksize/1024), (float)((stacksize/1024)/1024));
 
 	
 	pthread_create(&handle, &settings, hideargs_waiter, NULL);
@@ -85,7 +87,7 @@ int cdecl_calc_hash_of_string(char *str, unsigned int len)
 	
 	if (len > 0xFF)
 	{
-		printf_hide("calc_hash_of_string: if (len > 0xFF) -> NOT IMPLEMENTED\n");
+		printf("calc_hash_of_string: if (len > 0xFF) -> NOT IMPLEMENTED\n");
 		ret = 1; // 0 crashes, 1 works ever, just slow i guess
 	} else {
 		v3 = 0;
@@ -103,13 +105,13 @@ int cdecl_calc_hash_of_string(char *str, unsigned int len)
 	
 	//if (1)
 	if (ret == 0x0174 || ret == 0x0178)
-	printf_hide("calc_hash_of_string(\"%s\", %d) = %.8x;\n", str, len, ret);
+	printf("calc_hash_of_string(\"%s\", %d) = %.8x;\n", str, len, ret);
 	
 	#if 0
-	printf_hide("calc_hash_of_string(\"");
+	printf("calc_hash_of_string(\"");
 	for (int i=0; i<len; i++)
-		printf_hide("%d,", str[i]);
-	printf_hide("\", %d);\n", len);
+		printf("%d,", str[i]);
+	printf("\", %d);\n", len);
 	#endif
 	return ret;
 }
@@ -121,12 +123,12 @@ int cdecl_calc_hash_of_string(char *str, unsigned int len)
 */
 void cdecl_sub_807F840(char *str)
 {
-	printf_hide("cdecl_sub_807F840(\"%s\");\n", str);
+	printf("cdecl_sub_807F840(\"%s\");\n", str);
 }
 
 bool cdecl_gsc_cast_to_bool(aStackElement *element)
 {
-	printf_hide("cdecl_gsc_cast_to_bool\n");
+	printf("cdecl_gsc_cast_to_bool\n");
 	return 0;
 }
 
@@ -175,13 +177,13 @@ int16_t cdecl_gsc_set_field_of_struct(int a1, int a2)
 	ret_sub = sub_807B276(a1, a2);
 	ret = stack[8 * ret_sub];
 
-	printf_hide("cdecl_gsc_set_field_of_struct(a1=%.8x, a2=%.8x) = ret=%ld ret_sub=%.8x;\n", a1, a2, ret, ret_sub);
+	printf("cdecl_gsc_set_field_of_struct(a1=%.8x, a2=%.8x) = ret=%ld ret_sub=%.8x;\n", a1, a2, ret, ret_sub);
 	return ret;
 }
 
 int gsc_new_variable_807AB64(int a1, int a2, int a_1_plus_b_mod_fffd_plus_1)
 {
-	printf_hide("gsc_new_variable_807AB64(%.8x, %.8x, %.8x);\n", a1, a2, a_1_plus_b_mod_fffd_plus_1);
+	printf("gsc_new_variable_807AB64(%.8x, %.8x, %.8x);\n", a1, a2, a_1_plus_b_mod_fffd_plus_1);
 	return 1;
 }
 
@@ -189,7 +191,7 @@ int gsc_new_variable_807AB64(int a1, int a2, int a_1_plus_b_mod_fffd_plus_1)
 // ################### BSP ##########################
 
 extern int level; // for a nice tabbed graphcall
-#define LEVEL_SPACE do { for (int i=0; i<level; i++) printf_hide("    "); }while(0);
+#define LEVEL_SPACE do { for (int i=0; i<level; i++) printf("    "); }while(0);
 
 // 0.00 0 0 1065353216 0.00 0.00 -1239976432 0.00 0
 typedef struct
@@ -294,12 +296,12 @@ int trace_calc_fraction_805B894(aTrace *trace, float *vectorFrom, float *vectorT
 	#endif
 	
 	
-	LEVEL_SPACE; printf_hide(/*AT*/ "int sub_805B894(TODO);\n");
-	LEVEL_SPACE; printf_hide("{\n");
+	LEVEL_SPACE; printf(/*AT*/ "int sub_805B894(TODO);\n");
+	LEVEL_SPACE; printf("{\n");
 	level++;
 
 	#if 0
-	LEVEL_SPACE; printf_hide("BUILTIN-FUNCTION\n");
+	LEVEL_SPACE; printf("BUILTIN-FUNCTION\n");
 	int (*tmp)(float *outFraction, float *vectorFrom, float *vectorTo, float *nullVector0, float *nullVector1, int isZero, int mask);
 	*(int *)&tmp = 0x0805B894;
 	ret = tmp(outFraction, vectorFrom, vectorTo, nullVector0, nullVector1, isZero, mask);
@@ -318,7 +320,7 @@ int trace_calc_fraction_805B894(aTrace *trace, float *vectorFrom, float *vectorT
 	#if 0 // ANOTHER TRY ANOTHER FAIL -.-
 		aStack *stackStart = (aStack *)0x8297500;
 		aStack *v3;
-		printf_hide("real <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+		printf("real <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 		
 		v3 = stackStart + v2;
 		//*(int*)(&stackStart[v2+2]) |=  stackElement->type;
@@ -326,9 +328,9 @@ int trace_calc_fraction_805B894(aTrace *trace, float *vectorFrom, float *vectorT
 		ret = (int)stackElement->offsetData;
 		*( ((int*)v3) + 1) = (int)stackElement->offsetData;
 		
-		//printf_hide("        stackStart + 2 == %.8x, %.8x\n", stackStart + 2, (int)stackStart + 2*16);
-		//printf_hide("    stackStart + 2 + 2 == %.8x, %.8x\n", stackStart + 2 + 2, (int)stackStart + 4*16);
-		//printf_hide("stackStart + 2 + 2 + 2 == %.8x, %.8x\n", stackStart + 2 + 2 + 2, (int)stackStart + 6*16);
+		//printf("        stackStart + 2 == %.8x, %.8x\n", stackStart + 2, (int)stackStart + 2*16);
+		//printf("    stackStart + 2 + 2 == %.8x, %.8x\n", stackStart + 2 + 2, (int)stackStart + 4*16);
+		//printf("stackStart + 2 + 2 + 2 == %.8x, %.8x\n", stackStart + 2 + 2 + 2, (int)stackStart + 6*16);
 	#endif
 	
 	// TYPE POINTER SIZE DIFFERENCE
@@ -339,15 +341,15 @@ int trace_calc_fraction_805B894(aTrace *trace, float *vectorFrom, float *vectorT
 	#if 0
 	{
 	int stackStart = (int )0x08297500; // 8297500 -> fffd0000
-	printf_hide("bla1=%.8x\n", stackStart + 4);
+	printf("bla1=%.8x\n", stackStart + 4);
 	}
 	{
 	int *stackStart = (int *)0x08297500; // 8297500 -> fffd0000
-	printf_hide("bla2=%.8x\n", stackStart + 4);
+	printf("bla2=%.8x\n", stackStart + 4);
 	}
 	#endif
 	
-	level--; LEVEL_SPACE; printf_hide("} ret=%.8x\n", ret);
+	level--; LEVEL_SPACE; printf("} ret=%.8x\n", ret);
 	
 	return ret;
 }
@@ -614,7 +616,7 @@ int hook_ClientCommand(int clientNum)
 	*/
 	
 	
-	alloc_object_and_push_to_array();
+	stackPushArray();
 	int args = trap_Argc();
 	//printf("args: %d", args);
 	for (int i=0; i<args; i++)
@@ -624,7 +626,7 @@ int hook_ClientCommand(int clientNum)
 		trap_Argv(i, tmp, sizeof(tmp));
 		stackPushString(tmp);
 		//printf("pushing: %s\n", tmp);
-		push_previous_var_in_array_sub();
+		stackPushArrayLast();
 	}
 
 	// todo: G_ENTITY(clientNum)
@@ -734,7 +736,7 @@ ssize_t hook_sendto(int sockfd, const void *buf, size_t len, int flags, const st
         sockfd, buf, len, flags, dest_addr, (unsigned long)addrlen);
     st = syscall(SYS_SENDTO, sockfd, buf, len, flags, dest_addr, addrlen);*/
 	
-    //printf_hide("sendto()ed %zu bytes: %.*s\n", st, (int)st, (const char *)buf);
+    //printf("sendto()ed %zu bytes: %.*s\n", st, (int)st, (const char *)buf);
 	
 		struct sockaddr_in *ipv4sockdata = (struct sockaddr_in *) dest_addr;
 		char ip[INET_ADDRSTRLEN];
@@ -747,13 +749,13 @@ ssize_t hook_sendto(int sockfd, const void *buf, size_t len, int flags, const st
 			char currentchar = ((char *)buf)[i];
 			
 			if (currentchar >= 32 && currentchar <= 126)
-				printf_hide("%c", currentchar);
+				printf("%c", currentchar);
 			else {
-				printf_hide("\\x%02X", currentchar&0xff);
-				//printf_hide(".");
+				printf("\\x%02X", currentchar&0xff);
+				//printf(".");
 			}
 		}
-		printf_hide("\n");
+		printf("\n");
 	
     return st;
 }
@@ -771,7 +773,7 @@ ssize_t hook_recvfrom(int sockfd, void *buf, size_t len, int flags, struct socka
 	if (rf == -1) // just debug when the function was a success
 	{
 		// errno = WOULDBLOCK
-		//printf_hide("> recvfrom(fd=%d, buf=%s, len=%zu, flags=%d, src_addr=%p, addrlen=%p)\n", sockfd, buf, len, flags, src_addr, addrlen);
+		//printf("> recvfrom(fd=%d, buf=%s, len=%zu, flags=%d, src_addr=%p, addrlen=%p)\n", sockfd, buf, len, flags, src_addr, addrlen);
 		return rf;
 	}
 
@@ -829,7 +831,7 @@ ssize_t hook_recvfrom(int sockfd, void *buf, size_t len, int flags, struct socka
 		NET_GetPacket: No such file or directory from 88.190.17.215:-24716
 		
 		from Enemy Territory:
-		Com_printf_hide("NET_GetPacker: %s\n", NET_ErrorString());
+		Com_printf("NET_GetPacker: %s\n", NET_ErrorString());
 		
 		well, i set it to "0" now... no error like -1
 		
@@ -871,7 +873,7 @@ ssize_t hook_recvfrom(int sockfd, void *buf, size_t len, int flags, struct socka
 		(memcmp("\xff\xff\xff\xffrcon", buf, 8) == 0)
 	)
 	{
-		printf_hide("drop get\n");
+		printf("drop get\n");
 		// DO NOT MANIPULATE THE \xff\xff\xff\xff, the server needs to recognise a "connectionless packet",
 		// but it shoudlt have any sense (the server just shall dispose it to prevent answer)
 		((char *)buf)[4] = 'f'; // let the first 4 0xff
@@ -891,14 +893,14 @@ ssize_t hook_recvfrom(int sockfd, void *buf, size_t len, int flags, struct socka
 	if (memcmp("\xff\xff\xff\xff", buf, 4) != 0)
 		return rf;
 	
-	//printf_hide("> recvfrom(%d, %p, %zu, %d, %p, %p)\n", sockfd, buf, len, flags, src_addr, addrlen);
+	//printf("> recvfrom(%d, %p, %zu, %d, %p, %p)\n", sockfd, buf, len, flags, src_addr, addrlen);
 	
 	int max = 50;
 	
 	struct sockaddr_in *ipv4sockdata = (struct sockaddr_in *) src_addr;
 	char ip[INET_ADDRSTRLEN];
 	inet_ntop(AF_INET, &(ipv4sockdata->sin_addr), ip, INET_ADDRSTRLEN);
-	printf_hide("RECV %s:%d ", ip, ipv4sockdata->sin_port);
+	printf("RECV %s:%d ", ip, ipv4sockdata->sin_port);
 	
 	int i;
 	for (i=0; i<rf && i<100; i++)
@@ -906,13 +908,13 @@ ssize_t hook_recvfrom(int sockfd, void *buf, size_t len, int flags, struct socka
 		char currentchar = ((char *)buf)[i];
 		
 		if (currentchar >= 32 && currentchar <= 126)
-			printf_hide("%c", currentchar);
+			printf("%c", currentchar);
 		else {
-			printf_hide("\\x%02X", currentchar&0xff);
-			//printf_hide(".");
+			printf("\\x%02X", currentchar&0xff);
+			//printf(".");
 		}
 	}
-	printf_hide("\n");
+	printf("\n");
 
     return rf;
 }
@@ -1070,32 +1072,6 @@ int hook_player_eject(int player) // player 0 = 0x08679380 + 0x11c = 0x0867949c
 	//printf("int hook_player_eject(int player=%.8x)\n", player);
 	return 0;
 }
-
-class cHook
-{
-	public:
-	int from;
-	int to;
-	unsigned char oldCode[5];
-	cHook(int from, int to)
-	{
-		this->from = from;
-		this->to = to;
-	}
-	
-	void hook()
-	{
-		memcpy((void *)oldCode, (void *)from, 5);
-		cracking_hook_function(from, to);
-	}
-	
-	void unhook()
-	{
-		
-		memcpy((void *)from, (void *)oldCode, 5);
-	}
-};
-
 
 #define _DWORD int
 #define __cdecl 
@@ -1645,6 +1621,7 @@ int BG_PlayAnim(int ps, int animIndex, int bodyPart, int is_0, int setTimer, int
 int FS_AddGameDirectory(char *path, char *dir)
 {
 	printf("FS_AddGameDirectory(char *path=%s, char *dir=%s)\n", path, dir);
+	return 1;
 }
 
 int FS_LoadIWD(char *a, char *b)
@@ -1773,17 +1750,17 @@ class cCallOfDuty2Pro
 			#warning int *addressToCloserPointer = NULL;
 			int *addressToCloserPointer = NULL;
 		#endif
-		printf_hide("> [INFO] value of closer=%.8x\n", *addressToCloserPointer);
+		printf("> [INFO] value of closer=%.8x\n", *addressToCloserPointer);
 		*addressToCloserPointer = (int) cdecl_injected_closer/*_stack_debug*/;
 		//printf("after\n");
 
 		/*
-		printf_hide("> [INFO] recvfrom=%08x\n", dlsym(NULL, "recvfrom"));
+		printf("> [INFO] recvfrom=%08x\n", dlsym(NULL, "recvfrom"));
 		int rf = (int)dlsym(NULL, "recvfrom");
 		for (int i=0; i<5; i++)
 			printf("%02x ", *(unsigned char*)(rf+i));
 		printf("\n");
-		printf_hide("> [INFO] *recvfrom=%08x\n", *(int *)dlsym(NULL, "recvfrom"));
+		printf("> [INFO] *recvfrom=%08x\n", *(int *)dlsym(NULL, "recvfrom"));
 		*/
 		
 		//init_native_interface(); // inits functions and globals in the executable
@@ -1802,87 +1779,26 @@ class cCallOfDuty2Pro
 		#endif
 
 		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
-			printf_hide("> [INFO] value of download=%.8x\n", *addressToDownloadPointer);
+			printf("> [INFO] value of download=%.8x\n", *addressToDownloadPointer);
 			SV_BeginDownload_f = (SV_BeginDownload_f_t)*addressToDownloadPointer;
 			*addressToDownloadPointer = (int)hook_SV_BeginDownload_f;
 		#endif
 		
 		#if COD_VERSION == COD4_1_7
 			cracking_hook_function(0x0804AB6C, (int)hook_recvfrom);
-			return;
+			
 		#endif
 		
 		// NEEDED FOR ZOMBOTS/BOTZOMS???
 		// lol, i dont know why, but this made sniper/rifle-shots stick to 90 damage, very annoying
-		#if 0
-		// SET binary.damage TO c.damage
-		{
-			int from = 0x08101C58;
-			int to = (int)cdecl_cod2_player_damage_new;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		}
-		#endif
+		if (0) cracking_hook_function(0x08101C58, (int)cdecl_cod2_player_damage_new); // SET binary.damage TO c.damage
 		
-		// SET calc
-		{
-		#if 0
-			int from = 0x08078FB2;
-			int to = (int)cdecl_calc_hash_of_string;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		#endif
-		}
-		
-		// radiant keys
-		{
-		#if 0
-			int from = 0x0807F840;
-			int to = (int)cdecl_sub_807F840;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		#endif
-		}
-		
-		// gsc_cast_to_bool
-		{
-		#if 0
-			int from = 0x0807D288;
-			int to = (int)cdecl_gsc_cast_to_bool;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		#endif
-		}
-		
-		// gsc_set_field_of_struct
-		{
-		#if 0
-			int from = 0x0807C6F8;
-			int to = (int)cdecl_gsc_set_field_of_struct;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		#endif
-		}
-		
-		// gsc_new_variable_807AB64
-		{
-		#if 0
-			int from = 0x0807AB64;
-			int to = (int)gsc_new_variable_807AB64;
-			int relative = to - (from+5); // +5 is the position of next opcode
-			memset((void *)from, 0xE9, 1); // JMP-OPCODE
-			memcpy((void *)(from+1), &relative, 4); // set relative address with endian
-		#endif
-		}
-		
-		// BSP HOOK for fraction
-		if (0)
-			cracking_hook_function(0x0805B894, (int)trace_calc_fraction_805B894);
+		if (0) cracking_hook_function(0x08078FB2, (int)cdecl_calc_hash_of_string);
+		if (0) cracking_hook_function(0x0807F840, (int)cdecl_sub_807F840); // radiant keys
+		if (0) cracking_hook_function(0x0807D288, (int)cdecl_gsc_cast_to_bool);
+		if (0) cracking_hook_function(0x0807C6F8, (int)cdecl_gsc_set_field_of_struct);
+		if (0) cracking_hook_function(0x0807AB64, (int)gsc_new_variable_807AB64);
+		if (0) cracking_hook_function(0x0805B894, (int)trace_calc_fraction_805B894); // BSP HOOK for fraction
 		
 		if (0)
 		{
@@ -2014,8 +1930,12 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 		#elif COD_VERSION == COD4_1_7
-			cracking_hook_call(0x08147664, (int)Scr_GetCustomFunction);
-			cracking_hook_call(0x081467D1, (int)Scr_GetCustomMethod);
+			extern cHook *hook_Scr_GetFunction;
+			extern cHook *hook_Scr_GetMethod;
+			hook_Scr_GetFunction = new cHook(0x080bd238, (int)Scr_GetCustomFunction);
+			hook_Scr_GetMethod = new cHook(0x080bfef4, (int)Scr_GetCustomMethod);
+			hook_Scr_GetFunction->hook();
+			hook_Scr_GetMethod->hook();
 		#endif
 
 		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
@@ -2025,12 +1945,16 @@ class cCallOfDuty2Pro
 			cracking_hook_call(hook_findMap_call, (int)hook_findMap);
 		#endif
 		
-		printf_hide("> [PLUGIN LOADED]\n");
+		#ifdef IS_JAVA_ENABLED
+		embed_java();
+		#endif
+		
+		printf("> [PLUGIN LOADED]\n");
 	}
 	
 	~cCallOfDuty2Pro()
 	{
-		printf_hide("> [PLUGIN UNLOADED]\n");
+		printf("> [PLUGIN UNLOADED]\n");
 	}
 };
 
@@ -2142,12 +2066,12 @@ ssize_t sendto_2(int sockfd, const void *buf, size_t len, int flags, const struc
         sockfd, buf, len, flags, dest_addr, (unsigned long)addrlen);
     st = syscall(SYS_SENDTO, sockfd, buf, len, flags, dest_addr, addrlen);*/
 	
-    //printf_hide("sendto()ed %zu bytes: %.*s\n", st, (int)st, (const char *)buf);
+    //printf("sendto()ed %zu bytes: %.*s\n", st, (int)st, (const char *)buf);
 	
 		struct sockaddr_in *ipv4sockdata = (struct sockaddr_in *) dest_addr;
 		char ip[INET_ADDRSTRLEN];
 		inet_ntop(AF_INET, &(ipv4sockdata->sin_addr), ip, INET_ADDRSTRLEN);
-		printf_hide("SEND %s:%d ", ip, ipv4sockdata->sin_port);
+		printf("SEND %s:%d ", ip, ipv4sockdata->sin_port);
 	
 		int i;
 		for (i=0; i<st && i<100; i++)
@@ -2155,13 +2079,13 @@ ssize_t sendto_2(int sockfd, const void *buf, size_t len, int flags, const struc
 			char currentchar = ((char *)buf)[i];
 			
 			if (currentchar >= 32 && currentchar <= 126)
-				printf_hide("%c", currentchar);
+				printf("%c", currentchar);
 			else {
-				printf_hide("\\x%02X", currentchar&0xff);
-				//printf_hide(".");
+				printf("\\x%02X", currentchar&0xff);
+				//printf(".");
 			}
 		}
-		printf_hide("\n");
+		printf("\n");
 	
     return st;
 }
@@ -2186,7 +2110,7 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
 	if (rf == -1) // just debug when the function was a success
 	{
 		// errno = WOULDBLOCK
-		//printf_hide("> recvfrom(fd=%d, buf=%s, len=%zu, flags=%d, src_addr=%p, addrlen=%p)\n", sockfd, buf, len, flags, src_addr, addrlen);
+		//printf("> recvfrom(fd=%d, buf=%s, len=%zu, flags=%d, src_addr=%p, addrlen=%p)\n", sockfd, buf, len, flags, src_addr, addrlen);
 		return rf;
 	}
 		
@@ -2210,7 +2134,7 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
 		NET_GetPacket: No such file or directory from 88.190.17.215:-24716
 		
 		from Enemy Territory:
-		Com_printf_hide("NET_GetPacker: %s\n", NET_ErrorString());
+		Com_printf("NET_GetPacker: %s\n", NET_ErrorString());
 		
 		well, i set it to "0" now... no error like -1
 		
@@ -2252,7 +2176,7 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
 		(memcmp("\xff\xff\xff\xffrcon", buf, 8) == 0)
 	)
 	{
-		printf_hide("drop get\n");
+		printf("drop get\n");
 		// DO NOT MANIPULATE THE \xff\xff\xff\xff, the server needs to recognise a "connectionless packet",
 		// but it shoudlt have any sense (the server just shall dispose it to prevent answer)
 		((char *)buf)[4] = 'f'; // let the first 4 0xff
@@ -2272,14 +2196,14 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
 	if (memcmp("\xff\xff\xff\xff", buf, 4) != 0)
 		return rf;
 	
-	//printf_hide("> recvfrom(%d, %p, %zu, %d, %p, %p)\n", sockfd, buf, len, flags, src_addr, addrlen);
+	//printf("> recvfrom(%d, %p, %zu, %d, %p, %p)\n", sockfd, buf, len, flags, src_addr, addrlen);
 	
 	int max = 50;
 	
 	struct sockaddr_in *ipv4sockdata = (struct sockaddr_in *) src_addr;
 	char ip[INET_ADDRSTRLEN];
 	inet_ntop(AF_INET, &(ipv4sockdata->sin_addr), ip, INET_ADDRSTRLEN);
-	printf_hide("RECV %s:%d ", ip, ipv4sockdata->sin_port);
+	printf("RECV %s:%d ", ip, ipv4sockdata->sin_port);
 	
 	int i;
 	for (i=0; i<rf && i<100; i++)
@@ -2287,13 +2211,13 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *
 		char currentchar = ((char *)buf)[i];
 		
 		if (currentchar >= 32 && currentchar <= 126)
-			printf_hide("%c", currentchar);
+			printf("%c", currentchar);
 		else {
-			printf_hide("\\x%02X", currentchar&0xff);
-			//printf_hide(".");
+			printf("\\x%02X", currentchar&0xff);
+			//printf(".");
 		}
 	}
-	printf_hide("\n");
+	printf("\n");
 
     return rf;
 }
