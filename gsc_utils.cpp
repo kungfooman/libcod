@@ -700,6 +700,20 @@ void gsc_utils_ExecuteString() {
 	stackPushInt(1);
 }
 
+void gsc_utils_sendgameservercommand() {
+	int clientNum;
+	char *message;
+
+	if ( ! stackGetParams("is", &clientNum, &message)) {
+		stackPushUndefined();
+		return;
+	}
+
+	SV_GameSendServerCommand(clientNum, 0, message);
+
+	stackPushInt(1);
+}
+
 void gsc_utils_scandir() {
 	char *dirname;
 	if ( ! stackGetParams("s", &dirname)) {

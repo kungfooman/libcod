@@ -149,6 +149,18 @@ typedef int (*FS_LoadDir_t)(char *path, char *dir);
 	static int hook_AuthorizeState_call = (int)NULL;
 #endif
 
+typedef int (*SV_GameSendServerCommand_t)(int clientNum, signed int a2, const char *msg);
+#if COD_VERSION == COD2_1_0
+	static SV_GameSendServerCommand_t SV_GameSendServerCommand = (SV_GameSendServerCommand_t)0x0808FE96;
+#elif COD_VERSION == COD2_1_2
+	static SV_GameSendServerCommand_t SV_GameSendServerCommand = (SV_GameSendServerCommand_t)0x080916A6;
+#elif COD_VERSION == COD2_1_3
+	static SV_GameSendServerCommand_t SV_GameSendServerCommand = (SV_GameSendServerCommand_t)0x080917AA;
+#else
+	#warning static SV_GameSendServerCommand_t SV_GameSendServerCommand = NULL;
+	static SV_GameSendServerCommand_t SV_GameSendServerCommand = (SV_GameSendServerCommand_t)NULL;
+#endif
+
 typedef int (*SV_BeginDownload_f_t)(int a1);
 static SV_BeginDownload_f_t SV_BeginDownload_f = (SV_BeginDownload_f_t)NULL;
 

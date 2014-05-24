@@ -27,6 +27,7 @@ void gsc_utils_getType();
 void gsc_utils_stringToFloat();
 void gsc_utils_rundll();
 void gsc_utils_ExecuteString();
+void gsc_utils_sendgameservercommand();
 void gsc_utils_scandir();
 
 void gsc_add_language();
