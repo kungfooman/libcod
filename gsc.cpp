@@ -200,7 +200,7 @@ Scr_Function scriptFunctions[] = {
 	{"stringToFloat"               , gsc_utils_stringToFloat               , 0},
 	{"rundll"                      , gsc_utils_rundll                      , 0},
 	{"Cmd_ExecuteString"           , gsc_utils_ExecuteString               , 0},
-    {"sendGameServerCommand"	   , gsc_utils_sendgameservercommand       , 0},
+	{"sendGameServerCommand"	   , gsc_utils_sendgameservercommand       , 0},
 	{"scandir"                     , gsc_utils_scandir                     , 0},
 	{"fopen"                       , gsc_utils_fopen                       , 0},
 	{"fread"                       , gsc_utils_fread                       , 0},
