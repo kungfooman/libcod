@@ -99,56 +99,64 @@ int stackPrintParam(int param) {
 		case STACK_STRING:
 			char *str;
 			stackGetParamString(param, &str); // no error checking, since we know it's a string
-			printf("%s", str);
+			Com_Printf("%s", str);
 			return 1;
 		case STACK_VECTOR:
 			float vec[3];
 			stackGetParamVector(param, vec);
-			printf("(%.2f, %.2f, %.2f)", vec[0], vec[1], vec[2]);
+			Com_Printf("(%.2f, %.2f, %.2f)", vec[0], vec[1], vec[2]);
 			return 1;
 		case STACK_FLOAT:
 			float tmp_float;
 			stackGetParamFloat(param, &tmp_float);
-			printf("%.3f", tmp_float); // need a way to define precision
+			Com_Printf("%.3f", tmp_float); // need a way to define precision
 			return 1;
 		case STACK_INT:
 			int tmp_int;
 			stackGetParamInt(param, &tmp_int);
-			printf("%d", tmp_int);
+			Com_Printf("%d", tmp_int);
 			return 1;
 	}
-	printf("(%s)", stackGetParamTypeAsString(param));
+	Com_Printf("(%s)", stackGetParamTypeAsString(param));
 	return 0;
 }
 
 void gsc_utils_printf() {
 	char *str;
 	if ( ! stackGetParams("s", &str)) {
-		printf("scriptengine> WARNING: printf undefined argument!\n");
+		Com_Printf("%s", "scriptengine> WARNING: printf undefined argument!\n");
 		stackPushUndefined();
 		return;
 	}
 	
-	int param = 1; // maps to first %
-	int len = strlen(str);
+	char * pch = strstr (str, "%%"); 
+	
+	if(pch != NULL) // found %%
+	{
+		int param = 1; // maps to first %
+		int len = strlen(str);
 
-	for (int i=0; i<len; i++) {
-		if (str[i] == '%')
-		{
-			if(str[i + 1] == '%')
-				putchar('%');
+		for (int i=0; i<len; i++) {
+			if (str[i] == '%')
+			{
+				if(str[i + 1] == '%')
+					Com_Printf("%c", '%');
+				else
+					stackPrintParam(param++);
+			}
 			else
-				stackPrintParam(param++);
+				Com_Printf("%c", str[i]);
 		}
-		else
-			putchar(str[i]);
 	}
+	else
+		Com_Printf("%s", str);
+
 		
 	stackPushInt(1);
 }
 void gsc_utils_printfline() {
 	gsc_utils_printf();
-	printf("\n");
+	Com_Printf("%s", "\n");
 }
 
 Scr_Function scriptFunctions[] = {
