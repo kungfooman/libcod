@@ -1455,8 +1455,11 @@ void hook_SV_BeginDownload_f( int a1 ) {
 		printf("Invalid download attempt: %s\n", file);
 }
 
+void manymaps_prepare(char *mapname);
 int hook_findMap(const char *qpath, void **buffer)
 {
+	manymaps_prepare(Cmd_Argv(1));
+
 	int read = FS_ReadFile(qpath, buffer);
 
 	if(read != -1)
@@ -1652,6 +1655,58 @@ void MSG_WriteBigString(int *MSG, char *s)
 	
 	hook_MSG_WriteBigString->hook();
 	
+}
+
+
+void manymaps_prepare(char *mapname)
+{
+	char *sv_iwdNames = Cvar_VariableString("sv_iwdNames");
+	printf("manymaps> map=%s sv_iwdNames: %s\n", mapname, sv_iwdNames);
+	char *tok;
+	tok = strtok(sv_iwdNames, " ");
+	while (tok) {
+		tok = strtok(NULL, " ");
+		if ( ! tok)
+			continue;
+		char file[512];
+		snprintf(file, sizeof(file), "%s/%s/Library/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), tok);
+		int exists = access(file, F_OK) != -1;
+		printf("manymaps> exists in /Library=%d iwd=%s \n", exists, tok);
+		if (exists) {
+			char fileDelete[512];
+			snprintf(fileDelete, sizeof(fileDelete), "%s/%s/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), tok);
+			printf("manymaps> REMOVE MANYMAP: %s\n", fileDelete);
+			unlink(fileDelete);
+		}
+	}
+	
+	char src[512], dst[512];
+	snprintf(src, sizeof(src), "%s/%s/Library/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), mapname);
+	snprintf(dst, sizeof(dst), "%s/%s/%s.iwd",         Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), mapname);
+	printf("manymaps> link src=%s dst=%s\n", src, dst);
+	if (access(src, F_OK) != -1) {
+		int link_success = link(src, dst) == 0;
+		printf("manymaps> LINK: %s\n", link_success?"success":"failed (probably already exists)");
+		// FS_LoadDir is needed when empty.iwd is missing (then .d3dbsp isn't referenced anywhere)
+		FS_LoadDir(Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"));
+	}
+}
+
+// works, but not needed anymore for manymaps_prepare(mapname) (re-use Mitch's findmap-hook instead)
+cHook *hook_cmd_map;
+int cmd_map()
+{
+	//manymaps_prepare(Cmd_Argv(1)); // call with mapname
+	
+	hook_cmd_map->unhook();
+	int (*sig)();
+	*(int *)&sig = hook_cmd_map->from;
+	int ret = sig();
+	hook_cmd_map->hook();
+	
+	//printf("value of map change: %d\n", ret);
+	
+	return ret;
 }
 
 #define TOSTRING2(str) #str
@@ -1922,6 +1977,9 @@ class cCallOfDuty2Pro
 			
 			hook_MSG_WriteBigString = new cHook(0x0806825E, (int)MSG_WriteBigString);
 			//hook_MSG_WriteBigString->hook();
+			
+			//hook_cmd_map = new cHook(0x0808BC7A, (int)cmd_map);
+			//hook_cmd_map->hook();
 		#elif COD_VERSION == COD2_1_3
 			if (0)
 				cracking_hook_function(0x08094750, (int)SV_AddServerCommand);
