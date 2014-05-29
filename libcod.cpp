@@ -1467,7 +1467,7 @@ int hook_findMap(const char *qpath, void **buffer)
 
 	char *map = Cmd_Argv(1);
 	char tmp[256];
-	snprintf(tmp, 256, "%s/%s/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), map);
+	snprintf(tmp, 256, "%s/%s/%s.iwd", Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"), map);
 
 	int exists = access(tmp, F_OK);
 
@@ -1663,37 +1663,50 @@ void manymaps_prepare(char *mapname)
 	char *sv_iwdNames = Cvar_VariableString("sv_iwdNames");
 	char library_path[512];
 	if(Cvar_VariableString("fs_library")[0] == '\0')
-		snprintf(library_path, sizeof(library_path), "%s/%s/Library/", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"));
+		snprintf(library_path, sizeof(library_path), "%s/%s/Library/", Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"));
 	else
 		strncpy(library_path, Cvar_VariableString("fs_library"), sizeof(library_path));
 	printf("manymaps> map=%s sv_iwdNames: %s\n", mapname, sv_iwdNames);
 	char *tok;
 	tok = strtok(sv_iwdNames, " ");
-	while (tok) {
-		tok = strtok(NULL, " ");
-		if ( ! tok)
+	while (tok)
+	{
+		if(strncmp(tok, "zzz_", 4) == 0)
+		{
+			tok = strtok(NULL, " ");
 			continue;
+		}
+		int i = 0;
+		while(tok[i] != '\0')
+			i++;
+		if(i >= 5 && strcmp(&tok[i - 5], "Empty") == 0)
+		{
+			tok = strtok(NULL, " ");
+			continue;
+		}
 		char file[512];
 		snprintf(file, sizeof(file), "%s/%s.iwd", library_path, tok);
 		int exists = access(file, F_OK) != -1;
 		printf("manymaps> exists in Library=%d iwd=%s \n", exists, tok);
 		if (exists) {
 			char fileDelete[512];
-			snprintf(fileDelete, sizeof(fileDelete), "%s/%s/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), tok);
+			snprintf(fileDelete, sizeof(fileDelete), "%s/%s/%s.iwd", Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"), tok);
 			printf("manymaps> REMOVE MANYMAP: %s\n", fileDelete);
-			unlink(fileDelete);
+			int a = unlink(fileDelete);
+			printf("result of unlinK: %d\n", a);
 		}
+		tok = strtok(NULL, " ");
 	}
 	
 	char src[512], dst[512];
 	snprintf(src, sizeof(src), "%s/%s.iwd", library_path, mapname);
-	snprintf(dst, sizeof(dst), "%s/%s/%s.iwd",         Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), mapname);
+	snprintf(dst, sizeof(dst), "%s/%s/%s.iwd", Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"), mapname);
 	printf("manymaps> link src=%s dst=%s\n", src, dst);
 	if (access(src, F_OK) != -1) {
 		int link_success = link(src, dst) == 0;
 		printf("manymaps> LINK: %s\n", link_success?"success":"failed (probably already exists)");
 		// FS_LoadDir is needed when empty.iwd is missing (then .d3dbsp isn't referenced anywhere)
-		FS_LoadDir(Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"));
+		FS_LoadDir(Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"));
 	}
 }
 
