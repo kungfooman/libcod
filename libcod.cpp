@@ -1663,7 +1663,7 @@ void manymaps_prepare(char *mapname)
 	char *sv_iwdNames = Cvar_VariableString("sv_iwdNames");
 	char library_path[512];
 	if(Cvar_VariableString("fs_library")[0] == '\0')
-		snprintf(library_path, sizeof(library_path), "%s/%s/Library/", Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"));
+		snprintf(library_path, sizeof(library_path), "%s/%s/Library", Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"));
 	else
 		strncpy(library_path, Cvar_VariableString("fs_library"), sizeof(library_path));
 	printf("manymaps> map=%s sv_iwdNames: %s\n", mapname, sv_iwdNames);
@@ -1687,13 +1687,11 @@ void manymaps_prepare(char *mapname)
 		char file[512];
 		snprintf(file, sizeof(file), "%s/%s.iwd", library_path, tok);
 		int exists = access(file, F_OK) != -1;
-		printf("manymaps> exists in Library=%d iwd=%s \n", exists, tok);
+		printf("manymaps> exists in /Library=%d iwd=%s \n", exists, tok);
 		if (exists) {
 			char fileDelete[512];
 			snprintf(fileDelete, sizeof(fileDelete), "%s/%s/%s.iwd", Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"), tok);
-			printf("manymaps> REMOVE MANYMAP: %s\n", fileDelete);
-			int a = unlink(fileDelete);
-			printf("result of unlinK: %d\n", a);
+			printf("manymaps> REMOVE MANYMAP: %s result of unlink: %d\n", fileDelete, unlink(fileDelete));
 		}
 		tok = strtok(NULL, " ");
 	}
