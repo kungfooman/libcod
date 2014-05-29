@@ -1661,6 +1661,11 @@ void MSG_WriteBigString(int *MSG, char *s)
 void manymaps_prepare(char *mapname)
 {
 	char *sv_iwdNames = Cvar_VariableString("sv_iwdNames");
+	char library_path[512];
+	if(Cvar_VariableString("fs_library")[0] == '\0')
+		snprintf(library_path, sizeof(library_path), "%s/%s/Library/", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"));
+	else
+		strncpy(library_path, Cvar_VariableString("fs_library"), sizeof(library_path));
 	printf("manymaps> map=%s sv_iwdNames: %s\n", mapname, sv_iwdNames);
 	char *tok;
 	tok = strtok(sv_iwdNames, " ");
@@ -1669,9 +1674,9 @@ void manymaps_prepare(char *mapname)
 		if ( ! tok)
 			continue;
 		char file[512];
-		snprintf(file, sizeof(file), "%s/%s/Library/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), tok);
+		snprintf(file, sizeof(file), "%s/%s.iwd", library_path, tok);
 		int exists = access(file, F_OK) != -1;
-		printf("manymaps> exists in /Library=%d iwd=%s \n", exists, tok);
+		printf("manymaps> exists in Library=%d iwd=%s \n", exists, tok);
 		if (exists) {
 			char fileDelete[512];
 			snprintf(fileDelete, sizeof(fileDelete), "%s/%s/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), tok);
@@ -1681,7 +1686,7 @@ void manymaps_prepare(char *mapname)
 	}
 	
 	char src[512], dst[512];
-	snprintf(src, sizeof(src), "%s/%s/Library/%s.iwd", Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), mapname);
+	snprintf(src, sizeof(src), "%s/%s.iwd", library_path, mapname);
 	snprintf(dst, sizeof(dst), "%s/%s/%s.iwd",         Cvar_VariableString("fs_basepath"), Cvar_VariableString("fs_game"), mapname);
 	printf("manymaps> link src=%s dst=%s\n", src, dst);
 	if (access(src, F_OK) != -1) {
