@@ -99,64 +99,56 @@ int stackPrintParam(int param) {
 		case STACK_STRING:
 			char *str;
 			stackGetParamString(param, &str); // no error checking, since we know it's a string
-			Com_Printf("%s", str);
+			printf("%s", str);
 			return 1;
 		case STACK_VECTOR:
 			float vec[3];
 			stackGetParamVector(param, vec);
-			Com_Printf("(%.2f, %.2f, %.2f)", vec[0], vec[1], vec[2]);
+			printf("(%.2f, %.2f, %.2f)", vec[0], vec[1], vec[2]);
 			return 1;
 		case STACK_FLOAT:
 			float tmp_float;
 			stackGetParamFloat(param, &tmp_float);
-			Com_Printf("%.3f", tmp_float); // need a way to define precision
+			printf("%.3f", tmp_float); // need a way to define precision
 			return 1;
 		case STACK_INT:
 			int tmp_int;
 			stackGetParamInt(param, &tmp_int);
-			Com_Printf("%d", tmp_int);
+			printf("%d", tmp_int);
 			return 1;
 	}
-	Com_Printf("(%s)", stackGetParamTypeAsString(param));
+	printf("(%s)", stackGetParamTypeAsString(param));
 	return 0;
 }
 
 void gsc_utils_printf() {
 	char *str;
 	if ( ! stackGetParams("s", &str)) {
-		Com_Printf("%s", "scriptengine> WARNING: printf undefined argument!\n");
+		printf("scriptengine> WARNING: printf undefined argument!\n");
 		stackPushUndefined();
 		return;
 	}
 	
-	char * pch = strstr (str, "%%"); 
-	
-	if(pch != NULL) // found %%
-	{
-		int param = 1; // maps to first %
-		int len = strlen(str);
+	int param = 1; // maps to first %
+	int len = strlen(str);
 
-		for (int i=0; i<len; i++) {
-			if (str[i] == '%')
-			{
-				if(str[i + 1] == '%')
-					Com_Printf("%c", '%');
-				else
-					stackPrintParam(param++);
-			}
+	for (int i=0; i<len; i++) {
+		if (str[i] == '%')
+		{
+			if(str[i + 1] == '%')
+				putchar('%');
 			else
-				Com_Printf("%c", str[i]);
+				stackPrintParam(param++);
 		}
+		else
+			putchar(str[i]);
 	}
-	else
-		Com_Printf("%s", str);
-
 		
 	stackPushInt(1);
 }
 void gsc_utils_printfline() {
 	gsc_utils_printf();
-	Com_Printf("%s", "\n");
+	printf("\n");
 }
 
 Scr_Function scriptFunctions[] = {
@@ -208,7 +200,6 @@ Scr_Function scriptFunctions[] = {
 	{"stringToFloat"               , gsc_utils_stringToFloat               , 0},
 	{"rundll"                      , gsc_utils_rundll                      , 0},
 	{"Cmd_ExecuteString"           , gsc_utils_ExecuteString               , 0},
-	{"sendGameServerCommand"       , gsc_utils_sendgameservercommand       , 0},
 	{"scandir"                     , gsc_utils_scandir                     , 0},
 	{"fopen"                       , gsc_utils_fopen                       , 0},
 	{"fread"                       , gsc_utils_fread                       , 0},
@@ -279,6 +270,8 @@ Scr_Method scriptMethods[] = {
 	{"ClientCommand"         , gsc_player_ClientCommand      , 0},
 	{"getLastConnectTime"    , gsc_player_getLastConnectTime , 0},
 	{"getLastMSG"            , gsc_player_getLastMSG         , 0},
+	{"getAddressType"        , gsc_player_addresstype        , 0},
+	{"renameBot"             , gsc_player_renamebot          , 0},
 	{"setAlive"              , gsc_entity_setalive           , 0},
 	{"setBounds"             , gsc_entity_setbounds          , 0},
 	#endif

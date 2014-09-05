@@ -381,6 +381,71 @@ void gsc_player_getLastMSG(int id) {
 	stackPushInt(lastmsg);
 }
 
+void gsc_player_addresstype(int id) {
+    #if COD2_VERSION == COD2_VERSION_1_0
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+		int info_addresstype_offset = 0x6E5C4;
+	#elif COD2_VERSION == COD2_VERSION_1_2
+		int info_base = *(int *)0x0842200C;
+		int info_size = 0x79064;
+		int info_addresstype_offset = 0x6E6D4;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+        int info_base = *(int *)0x0842308C;
+        int info_size = 0xB1064;
+        int info_addresstype_offset = 0x6E6D4;
+    #else
+        #warning gsc_player_addresstype() got no working addresses
+        int info_base = *(int *)0x0;
+        int info_size = 0x0;
+        int info_addresstype_offset = 0x0;
+    #endif
+
+    int info_player = info_base + id * info_size;
+    int addrtype = *(unsigned int *)(info_player + info_addresstype_offset);
+    stackPushInt(addrtype);
+}
+
+void gsc_player_renamebot(int id) {
+	char * key;
+
+	if ( ! stackGetParams("s", &key)) {
+		printf("scriptengine> ERROR: gsc_player_renamebot(): param \"key\"[1] has to be an string!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	#if COD2_VERSION == COD2_VERSION_1_0
+		int info_base = *(int *)0x0841FB0C;
+		int info_size = 0x78F14;
+	#elif COD2_VERSION == COD2_VERSION_1_2
+		int info_base = *(int *)0x0842200C;
+		int info_size = 0x79064;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+        int info_base = *(int *)0x0842308C;
+        int info_size = 0xB1064;
+    #else
+        #warning gsc_player_renamebot() got no working addresses
+        int info_base = *(int *)0x0;
+        int info_size = 0x0;
+    #endif
+
+    int info_player = info_base + id * info_size;
+	
+	#if COD2_VERSION == COD2_VERSION_1_3
+	typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value);
+	Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B85CE;
+	
+	Info_SetValueForKey((unsigned int *)(info_player + 12), "name", key);
+	char * name = (const char *)(unsigned int *)(info_player + 134216);
+	memcpy(&name[0], key, 32);
+    name[31] = '\0';
+    printf("name = %s\n", name);
+	#endif
+
+	stackPushInt(1);
+}
+
 // entity functions (could be in own file, but atm not many pure entity functions)
 
 void gsc_entity_setalive(int id) { // as in isAlive?
