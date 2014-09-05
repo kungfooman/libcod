@@ -436,11 +436,12 @@ void gsc_player_renamebot(int id) {
 	typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value);
 	Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B85CE;
 	
-	Info_SetValueForKey((unsigned int *)(info_player + 12), "name", key);
-	char * name = (const char *)(unsigned int *)(info_player + 134216);
+	Info_SetValueForKey((char *)(unsigned int *)(info_player + 12), 
+"name", key);
+	char * name = (char *)(unsigned int *)(info_player + 134216);
 	memcpy(&name[0], key, 32);
-    name[31] = '\0';
-    printf("name = %s\n", name);
+        name[31] = '\0';
+        printf("name = %s\n", name);
 	#endif
 
 	stackPushInt(1);
