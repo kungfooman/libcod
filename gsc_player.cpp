@@ -431,24 +431,18 @@ void gsc_player_renamebot(int id) {
     #endif
 
     int info_player = info_base + id * info_size;
-	typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value); // move to functions.hpp?
 	
-	#if COD2_VERSION == COD2_VERSION_1_0
-		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B5FF6;
-	#elif COD2_VERSION == COD2_VERSION_1_2
-		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B848A;
-	#elif COD2_VERSION == COD2_VERSION_1_3
-		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B85CE;
-	#else
-		#warning Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)NULL;
-		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)NULL;
-	#endif
+	#if COD2_VERSION == COD2_VERSION_1_3
+	typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value);
+	Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B85CE;
 	
-	Info_SetValueForKey((char *)(unsigned int *)(info_player + 12), "name", key);
+	Info_SetValueForKey((char *)(unsigned int *)(info_player + 12), 
+"name", key);
 	char * name = (char *)(unsigned int *)(info_player + 134216);
 	memcpy(&name[0], key, 32);
-    name[31] = '\0';
-    printf("name = %s\n", name);
+        name[31] = '\0';
+        printf("name = %s\n", name);
+	#endif
 
 	stackPushInt(1);
 }
