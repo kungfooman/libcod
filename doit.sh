@@ -199,6 +199,24 @@ if [ "$1" == "" ] || [ "$1" == "cod4_1_7" ]; then
 fi
 
 
+if [ "$1" == "" ] || [ "$1" == "cod4_1_7_l" ]; then
+	constants="-D COD_VERSION=COD4_1_7_L"
+
+	mkdir -p objects_$1
+	echo "##### COMPILE $1 LIBCOD.CPP #####"
+	$cc $options $constants -o objects_$1/libcod.opp -c libcod.cpp
+	echo "##### COMPILE $1 GSC.CPP #####"
+	$cc $options $constants -o objects_$1/gsc.opp -c gsc.cpp
+	echo "##### COMPILE $1 GSC_PLAYER.CPP #####"
+	$cc $options $constants -o objects_$1/gsc_player.opp -c gsc_player.cpp
+	echo "##### COMPILE $1 GSC_UTILS.CPP #####"
+	$cc $options $constants -o objects_$1/gsc_utils.opp -c gsc_utils.cpp
+
+	echo "##### LINK lib$1.so #####"
+	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
+	$cc -m32 -shared -L/lib32 $mysql_link -L./vendors/lib -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib
+fi
+
 
 if [ "$1" == "wrapper" ]; then
 	echo "##### WRAPPER: COMPILE wrapper_libcod2.cpp #####"

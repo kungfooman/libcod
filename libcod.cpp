@@ -1455,6 +1455,26 @@ void hook_SV_BeginDownload_f( int a1 ) {
 		printf("Invalid download attempt: %s\n", file);
 }
 
+char * hook_beginDownloadCopy(char *a1, char *a2, int a3) {
+	typedef char* (*beginDownloadCopy_t)(char *a1, char *a2, int a3);
+
+	#if COD_VERSION == COD4_1_7
+		beginDownloadCopy_t beginDownloadCopy = (beginDownloadCopy_t)0x81A9E1C;
+	#elif COD_VERSION == COD4_1_7_L
+		beginDownloadCopy_t beginDownloadCopy = (beginDownloadCopy_t)0x81AA54C;
+	#endif
+	
+	int len = strlen(a2);
+	
+	if(len > 3 && !strcmp(a2 + len - 4, ".iwd") || len > 2 && !strcmp(a2 + len - 3, ".ff"))
+		return beginDownloadCopy(a1, a2, a3);
+	else
+	{
+		printf("Invalid download attempt: %s\n", a2);
+		return beginDownloadCopy(a1, (char*)"fail.iwd", a3);
+	}
+}
+
 void manymaps_prepare(char *mapname);
 int hook_findMap(const char *qpath, void **buffer)
 {
@@ -1815,6 +1835,8 @@ class cCallOfDuty2Pro
 			int *addressToCloserPointer = (int *)0x081882F0;
 		#elif COD_VERSION == COD4_1_7
 			int *addressToCloserPointer = (int *)0x0826D66C;
+		#elif COD_VERSION == COD4_1_7_L
+			int *addressToCloserPointer = (int *)0x0826E40C;
 		#elif COD_VERSION == COD2_1_0
 			int *addressToCloserPointer = (int *)0x08167E70;
 		#else
@@ -1857,7 +1879,11 @@ class cCallOfDuty2Pro
 		
 		#if COD_VERSION == COD4_1_7
 			cracking_hook_function(0x0804AB6C, (int)hook_recvfrom);
-			
+			cracking_hook_call(0x081721AE, (int)hook_beginDownloadCopy);
+		#endif
+		
+		#if COD_VERSION == COD4_1_7_L
+			cracking_hook_call(0x0817225E, (int)hook_beginDownloadCopy);
 		#endif
 		
 		// NEEDED FOR ZOMBOTS/BOTZOMS???
@@ -2003,7 +2029,7 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x080AC5D8, (int)SV_SendServerCommand);
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
-		#elif COD_VERSION == COD4_1_7
+		#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 			extern cHook *hook_Scr_GetFunction;
 			extern cHook *hook_Scr_GetMethod;
 			hook_Scr_GetFunction = new cHook(0x080bd238, (int)Scr_GetCustomFunction);

@@ -14,7 +14,7 @@
 #elif COD_VERSION == COD2_1_3
 	Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x08117CB2;
 	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x08117DEA;
-#elif COD_VERSION == COD4_1_7
+#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 	//Scr_GetFunction_t Scr_GetFunction = (Scr_GetFunction_t)0x080BD238;
 	//Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)0x080BFEF4;
 
@@ -314,7 +314,7 @@ int getStack()
 		return 0x083D8A90;
 	#elif COD_VERSION == COD1_1_5
 		return 0x0830AE88;
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		return 0x08c055b0;
 	#else
 		#warning int getStack() return NULL;
@@ -398,7 +398,7 @@ int getNumberOfParams() // as in stackNew()
 		return 0x083D8A9C;
 	#elif COD_VERSION == COD1_1_5
 		return 0x0830AE84;
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		return 0x08c055bc;
 	#else
 		#warning int getNumberOfParams() return NULL;
@@ -561,7 +561,7 @@ int stackNew()
 		*((int *)(&signature)) = 0x08083DF8;
 	#elif COD_VERSION == COD1_1_5
 		*((int *)(&signature)) = 0x080AE084;
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		*((int *)(&signature)) = 0x0815EC48;
 	#else
 		#warning int stackNew() *((int *)(&signature)) = NULL;
@@ -625,7 +625,7 @@ int stackPushInt(int ret) // as in isalive
 			*((int *)(&signature)) = 0x08085098; // difference to 1.3: CC
 		#elif COD_VERSION == COD2_1_3
 			*((int *)(&signature)) = 0x08085164;
-		#elif COD_VERSION == COD4_1_7
+		#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 			*((int *)(&signature)) = 0x0815EFFA;
 		#else
 			#warning int stackPushInt(int ret)
@@ -675,7 +675,7 @@ int stackPushVector(float *ret) // as in vectornormalize
 	#elif COD_VERSION == COD1_1_5
 		printf("*((int *)(&signature)) = 0x080AF464;\n");
 		*((int *)(&signature)) = 0x080AF464;
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		*((int *)(&signature)) = 0x0815EDF2;
 	#else
 		#warning int stackPushVector(float *ret) *((int *)(&signature)) = NULL;
@@ -708,7 +708,7 @@ int stackPushFloat(float ret) // as in distance
 		*((int *)(&signature)) = 0x080850BC; // difference to 1.3: CC
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08085188;
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		*((int *)(&signature)) = 0x0815EF7A;
 	#else
 		#warning int stackPushFloat(float ret) *((int *)(&signature)) = NULL;
@@ -727,7 +727,7 @@ int stackPushString(char *toPush) // as in getcvar()
 		*((int *)(&signature)) = 0x08085196; // difference to 1.3: CC
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08085262;
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		*((int *)(&signature)) = 0x0815EC48;
 	#else
 		#warning int stackPushString(char *toPush) *((int *)(&signature)) = NULL;
@@ -746,7 +746,7 @@ int stackPushEntity(int arg) // as in getent() // todo: find out how to represen
 		*((int *)(&signature)) = 0x0811AFF4; // difference OTHER then CC
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08117F50;
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		*((int *)(&signature)) = 0x080C7770;
 	#else
 		#warning int stackPushEntity(int arg) *((int *)(&signature)) = NULL;
@@ -773,7 +773,7 @@ int stackPushArray() {
 		*((int *)(&signature)) = 0x0808526C;
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08085338;
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		*((int *)(&signature)) = 0x0815ED6A;
 	#else
 		#warning int stackPushArray() *((int *)(&signature)) = NULL;
@@ -799,7 +799,7 @@ int stackPushArrayLast() {
 		*((int *)(&signature)) = 0x08085298;
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x08085364;
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		*((int *)(&signature)) = 0x0815D5A0;
 	#else
 		#warning int stackPushArrayLast() *((int *)(&signature)) = NULL;

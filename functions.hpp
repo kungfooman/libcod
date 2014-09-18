@@ -55,6 +55,8 @@ typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
 #elif COD_VERSION == COD2_1_3
     static Com_Printf_t Com_Printf = (Com_Printf_t)0x08060DEA;
 #elif COD_VERSION == COD4_1_7
+	static Com_Printf_t Com_Printf = (Com_Printf_t)0x08122B0E;
+#elif COD_VERSION == COD4_1_7_L
     static Com_Printf_t Com_Printf = (Com_Printf_t)0x08122B2E;
 #else
 	#warning static Com_Printf_t Com_Printf = (Com_Printf_t)NULL;
@@ -73,7 +75,7 @@ typedef int (*Cmd_ExecuteString_t)(const char *text);
 	static Cmd_ExecuteString_t Cmd_ExecuteString = (Cmd_ExecuteString_t)0x080609D4;
 #elif COD_VERSION == COD2_1_3
 	static Cmd_ExecuteString_t Cmd_ExecuteString = (Cmd_ExecuteString_t)0x080609CC;
-#elif COD_VERSION == COD4_1_7
+#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 	static Cmd_ExecuteString_t Cmd_ExecuteString = (Cmd_ExecuteString_t)0x08111F32;
 #else
 	static Cmd_ExecuteString_t Cmd_ExecuteString = (Cmd_ExecuteString_t)NULL;

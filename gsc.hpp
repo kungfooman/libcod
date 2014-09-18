@@ -26,6 +26,7 @@ extern "C" {
 #define COD2_1_2 212
 #define COD2_1_3 213
 #define COD4_1_7 417
+#define COD4_1_7_L 4171
 
 //#define COD2_VERSION COD2_VERSION_1_2
 
@@ -124,7 +125,7 @@ static void printf_hide(const char *str, ...)
 	#define STACK_DEAD_ENTITY 17
 	#define STACK_DEAD_OBJECT 18
 
-#elif COD_VERSION == COD4_1_7
+#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 	/*
 	THOSE ARE CoD2 ones!
 	
