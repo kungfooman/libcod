@@ -83,15 +83,21 @@ typedef int (*Cmd_ExecuteString_t)(const char *text);
 #endif
 
 typedef int (*ClientCommand_t)(int clientNum);
-#if COD2_VERSION == COD2_VERSION_1_0
+#if COD_VERSION == COD2_1_0
 	static ClientCommand_t ClientCommand = (ClientCommand_t)0x080FE998; // search 'say_team' and see code xref function
 	static int hook_ClientCommand_call = 0x0808F281;
-#elif COD2_VERSION == COD2_VERSION_1_2
+#elif COD_VERSION == COD2_1_2
 	static ClientCommand_t ClientCommand = (ClientCommand_t)0x08100D1E;
 	static int hook_ClientCommand_call = 0x08090B0C;
-#elif COD2_VERSION == COD2_VERSION_1_3
+#elif COD_VERSION == COD2_1_3
 	static ClientCommand_t ClientCommand = (ClientCommand_t)0x08100E62;
 	static int hook_ClientCommand_call = 0x08090BA0;
+#elif COD_VERSION == COD4_1_7
+	static ClientCommand_t ClientCommand = (ClientCommand_t)0x080B070C;
+	static int hook_ClientCommand_call = 0x08170E70;
+#elif COD_VERSION == COD4_1_7_L
+	static ClientCommand_t ClientCommand = (ClientCommand_t)0x080B070C;
+	static int hook_ClientCommand_call = 0x08170F20;
 #else
 	#warning static ClientCommand_t ClientCommand = (ClientCommand_t)NULL;
 	#warning static int hook_ClientCommand_call = NULL;
@@ -186,25 +192,30 @@ typedef int (*SV_BeginDownload_f_t)(int a1);
 static SV_BeginDownload_f_t SV_BeginDownload_f = (SV_BeginDownload_f_t)NULL;
 
 typedef short (*codscript_call_callback_entity_t)(int self, int callback, int params);
-#if COD2_VERSION == COD2_VERSION_1_0
+#if COD_VERSION == COD2_1_0
 	static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)0x08118DF4; // search 'badMOD'
-
-#elif COD2_VERSION == COD2_VERSION_1_2
+#elif COD_VERSION == COD2_1_2
 	static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)0x0811B128;
-#elif COD2_VERSION == COD2_VERSION_1_3
+#elif COD_VERSION == COD2_1_3
 	static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)0x0811B284;
+#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
+	static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)0x080C765C;
 #else
 	#warning static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)NULL;
 	static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)NULL;
 #endif
 
 typedef int (*codscript_callback_finish_t)(short callback_handle);
-#if COD2_VERSION == COD2_VERSION_1_0
+#if COD_VERSION == COD2_1_0
 	static codscript_callback_finish_t codscript_callback_finish = (codscript_callback_finish_t)0x08083B8E;
-#elif COD2_VERSION == COD2_VERSION_1_2
+#elif COD_VERSION == COD2_1_2
 	static codscript_callback_finish_t codscript_callback_finish = (codscript_callback_finish_t)0x0808410A;
-#elif COD2_VERSION == COD2_VERSION_1_3
+#elif COD_VERSION == COD2_1_3
 	static codscript_callback_finish_t codscript_callback_finish = (codscript_callback_finish_t)0x080841D6;
+#elif COD_VERSION == COD4_1_7
+	static codscript_callback_finish_t codscript_callback_finish = (codscript_callback_finish_t)0x0815D042;
+#elif COD_VERSION == COD4_1_7_L
+	static codscript_callback_finish_t codscript_callback_finish = (codscript_callback_finish_t)0x0815D062;
 #else
 	#warning static codscript_callback_finish_t codscript_callback_finish = (codscript_callback_finish_t)NULL;
 	static codscript_callback_finish_t codscript_callback_finish = (codscript_callback_finish_t)NULL;

@@ -560,6 +560,8 @@ typedef void (*gametype_scripts_t)();
 	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x0811012A;
 #elif COD_VERSION == COD2_1_3
 	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x08110286;
+#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
+	gametype_scripts_t gametype_scripts = (gametype_scripts_t)0x080C0A7A;
 #else
 	#warning gametype_scripts_t gametype_scripts = (gametype_scripts_t)NULL;
 	gametype_scripts_t gametype_scripts = (gametype_scripts_t)NULL;
@@ -572,6 +574,8 @@ typedef int (*codscript_load_function_t)(char *file, char *function, int isNeede
 	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x081100AC;
 #elif COD_VERSION == COD2_1_3
 	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x08110208;
+#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
+	codscript_load_function_t codscript_load_function = (codscript_load_function_t)0x080C09E8; // int __usercall sub_80C09E8<eax>(int a1<eax>, int a2<edx>, int a3<ecx>)
 #else
 	#warning codscript_load_function_t codscript_load_function = (codscript_load_function_t)NULL;
 	codscript_load_function_t codscript_load_function = (codscript_load_function_t)NULL;
@@ -2038,9 +2042,12 @@ class cCallOfDuty2Pro
 			hook_Scr_GetMethod->hook();
 		#endif
 
-		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
+		#if COD_VERSION >= COD2_1_0
 			cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 			cracking_hook_call(hook_ClientCommand_call, (int)hook_ClientCommand);
+		#endif
+			
+		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
 			cracking_hook_call(hook_AuthorizeState_call, (int)hook_AuthorizeState);
 			cracking_hook_call(hook_findMap_call, (int)hook_findMap);
 		#endif
