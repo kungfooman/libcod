@@ -640,6 +640,10 @@ int hook_ClientCommand(int clientNum)
 		short ret = codscript_call_callback_entity(/*gentity*/0x08679380 + 560 * clientNum, codecallback_playercommand, 1);
 	#elif COD_VERSION == COD2_1_3
 		short ret = codscript_call_callback_entity(/*gentity*/0x08716400 + 560 * clientNum, codecallback_playercommand, 1);
+	#elif COD_VERSION == COD4_1_7
+		short ret = codscript_call_callback_entity(/*gentity*/0x0841F3BC + 628 * clientNum, codecallback_playercommand, 1);
+	#elif COD_VERSION == COD4_1_7_L
+		short ret = codscript_call_callback_entity(/*gentity*/0x0842013C + 628 * clientNum, codecallback_playercommand, 1);
 	#else
 		#warning short ret = codscript_call_callback_entity(NULL, codecallback_playercommand, 1);
 		short ret = codscript_call_callback_entity(NULL, codecallback_playercommand, 1);
@@ -711,7 +715,7 @@ void Cmd_AddCommand(const char *cmd_name, xcommand_t function)
 		*((int *)(&signature)) = 0x080606BE;
 	#elif COD_VERSION == COD2_1_3
 		*((int *)(&signature)) = 0x080606B6;
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		*((int *)(&signature)) = 0x081116B4;
 	#else
 		#warning void (const char *cmd_name, xcommand_t function) *((int *)(&signature)) = NULL;

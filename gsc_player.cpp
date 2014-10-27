@@ -24,6 +24,9 @@
 	*/
 	int playerStates = 0x084BC3A0;
 	int sizeOfPlayer = 0x3184;
+#elif COD_VERSION == COD4_1_7_L
+	int playerStates = 0x084BD120;
+	int sizeOfPlayer = 0x3184;
 #else
 	#warning int playerStates int sizeOfPlayer
 	int playerStates = NULL;
@@ -39,6 +42,12 @@
 #elif COD2_VERSION == COD2_VERSION_1_3
 	int gentities = 0x08716400;
 	int gentities_size = 560;
+#elif COD_VERSION == COD4_1_7
+	int gentities = 0x0841F3BC;
+	int gentities_size = 628;
+#elif COD_VERSION == COD4_1_7_L
+	int gentities = 0x0842013C;
+	int gentities_size = 628;
 #else
 	#warning int gentities int gentities_size
 	int gentities = NULL;

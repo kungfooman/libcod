@@ -454,6 +454,8 @@ int stackGetParamString(int param, char **value) // as in the sub-functions in g
 		*value = (char *)(*(int *)0x081F6940 + 8*(int)arg->offsetData + 4);
 	#elif COD_VERSION == COD4_1_7
 		*value = (char *)(*(int *)0x0897ca00 + 12 * (int)arg->offsetData + 4);
+	#elif COD_VERSION == COD4_1_7_L
+		*value = (char *)(*(int *)0x0897D780 + 12 * (int)arg->offsetData + 4);
 	#else
 		#warning stackGetParamString(int param, char **value) *value = (char *)(*(int *)NULL + 8*(int)arg->offsetData + 4);
 		*value = (char *)(*(int *)NULL + 8*(int)arg->offsetData + 4);
