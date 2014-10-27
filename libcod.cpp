@@ -663,27 +663,19 @@ int hook_ClientCommand(int clientNum)
 	ClientCommand_8100D1E(clientNum);
 	*/
 	
-	printf("1\n");
-	
 	stackPushArray();
 	int args = trap_Argc();
-	printf("1.1\n");
-	printf("args: %d", args);
+	//printf("args: %d\n", args);
 	for (int i=0; i<args; i++)
 	{
 		char tmp[1024];
 		
 		trap_Argv(i, tmp, sizeof(tmp));
-		printf("1.2\n");
 		stackPushString(tmp);
-		printf("1.3\n");
 		//printf("pushing: %s\n", tmp);
 		stackPushArrayLast();
-		printf("1.4\n");
 	}
 	
-	printf("2\n");
-
 	// todo: G_ENTITY(clientNum)
 	#if COD_VERSION == COD2_1_0 // search '\\name\\badinfo'
 		short ret = codscript_call_callback_entity(/*gentity*/0x08665480 + 560 * clientNum, codecallback_playercommand, 1);
@@ -692,21 +684,17 @@ int hook_ClientCommand(int clientNum)
 	#elif COD_VERSION == COD2_1_3
 		short ret = codscript_call_callback_entity(/*gentity*/0x08716400 + 560 * clientNum, codecallback_playercommand, 1);
 	#elif COD_VERSION == COD4_1_7
-		short ret = codscript_call_callback_entity(/*gentity*/0x0841F3BC + 628 * clientNum, codecallback_playercommand, 1);
+		short ret = codscript_call_callback_entity(/*gentity*/0x0841F260 + 628 * clientNum, codecallback_playercommand, 1);
 	#elif COD_VERSION == COD4_1_7_L
-		short ret = codscript_call_callback_entity(/*gentity*/0x0842013C + 628 * clientNum, codecallback_playercommand, 1);
+		short ret = codscript_call_callback_entity(/*gentity*/0x0841FFE0 + 628 * clientNum, codecallback_playercommand, 1);
 	#else
 		#warning short ret = codscript_call_callback_entity(NULL, codecallback_playercommand, 1);
 		short ret = codscript_call_callback_entity(NULL, codecallback_playercommand, 1);
 	#endif
-	
-	printf("3\n");
 
 	//printf("codecallback_playercommand=%.8x ret=%i\n", codecallback_playercommand, ret);
 	
 	codscript_callback_finish(ret);
-	
-	printf("4\n");
 
 	//printf("after codscript_callback_finish\n");
 	

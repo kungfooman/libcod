@@ -811,7 +811,7 @@ int stackSetKeyInArray(int precachedStringOffset) // TODOOOOOO
 int stackPushArrayLast() { // as in getentarray
 	int (*signature)();
 	
-	#  if COD_VERSION == COD2_1_0
+	#if COD_VERSION == COD2_1_0
 		*((int *)(&signature)) = 0x08084D1C;
 	#elif COD_VERSION == COD2_1_2
 		*((int *)(&signature)) = 0x08085298;

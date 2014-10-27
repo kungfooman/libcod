@@ -43,10 +43,10 @@
 	int gentities = 0x08716400;
 	int gentities_size = 560;
 #elif COD_VERSION == COD4_1_7
-	int gentities = 0x0841F3BC;
+	int gentities = 0x0841F260;
 	int gentities_size = 628;
 #elif COD_VERSION == COD4_1_7_L
-	int gentities = 0x0842013C;
+	int gentities = 0x0841FFE0;
 	int gentities_size = 628;
 #else
 	#warning int gentities int gentities_size
