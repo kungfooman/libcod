@@ -581,18 +581,62 @@ typedef int (*codscript_load_function_t)(char *file, char *function, int isNeede
 	codscript_load_function_t codscript_load_function = (codscript_load_function_t)NULL;
 #endif
 
+int codscript_load_function_custom(char *file, char *function, int isNeeded)
+{
+	typedef int (*codscript_file_load_function_t)(char *file, char *function);
+	#if COD_VERSION == COD4_1_7
+		codscript_file_load_function_t codscript_file_load_function = (codscript_file_load_function_t)0x0814C194;
+	#elif COD_VERSION == COD4_1_7_L
+		codscript_file_load_function_t codscript_file_load_function = (codscript_file_load_function_t)0x0814C1B4;
+	#else
+		codscript_file_load_function_t codscript_file_load_function = (codscript_file_load_function_t)NULL;
+	#endif
+
+	typedef int (*codscript_file_load_t)(char *file);
+	#if COD_VERSION == COD4_1_7
+		codscript_file_load_t codscript_file_load = (codscript_file_load_t)0x0814C076;
+	#elif COD_VERSION == COD4_1_7_L
+		codscript_file_load_t codscript_file_load = (codscript_file_load_t)0x0814C096;
+	#else
+		codscript_file_load_t codscript_file_load = (codscript_file_load_t)NULL;
+	#endif
+
+	if (!codscript_file_load(file))
+	{
+		if(isNeeded)
+			printf((char*)"Could not find script '%s'\n", file);
+
+		return 0;
+	}
+
+	int result = codscript_file_load_function(file, function);
+
+	if(!result && isNeeded)
+		printf((char *)"Could not find label '%s' in script '%s'\n", function, file);
+
+	return result;
+}
+
 void hook_codscript_gametype_scripts()
 {
-	codecallback_playercommand = codscript_load_function((char *)"maps/mp/gametypes/_callbacksetup", (char *)"CodeCallback_PlayerCommand", 0);
+	#if COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
+		codecallback_playercommand = codscript_load_function_custom((char *)"maps/mp/gametypes/_callbacksetup", (char *)"CodeCallback_PlayerCommand", 0);
+	#else
+		codecallback_playercommand = codscript_load_function((char *)"maps/mp/gametypes/_callbacksetup", (char *)"CodeCallback_PlayerCommand", 0);
+	#endif
 
 	//printf("codecallback_playercommand=%.8x\n", codecallback_playercommand);
 
 	// unhook
-	cracking_write_hex((int)gametype_scripts, (char *)"5589E583EC58"); // todo: hook->unhook()
+	#if COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
+		cracking_write_hex((int)gametype_scripts, (char *)"5589E55383EC54");
+	#else
+		cracking_write_hex((int)gametype_scripts, (char *)"5589E583EC58"); // todo: hook->unhook()
+	#endif
 
 	// call original
 	gametype_scripts();
-	
+
 	// hook again
 	cracking_hook_function((int)gametype_scripts, (int)hook_codscript_gametype_scripts);
 }
@@ -619,19 +663,26 @@ int hook_ClientCommand(int clientNum)
 	ClientCommand_8100D1E(clientNum);
 	*/
 	
+	printf("1\n");
 	
 	stackPushArray();
 	int args = trap_Argc();
-	//printf("args: %d", args);
+	printf("1.1\n");
+	printf("args: %d", args);
 	for (int i=0; i<args; i++)
 	{
 		char tmp[1024];
 		
 		trap_Argv(i, tmp, sizeof(tmp));
+		printf("1.2\n");
 		stackPushString(tmp);
+		printf("1.3\n");
 		//printf("pushing: %s\n", tmp);
 		stackPushArrayLast();
+		printf("1.4\n");
 	}
+	
+	printf("2\n");
 
 	// todo: G_ENTITY(clientNum)
 	#if COD_VERSION == COD2_1_0 // search '\\name\\badinfo'
@@ -649,10 +700,13 @@ int hook_ClientCommand(int clientNum)
 		short ret = codscript_call_callback_entity(NULL, codecallback_playercommand, 1);
 	#endif
 	
+	printf("3\n");
 
 	//printf("codecallback_playercommand=%.8x ret=%i\n", codecallback_playercommand, ret);
 	
 	codscript_callback_finish(ret);
+	
+	printf("4\n");
 
 	//printf("after codscript_callback_finish\n");
 	

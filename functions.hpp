@@ -12,6 +12,10 @@ static int trap_Argc()
 		return *(int *)0x0819E080;
 	#elif COD2_VERSION == COD2_VERSION_1_3
 		return *(int *)0x0819F100;
+	#elif COD_VERSION == COD4_1_7
+		return *(int *)(int *)(4 * 0x08878cc0 + 0x08878D04); //*(_DWORD *)(4 * v8878cc0 + 0x8878D04)
+	#elif COD_VERSION == COD4_1_7_L
+		return *(int *)(int *)(4 * 0x08879A40 + 0x08879A84);
 	#else
 		#warning trap_Argc() return *(int *)NULL;
 		return *(int *)NULL;
@@ -37,6 +41,8 @@ typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
 	static trap_Argv_t trap_Argv = (trap_Argv_t)0x08060280;
 #elif COD2_VERSION == COD2_VERSION_1_3
 	static trap_Argv_t trap_Argv = (trap_Argv_t)0x08060278;
+#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
+	static trap_Argv_t trap_Argv = (trap_Argv_t)0x08110E08;
 #else
 	#warning static trap_Argv_t trap_Argv = (trap_Argv_t)NULL;
 	static trap_Argv_t trap_Argv = (trap_Argv_t)NULL;
