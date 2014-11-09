@@ -111,13 +111,17 @@ typedef int (*ClientCommand_t)(int clientNum);
 	static int hook_ClientCommand_call = (int)NULL;
 #endif
 
-typedef int (*Cvar_VariableValue_t)(const char *var_name);
-#if COD2_VERSION == COD2_VERSION_1_0
+typedef int (*Cvar_VariableValue_t)(const char *var_name); // search for 'sv_allowAnonymous'
+#if COD_VERSION == COD2_1_0
 	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B0BB6;
-#elif COD2_VERSION == COD2_VERSION_1_2
+#elif COD_VERSION == COD2_1_2
 	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B2E66;
-#elif COD2_VERSION == COD2_VERSION_1_3
+#elif COD_VERSION == COD2_1_3
 	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B2FAA;
+#elif COD_VERSION == COD4_1_7
+	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x0819E090;
+#elif COD_VERSION == COD4_1_7_L
+	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x0819E7C0;
 #else
 	#warning static Cvar_VariableValue_t CvarVariableValue = NULL;
 	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)NULL;

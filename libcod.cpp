@@ -1495,6 +1495,29 @@ char * hook_AuthorizeState( int arg )
 	return s;
 }
 
+int hook_StateCompare(char * state, char * base)
+{
+    if ((CvarVariableValue == NULL || CvarVariableValue("sv_cracked") == 1) && strcmp (state, "deny") == 0) // when sv_cracked 1 and deny state
+    {
+        if(strcmp(base, "accept") == 0) // when compare value is accept return true
+            return 0;
+        else
+            return 1; // when compare to value is deny return false
+    }
+
+    return strcmp(state, base);
+}
+
+int hook_BadKeyCompare(char * s1, char * s2)
+{
+	if (CvarVariableValue == NULL || CvarVariableValue("sv_cracked") == 1)
+    {
+        return 0; // when sv_cracked 1 no bad keys
+    }
+
+    return strcmp(s1, s2);
+}
+
 void hook_SV_BeginDownload_f( int a1 ) {
 	char * file = Cmd_Argv(1);
 	int len;
@@ -1930,10 +1953,16 @@ class cCallOfDuty2Pro
 		#if COD_VERSION == COD4_1_7
 			cracking_hook_function(0x0804AB6C, (int)hook_recvfrom);
 			cracking_hook_call(0x081721AE, (int)hook_beginDownloadCopy);
+			cracking_hook_call(0x0816FE8C, (int)hook_StateCompare);
+			cracking_hook_call(0x08170102, (int)hook_StateCompare);
+			cracking_hook_call(0x0816FFB8, (int)hook_BadKeyCompare);
 		#endif
 		
 		#if COD_VERSION == COD4_1_7_L
 			cracking_hook_call(0x0817225E, (int)hook_beginDownloadCopy);
+			cracking_hook_call(0x0816FF42, (int)hook_StateCompare);
+			cracking_hook_call(0x081701D6, (int)hook_StateCompare);
+			cracking_hook_call(0x0817006E, (int)hook_BadKeyCompare);
 		#endif
 		
 		// NEEDED FOR ZOMBOTS/BOTZOMS???
