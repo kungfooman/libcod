@@ -177,7 +177,10 @@ Scr_Function scriptFunctions[] = {
 	{"mysql_async_getresult_and_free", gsc_mysql_async_getresult_and_free, 0},
 	{"mysql_async_initializer" , gsc_mysql_async_initializer , 0},
 	{"mysql_reuse_connection"  , gsc_mysql_reuse_connection  , 0},
+	#endif
 	
+	#if COMPILE_PLAYER == 1
+	{"free_slot"                   , gsc_free_slot                         , 0},
 	#endif
 	
 	#if COMPILE_MEMORY == 1
@@ -209,7 +212,6 @@ Scr_Function scriptFunctions[] = {
 	{"add_language"                , gsc_add_language                      , 0},
 	{"load_languages"              , gsc_load_languages                    , 0},
 	{"get_language_item"           , gsc_get_language_item                 , 0},
-	{"free_slot"                   , gsc_free_slot                         , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
@@ -271,6 +273,7 @@ Scr_Method scriptMethods[] = {
 	{"getLastConnectTime"    , gsc_player_getLastConnectTime , 0},
 	{"getLastMSG"            , gsc_player_getLastMSG         , 0},
 	{"getAddressType"        , gsc_player_addresstype        , 0},
+	{"getClientState"        , gsc_player_getclientstate     , 0},
 	{"renameBot"             , gsc_player_renamebot          , 0},
 	{"setAlive"              , gsc_entity_setalive           , 0},
 	{"setBounds"             , gsc_entity_setbounds          , 0},

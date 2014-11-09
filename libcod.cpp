@@ -1535,6 +1535,8 @@ char * hook_beginDownloadCopy(char *a1, char *a2, int a3) {
 		beginDownloadCopy_t beginDownloadCopy = (beginDownloadCopy_t)0x81A9E1C;
 	#elif COD_VERSION == COD4_1_7_L
 		beginDownloadCopy_t beginDownloadCopy = (beginDownloadCopy_t)0x81AA54C;
+	#else
+		beginDownloadCopy_t beginDownloadCopy = (beginDownloadCopy_t)NULL;
 	#endif
 	
 	int len = strlen(a2);

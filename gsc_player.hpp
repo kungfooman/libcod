@@ -39,6 +39,7 @@ void gsc_player_ClientCommand(int id);
 
 void gsc_player_getLastConnectTime(int id);
 void gsc_player_getLastMSG(int id);
+void gsc_player_getclientstate(int id);
 
 void gsc_player_addresstype(int id);
 void gsc_player_renamebot(int id);
@@ -46,6 +47,7 @@ void gsc_player_renamebot(int id);
 // entity functions
 void gsc_entity_setalive(int id);
 void gsc_entity_setbounds(int id);
+void gsc_free_slot();
 
 #ifdef __cplusplus
 }

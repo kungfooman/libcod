@@ -33,7 +33,6 @@ void gsc_utils_scandir();
 void gsc_add_language();
 void gsc_load_languages();
 void gsc_get_language_item();
-void gsc_free_slot();
 
 void gsc_utils_fopen();
 void gsc_utils_fread();

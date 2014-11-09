@@ -2,15 +2,15 @@
 
 #if COMPILE_PLAYER == 1
 
-#if COD2_VERSION == COD2_VERSION_1_0
+#if COD_VERSION == COD2_1_0
 	int playerStates = 0x086F1480; // search 'winner'
 	int sizeOfPlayer = 0x28A4;
-#elif COD2_VERSION == COD2_VERSION_1_2
+#elif COD_VERSION == COD2_1_2
 	int playerStates = 0x08705480; // as in game initialisation "------- Game Initializati"
 	int sizeOfPlayer = 0x28A4;
 	// memset(&playerStates_8705480, 0, 0xA2900u);  
 	// then we need a bit math: 0xA2900 / 64 = 0x28A4
-#elif COD2_VERSION == COD2_VERSION_1_3
+#elif COD_VERSION == COD2_1_3
 	// 8716558 pointed on that!! and that i found in setorigin() with ida decompiler
 	// looked it up and it points to game_initialization_8109096()
 	int playerStates = 0x087a2500;
@@ -33,13 +33,13 @@
 	int sizeOfPlayer = NULL;
 #endif
 
-#if COD2_VERSION == COD2_VERSION_1_0
+#if COD_VERSION == COD2_1_0
 	int gentities = 0x08665480;
 	int gentities_size = 560;
-#elif COD2_VERSION == COD2_VERSION_1_2
+#elif COD_VERSION == COD2_1_2
 	int gentities = 0x08679380;
 	int gentities_size = 560;
-#elif COD2_VERSION == COD2_VERSION_1_3
+#elif COD_VERSION == COD2_1_3
 	int gentities = 0x08716400;
 	int gentities_size = 560;
 #elif COD_VERSION == COD4_1_7
@@ -55,14 +55,31 @@
 #endif
 
 #define PLAYERSTATE(playerid) (playerStates + playerid * sizeOfPlayer)
-#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
+#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
 	#define PLAYERSTATE_VELOCITY(playerid) (PLAYERSTATE(playerid) + 0x20)
-#elif COD_VERSION == COD4_1_7
+#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 	#define PLAYERSTATE_VELOCITY(playerid) (PLAYERSTATE(playerid) + 40)
 #else
 	#warning NO PLAYERSTATE_VELOCITY!
 	#define PLAYERSTATE_VELOCITY(playerid) 0
 #endif
+
+#if COD_VERSION == COD2_1_0
+	int info_base = *(int *)0x0841FB0C;
+	int info_size = 0x78F14;
+#elif COD_VERSION == COD2_1_2
+	int info_base = *(int *)0x0842200C;
+	int info_size = 0x79064;
+#elif COD_VERSION == COD2_1_3
+	int info_base = *(int *)0x0842308C;
+	int info_size = 0xB1064;
+#else
+	#warning PLAYERBASE() got no working addresses
+	int info_base = *(int *)0x0;
+	int info_size = 0x0;
+#endif
+	
+#define PLAYERBASE(playerid) (info_base + playerid * info_size)
 
 void gsc_player_velocity_set(int id) {
 	float velocity[3];
@@ -247,8 +264,7 @@ void gsc_player_stance_get(int id) {
 }
 
 void gsc_player_spectatorclient_get(int id) {
-	int entity = playerStates + id * sizeOfPlayer;
-	int spectatorClient = *(unsigned char *)(entity + 0xCC);
+	int spectatorClient = *(unsigned char *)(PLAYERSTATE(id) + 0xCC);
 	
 	//printf("spectator client: %x=%d\n", entity, spectatorClient);
 	
@@ -261,30 +277,18 @@ void gsc_player_spectatorclient_get(int id) {
 }
 
 void gsc_player_getip(int id) {
-	#if COD2_VERSION == COD2_VERSION_1_0
-		int info_base = *(int *)0x0841FB0C;
-		int info_size = 0x78F14;
+	#if COD_VERSION == COD2_1_0
 		int info_ip_offset = 0x6E5C8;
-		int info_port_offset = 0x6E5A4;
-	#elif COD2_VERSION == COD2_VERSION_1_2
-		int info_base = *(int *)0x0842200C;
-		int info_size = 0x79064;
+	#elif COD_VERSION == COD2_1_2
+		int info_ip_offset = 0x6E6D8;	
+	#elif COD_VERSION == COD2_1_3
 		int info_ip_offset = 0x6E6D8;
-		int info_port_offset = 0x6E6B4;	
-	#elif COD2_VERSION == COD2_VERSION_1_3
-		int info_base = *(int *)0x0842308C;
-		int info_size = 0xB1064;
-		int info_ip_offset = 0x6E6D8;
-		int info_port_offset = 0x6E6B4;
 	#else
 		#warning gsc_player_getip() got no working addresses
-		int info_base = *(int *)0x0;
-		int info_size = 0x0;
 		int info_ip_offset = 0x0;
-		int info_port_offset = 0x0;
 	#endif
 	
-	int info_player = info_base + id * info_size;
+	int info_player = PLAYERBASE(id);
 
 	int ip_a = *(unsigned char *)(info_player + info_ip_offset + 0);
 	int ip_b = *(unsigned char *)(info_player + info_ip_offset + 1); // dafuq, its +1 but in IDA its +4 step :S
@@ -300,31 +304,18 @@ void gsc_player_getip(int id) {
 }
 
 void gsc_player_getping(int id) {
-	#if COD2_VERSION == COD2_VERSION_1_0
-		int info_base = *(int *)0x0841FB0C;
-		int info_size = 0x78F14;
-		int info_ip_offset = 0x6E5C8;
+	#if COD_VERSION == COD2_1_0
 		int info_port_offset = 0x6E5A4;
-	#elif COD2_VERSION == COD2_VERSION_1_2
-		int info_base = *(int *)0x0842200C;
-		int info_size = 0x79064;
-		int info_ip_offset = 0x6E6D8;
+	#elif COD_VERSION == COD2_1_2
 		int info_port_offset = 0x6E6B4;
-	#elif COD2_VERSION == COD2_VERSION_1_3
-		int info_base = *(int *)0x0842308C;
-		int info_size = 0xB1064;
-		int info_ip_offset = 0x6E6D8;
+	#elif COD_VERSION == COD2_1_3
 		int info_port_offset = 0x6E6B4;
 	#else
-		#warning gsc_player_getip() got no working addresses
-		int info_base = *(int *)0x0;
-		int info_size = 0x0;
-		int info_ip_offset = 0x0;
+		#warning gsc_player_getport() got no working addresses
 		int info_port_offset = 0x0;
 	#endif
 	
-	int info_player = info_base + id * info_size;
-	int ping = *(unsigned int *)(info_player + info_port_offset);
+	int ping = *(unsigned int *)(PLAYERBASE(id) + info_port_offset);
 	stackPushInt(ping);
 }
 
@@ -333,85 +324,63 @@ void gsc_player_ClientCommand(int id) {
 }
 
 void gsc_player_getLastConnectTime(int id) {
-	#if COD2_VERSION == COD2_VERSION_1_0
+	#if COD_VERSION == COD2_1_0
 		int info_start = *(int *)0x0841FB04;
-		int info_base = *(int *)0x0841FB0C;
-		int info_size = 0x78F14;
 		int info_connecttime_offset = 0x20D14;
-	#elif COD2_VERSION == COD2_VERSION_1_2
+	#elif COD_VERSION == COD2_1_2
 		int info_start = *(int *)0x08422004;
-		int info_base = *(int *)0x0842200C;
-		int info_size = 0x79064;
 		int info_connecttime_offset = 0x20E24;
-	#elif COD2_VERSION == COD2_VERSION_1_3
+	#elif COD_VERSION == COD2_1_3
 		int info_start = *(int *)0x08423084;
-		int info_base = *(int *)0x0842308C;
-		int info_size = 0xB1064;
 		int info_connecttime_offset = 0x20E24;
 	#else
 		#warning gsc_player_getLastConnectTime() got no working addresses
 		int info_start = *(int *)0x0;
-		int info_base = *(int *)0x0;
-		int info_size = 0x0;
 		int info_connecttime_offset = 0x0;
 	#endif
 
-	int info_player = info_base + id * info_size;
-	int lastconnect = info_start - *(unsigned int *)(info_player + info_connecttime_offset);
+	int lastconnect = info_start - *(unsigned int *)(PLAYERBASE(id) + info_connecttime_offset);
 	stackPushInt(lastconnect);
 }
 
 void gsc_player_getLastMSG(int id) {
-	#if COD2_VERSION == COD2_VERSION_1_0
+	#if COD_VERSION == COD2_1_0
 		int info_start = *(int *)0x0841FB04;
-		int info_base = *(int *)0x0841FB0C;
-		int info_size = 0x78F14;
 		int info_lastmsg_offset = 0x20D10;
-	#elif COD2_VERSION == COD2_VERSION_1_2
+	#elif COD_VERSION == COD2_1_2
 		int info_start = *(int *)0x08422004;
-		int info_base = *(int *)0x0842200C;
-		int info_size = 0x79064;
 		int info_lastmsg_offset = 0x20E20;
-	#elif COD2_VERSION == COD2_VERSION_1_3
+	#elif COD_VERSION == COD2_1_3
 		int info_start = *(int *)0x08423084;
-		int info_base = *(int *)0x0842308C;
-		int info_size = 0xB1064;
 		int info_lastmsg_offset = 0x20E20;
 	#else
 		#warning gsc_player_getlastmsg() got no working addresses
 		int info_start = *(int *)0x0;
-		int info_base = *(int *)0x0;
-		int info_size = 0x0;
 		int info_lastmsg_offset = 0x0;
 	#endif
 
-	int info_player = info_base + id * info_size;
-	int lastmsg = info_start - *(unsigned int *)(info_player + info_lastmsg_offset);
+	int lastmsg = info_start - *(unsigned int *)(PLAYERBASE(id) + info_lastmsg_offset);
 	stackPushInt(lastmsg);
 }
 
+void gsc_player_getclientstate(int id) {
+	int info_player = PLAYERBASE(id);
+	stackPushInt(*(int*)info_player);
+}
+
 void gsc_player_addresstype(int id) {
-	#if COD2_VERSION == COD2_VERSION_1_0
-		int info_base = *(int *)0x0841FB0C;
-		int info_size = 0x78F14;
+	#if COD_VERSION == COD2_1_0
 		int info_addresstype_offset = 0x6E5C4;
-	#elif COD2_VERSION == COD2_VERSION_1_2
-		int info_base = *(int *)0x0842200C;
-		int info_size = 0x79064;
+	#elif COD_VERSION == COD2_1_2
 		int info_addresstype_offset = 0x6E6D4;
-	#elif COD2_VERSION == COD2_VERSION_1_3
-		int info_base = *(int *)0x0842308C;
-		int info_size = 0xB1064;
+	#elif COD_VERSION == COD2_1_3
 		int info_addresstype_offset = 0x6E6D4;
 	#else
 		#warning gsc_player_addresstype() got no working addresses
-		int info_base = *(int *)0x0;
-		int info_size = 0x0;
 		int info_addresstype_offset = 0x0;
 	#endif
 
-	int info_player = info_base + id * info_size;
-	int addrtype = *(unsigned int *)(info_player + info_addresstype_offset);
+	int addrtype = *(unsigned int *)(PLAYERBASE(id) + info_addresstype_offset);
 	stackPushInt(addrtype);
 }
 
@@ -424,29 +393,14 @@ void gsc_player_renamebot(int id) {
 		return;
 	}
 	
-	#if COD2_VERSION == COD2_VERSION_1_0
-		int info_base = *(int *)0x0841FB0C;
-		int info_size = 0x78F14;
-	#elif COD2_VERSION == COD2_VERSION_1_2
-		int info_base = *(int *)0x0842200C;
-		int info_size = 0x79064;
-	#elif COD2_VERSION == COD2_VERSION_1_3
-		int info_base = *(int *)0x0842308C;
-		int info_size = 0xB1064;
-	#else
-		#warning gsc_player_renamebot() got no working addresses
-		int info_base = *(int *)0x0;
-		int info_size = 0x0;
-	#endif
-
-	int info_player = info_base + id * info_size;
+	int info_player = PLAYERBASE(id);
 	typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value); // move to functions.hpp?
 	
-	#if COD2_VERSION == COD2_VERSION_1_0
+	#if COD_VERSION == COD2_1_0
 		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B5FF6;
-	#elif COD2_VERSION == COD2_VERSION_1_2
+	#elif COD_VERSION == COD2_1_2
 		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B848A;
-	#elif COD2_VERSION == COD2_VERSION_1_3
+	#elif COD_VERSION == COD2_1_3
 		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B85CE;
 	#else
 		#warning Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)NULL;
@@ -494,6 +448,20 @@ void gsc_entity_setbounds(int id) {
 	
 	printf("id=%d height=%f width=%f\n", id, height, width);
 	stackReturnInt(1);
+}
+
+void gsc_free_slot()
+{
+	int id = 0;
+	if(!stackGetParamInt(0, &id))
+	{
+		printf("Param 0 needs to be an int for free_slot\n");
+		stackPushUndefined();
+		return;
+	}
+	int entity = PLAYERBASE(id);
+	*(int*)entity = 0; //CS_FREE
+	stackPushUndefined();
 }
 
 #endif
