@@ -289,7 +289,7 @@ void gsc_player_getip(int id) {
 		int info_ip_offset = 0x6E6D8;	
 	#elif COD_VERSION == COD2_1_3
 		int info_ip_offset = 0x6E6D8;	
-	#elif COD_VERSION == COD4_1_7 || COD4_1_7_L
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		int info_ip_offset = 0x9;	
 	#else
 		#warning gsc_player_getip() got no working addresses
