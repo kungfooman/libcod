@@ -73,12 +73,18 @@
 #elif COD_VERSION == COD2_1_3
 	int info_base = *(int *)0x0842308C;
 	int info_size = 0xB1064;
+#elif COD_VERSION == COD4_1_7
+	int info_base = 0x090B420C;
+	int info_size = 0x2958F;
+#elif COD_VERSION == COD4_1_7_L
+	int info_base = 0x090B4F8C;
+	int info_size = 0x2958F;
 #else
 	#warning PLAYERBASE() got no working addresses
 	int info_base = *(int *)0x0;
 	int info_size = 0x0;
 #endif
-	
+
 #define PLAYERBASE(playerid) (info_base + playerid * info_size)
 
 void gsc_player_velocity_set(int id) {
@@ -138,7 +144,7 @@ void gsc_player_button_ads(int id) {
 void gsc_player_button_left(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26FD);
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FA7);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
@@ -151,7 +157,7 @@ void gsc_player_button_left(int id) {
 void gsc_player_button_right(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26FD);
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FA7);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
@@ -165,7 +171,7 @@ void gsc_player_button_right(int id) {
 void gsc_player_button_forward(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26FC);
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FA6);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
@@ -179,7 +185,7 @@ void gsc_player_button_forward(int id) {
 void gsc_player_button_back(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26FC);
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FA6);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
@@ -193,7 +199,7 @@ void gsc_player_button_back(int id) {
 void gsc_player_button_leanleft(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26E8);
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FB4);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
@@ -207,7 +213,7 @@ void gsc_player_button_leanleft(int id) {
 void gsc_player_button_leanright(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26E8);
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FB4);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
@@ -221,7 +227,7 @@ void gsc_player_button_leanright(int id) {
 void gsc_player_button_jump(int id) {
 	#if COD2_VERSION == COD2_VERSION_1_0 || COD2_VERSION == COD2_VERSION_1_2 || COD2_VERSION == COD2_VERSION_1_3
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x26E9);
-	#elif COD_VERSION == COD4_1_7
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		unsigned char *aim_address = (unsigned char *)(PLAYERSTATE(id) + 0x2FB5);
 	#else
 		#warning unsigned char *aim_address = (unsigned char *)(NULL);
@@ -282,40 +288,50 @@ void gsc_player_getip(int id) {
 	#elif COD_VERSION == COD2_1_2
 		int info_ip_offset = 0x6E6D8;	
 	#elif COD_VERSION == COD2_1_3
-		int info_ip_offset = 0x6E6D8;
+		int info_ip_offset = 0x6E6D8;	
+	#elif COD_VERSION == COD4_1_7 || COD4_1_7_L
+		int info_ip_offset = 0x9;	
 	#else
 		#warning gsc_player_getip() got no working addresses
 		int info_ip_offset = 0x0;
 	#endif
 	
 	int info_player = PLAYERBASE(id);
-
-	int ip_a = *(unsigned char *)(info_player + info_ip_offset + 0);
-	int ip_b = *(unsigned char *)(info_player + info_ip_offset + 1); // dafuq, its +1 but in IDA its +4 step :S
-	int ip_c = *(unsigned char *)(info_player + info_ip_offset + 2);
-	int ip_d = *(unsigned char *)(info_player + info_ip_offset + 3);
-	//int port = *(unsigned char *)(info_player + info_ip_offset + 16);
-
 	char tmp[64];
-	snprintf(tmp, 64, "%d.%d.%d.%d", ip_a, ip_b, ip_c, ip_d);
+	unsigned int ip_a, ip_b, ip_c, ip_d = 0;
+	
+	#if COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
+	char iphex[9];
+	snprintf(iphex, 9, "%08x", ((int *)info_player)[info_ip_offset]);
+	sscanf(iphex, "%2x%2x%2x%2x", &ip_d, &ip_c, &ip_b, &ip_a);
+	#else
+	ip_a = *(unsigned char *)(info_player + info_ip_offset + 0);
+	ip_b = *(unsigned char *)(info_player + info_ip_offset + 1); // dafuq, its +1 but in IDA its +4 step :S
+	ip_c = *(unsigned char *)(info_player + info_ip_offset + 2);
+	ip_d = *(unsigned char *)(info_player + info_ip_offset + 3);
+	//int port = *(unsigned char *)(info_player + info_ip_offset + 16);
 	//snprintf(tmp, 64, "%d.%d.%d.%d:%d", ip_a, ip_b, ip_c, ip_d, port);
+	#endif
+	snprintf(tmp, 64, "%d.%d.%d.%d", ip_a, ip_b, ip_c, ip_d);
 	
 	stackPushString(tmp);
 }
 
 void gsc_player_getping(int id) {
 	#if COD_VERSION == COD2_1_0
-		int info_port_offset = 0x6E5A4;
+		int info_ping_offset = 0x6E5A4;
 	#elif COD_VERSION == COD2_1_2
-		int info_port_offset = 0x6E6B4;
+		int info_ping_offset = 0x6E6B4;
 	#elif COD_VERSION == COD2_1_3
-		int info_port_offset = 0x6E6B4;
+		int info_ping_offset = 0x6E6B4;
+	#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
+		int info_ping_offset = 0x804EC;
 	#else
 		#warning gsc_player_getport() got no working addresses
-		int info_port_offset = 0x0;
+		int info_ping_offset = 0x0;
 	#endif
 	
-	int ping = *(unsigned int *)(PLAYERBASE(id) + info_port_offset);
+	int ping = *(unsigned int *)(PLAYERBASE(id) + info_ping_offset);
 	stackPushInt(ping);
 }
 
