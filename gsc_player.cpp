@@ -65,13 +65,13 @@
 #endif
 
 #if COD_VERSION == COD2_1_0
-	int info_base = *(int *)0x0841FB0C;
+	int info_base = 0x0841FB0C;
 	int info_size = 0x78F14;
 #elif COD_VERSION == COD2_1_2
-	int info_base = *(int *)0x0842200C;
+	int info_base = 0x0842200C;
 	int info_size = 0x79064;
 #elif COD_VERSION == COD2_1_3
-	int info_base = *(int *)0x0842308C;
+	int info_base = 0x0842308C;
 	int info_size = 0xB1064;
 #elif COD_VERSION == COD4_1_7
 	int info_base = 0x090B420C;
@@ -81,11 +81,11 @@
 	int info_size = 0x2958F;
 #else
 	#warning PLAYERBASE() got no working addresses
-	int info_base = *(int *)0x0;
+	int info_base = 0x0;
 	int info_size = 0x0;
 #endif
 
-#define PLAYERBASE(playerid) (info_base + playerid * info_size)
+#define PLAYERBASE(playerid) (*(int*)(info_base + playerid * info_size))
 
 void gsc_player_velocity_set(int id) {
 	float velocity[3];
@@ -296,15 +296,15 @@ void gsc_player_getip(int id) {
 		int info_ip_offset = 0x0;
 	#endif
 	
-	int info_player = PLAYERBASE(id);
 	char tmp[64];
-	unsigned int ip_a, ip_b, ip_c, ip_d = 0;
+	unsigned int ip_a, ip_b, ip_c, ip_d;
 	
 	#if COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 	char iphex[9];
-	snprintf(iphex, 9, "%08x", ((int *)info_player)[info_ip_offset]);
+	snprintf(iphex, 9, "%08x", ((int *)PLAYERBASE(id))[info_ip_offset]);
 	sscanf(iphex, "%2x%2x%2x%2x", &ip_d, &ip_c, &ip_b, &ip_a);
-	#else
+	#else	
+	int info_player = PLAYERBASE(id);
 	ip_a = *(unsigned char *)(info_player + info_ip_offset + 0);
 	ip_b = *(unsigned char *)(info_player + info_ip_offset + 1); // dafuq, its +1 but in IDA its +4 step :S
 	ip_c = *(unsigned char *)(info_player + info_ip_offset + 2);
