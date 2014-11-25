@@ -85,7 +85,11 @@
 	int playerinfo_size = 0x0;
 #endif
 
-#define PLAYERBASE(playerid) (*(int*)(playerinfo_base) + playerid * playerinfo_size)
+#if COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
+	#define PLAYERBASE(playerid) (playerinfo_base + playerid * playerinfo_size)
+#else
+	#define PLAYERBASE(playerid) (*(int*)(playerinfo_base) + playerid * playerinfo_size)
+#endif
 
 void gsc_player_velocity_set(int id) {
 	float velocity[3];
