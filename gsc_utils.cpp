@@ -636,7 +636,7 @@ void gsc_utils_rundll() {
 		return;
 	}
 		
-	printf("dlopen(\"%s\") returned: %.8x\n", arg_library, handle);
+	printf("dlopen(\"%s\") returned: %.8x\n", arg_library, (unsigned int)handle);
 	
 	void (*func)();
 	//*((void *)&func) = dlsym(handle, arg_function);
@@ -647,7 +647,7 @@ void gsc_utils_rundll() {
 		return;
 	}
 	
-	printf("function-name=%s -> address=%.8x\n", arg_function, func);
+	printf("function-name=%s -> address=%.8x\n", arg_function, (unsigned int)func);
 	func();
 	dlclose(handle);
 	stackPushInt(1);

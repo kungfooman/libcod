@@ -895,7 +895,7 @@ int gsc_mysql_test_0()
 		return stackReturnInt(0);
 	}
 	
-	printf("affected rows: %d\n", mysql_affected_rows(my));
+	printf("affected rows: %llu\n", mysql_affected_rows(my));
 	
 	MYSQL_RES *query;
 	query = mysql_store_result(my);
@@ -907,7 +907,7 @@ int gsc_mysql_test_0()
 		return stackReturnInt(0);
 	}
 	
-	printf("query-num rows: %d\n", mysql_num_rows(query));
+	printf("query-num rows: %llu\n", mysql_num_rows(query));
 	
 	printf("spalten im query: %d\n", mysql_num_fields(query));
 	
@@ -985,8 +985,8 @@ int gsc_mysql_test_1()
 		MYSQL_STMT *stmt;
 		stmt = mysql_stmt_init(my);
 		
-		printf("stmt->stmt_id = %d\n", stmt->stmt_id);
-		printf("stmt->prefetch_rows = %d\n", stmt->prefetch_rows);
+		printf("stmt->stmt_id = %lu\n", stmt->stmt_id);
+		printf("stmt->prefetch_rows = %lu\n", stmt->prefetch_rows);
 		printf("stmt->param_count = %d\n", stmt->param_count);
 		printf("stmt->field_count = %d\n", stmt->field_count);
 		
@@ -1006,8 +1006,8 @@ int gsc_mysql_test_1()
 		
 		// set by mysql_stmt_prepare, before they are just default-values (0,1,0,0)
 		// 
-		printf("stmt->stmt_id = %d\n", stmt->stmt_id);
-		printf("stmt->prefetch_rows = %d\n", stmt->prefetch_rows); // i dont know
+		printf("stmt->stmt_id = %lu\n", stmt->stmt_id);
+		printf("stmt->prefetch_rows = %lu\n", stmt->prefetch_rows); // i dont know
 		printf("stmt->param_count = %d\n", stmt->param_count); // "SELECT ?,?" param_count=2
 		printf("stmt->field_count = %d\n", stmt->field_count); // "SELECT 1,2,3" field_count=3
 		
@@ -1159,7 +1159,7 @@ int gsc_mysql_test_1()
 		return stackReturnInt(0);
 	}
 	
-	printf("affected rows: %d\n", mysql_affected_rows(my));
+	printf("affected rows: %llu\n", mysql_affected_rows(my));
 	
 	MYSQL_RES *query;
 	query = mysql_store_result(my);
@@ -1171,7 +1171,7 @@ int gsc_mysql_test_1()
 		return stackReturnInt(0);
 	}
 	
-	printf("query-num rows: %d\n", mysql_num_rows(query));
+	printf("query-num rows: %llu\n", mysql_num_rows(query));
 	
 	printf("spalten im query: %d\n", mysql_num_fields(query));
 	

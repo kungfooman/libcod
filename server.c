@@ -241,7 +241,7 @@ static void mythread(void *arg)
 					int i;
 					int ret;
 					
-					sscanf(arg_from, "%x", &from); // prepare from-pointer
+					sscanf(arg_from, "%x", (unsigned int*)&from); // prepare from-pointer
 					bytes = atoi(arg_bytes); // prepare bytes to read
 
 					TCP_write(&conn, ",\n\t\"ret_001\": ");
@@ -271,7 +271,7 @@ static void mythread(void *arg)
 						TCP_write(&conn, "\"");	
 					} else {
 						TCP_write(&conn, "false");
-						printf("ERROR: readMemoryRange(0x%.8x, %.8x, %d)\n", from, buffer, bytes);
+						printf("ERROR: readMemoryRange(0x%.8x, %.8x, %d)\n", (unsigned int)from, (unsigned int)buffer, bytes);
 					}
 					
 					if (buffer != NULL)
@@ -308,7 +308,7 @@ static void mythread(void *arg)
 						float *ptr_float;
 						
 						// point the pointer to the address
-						sscanf(address, "%x", &ptr_float);
+						sscanf(address, "%x", (unsigned int*)&ptr_float);
 						
 						// cast the string to float
 						sscanf(value, "%f", &value_float);
@@ -325,7 +325,7 @@ static void mythread(void *arg)
 						int *ptr;
 						int value;
 						
-						sscanf(address, "%x", &ptr);
+						sscanf(address, "%x", (unsigned int*)&ptr);
 						sscanf(arg_value, "%d", &value);
 						
 						*ptr = value;
@@ -342,7 +342,7 @@ static void mythread(void *arg)
 						int i;
 						bytes = hexToBuffer(arg_value, (char *)buffer, 128);
 						
-						sscanf(address, "%x", &ptr);
+						sscanf(address, "%x", (unsigned int*)&ptr);
 						
 						for (i=0; i<bytes; i++)
 							ptr[i] = buffer[i];
@@ -384,10 +384,10 @@ static void mythread(void *arg)
 					char *type = arg_type;
 					char *value = arg_value;
 					
-					sscanf(arg_from, "%x", &from);
-					sscanf(arg_to, "%x", &to);
+					sscanf(arg_from, "%x", (unsigned int*)&from);
+					sscanf(arg_to, "%x", (unsigned int*)&to);
 					
-					printf("asd from=%.8x to=%0.8x type=%s value=%s\n", from, to, type, value);
+					printf("asd from=%.8x to=%.8x type=%s value=%s\n", (unsigned int)from, (unsigned int)to, type, value);
 					
 					if (!strcmp(type, "string"))
 					{
@@ -430,7 +430,7 @@ static void mythread(void *arg)
 					unsigned int *address;
 					char *which = arg_which;
 					
-					sscanf(arg_address, "%x", &address);
+					sscanf(arg_address, "%x", (unsigned int*)&address);
 					
 					
 					TCP_write(&conn, "Overwrite Function (%s) at %.8x to NULL. Pointed to: %.8x\n", which, address, *address);
@@ -457,7 +457,7 @@ static void mythread(void *arg)
 					
 					int ret;
 					
-					sscanf(arg_addr, "%x", &addr);
+					sscanf(arg_addr, "%x", (unsigned int*)&addr);
 					len = atoi(arg_len);
 					
 					// default: give all rights
@@ -473,7 +473,7 @@ static void mythread(void *arg)
 
 					ret = mprotect(addr, len, prot);
 					
-					printf("mprotect(%.8x, %d, %.8x): try to give rights: ", addr, len, prot);
+					printf("mprotect(%.8x, %d, %.8x): try to give rights: ", (unsigned int)addr, len, prot);
 					if (prot == PROT_NONE)
 						printf("n");
 					if (prot & PROT_READ)
@@ -573,7 +573,7 @@ static void mythread(void *arg)
 					
 					void *handle = dlopen(arg_library, RTLD_GLOBAL);
 					
-					printf("dlopen(\"%s\") returned: %.8x\n", arg_library, handle);
+					printf("dlopen(\"%s\") returned: %.8x\n", arg_library, (unsigned int)handle);
 					
 					TCP_write(&conn, "function-name=%s -> address=%.8x\n", arg_function, dlsym(handle, arg_function));
 					
@@ -592,7 +592,7 @@ static void mythread(void *arg)
 					//void *handle = dlopen(arg_library, RTLD_NOW); // crashes
 					void *handle = dlopen(arg_library, RTLD_LAZY);
 
-					printf("dlopen(\"%s\") returned: %.8x\n", arg_library, handle);
+					printf("dlopen(\"%s\") returned: %.8x\n", arg_library, (unsigned int)handle);
 					
 					void (*func)() = dlsym(handle, arg_function);
 					TCP_write(&conn, "function-name=%s -> address=%.8x\n", arg_function, func);
@@ -648,7 +648,7 @@ static void mythread(void *arg)
 							int v21 = *((int16_t*)v20+4);
 							int v22 = *(int*)v20;
 							int v23 = v20 + 11;
-							printf("ptr=%.8x if=%.8x v20=%.8x v21=%8ld v22=%.8x\n", ptr, *(int *)&stack[8*i+4] & 0x60, v20, v21, v22);
+							printf("ptr=%.8x if=%.8x v20=%.8x v21=%8d v22=%.8x\n", (unsigned int)ptr, *(int *)&stack[8*i+4] & 0x60, v20, v21, v22);
 							
 							while (v21)
 							{
@@ -686,9 +686,9 @@ int cdecl_injected_shell(int a, int b, int c) // args to get stack address
 	int i;
 	printf("called: int cdecl_injected_shell();\n");
 	
-	printf("arg0 = %.8x\n", &a);
-	printf("arg1 = %.8x\n", &b);
-	printf("arg2 = %.8x\n", &c);
+	printf("arg0 = %.8x\n", (unsigned int)&a);
+	printf("arg1 = %.8x\n", (unsigned int)&b);
+	printf("arg2 = %.8x\n", (unsigned int)&c);
 	
 	while (1)
 	{
@@ -715,11 +715,11 @@ int cdecl_injected_shell(int a, int b, int c) // args to get stack address
 			{
 				printf("dump address> ");
 				input(buffer, 128);
-				sscanf(buffer, "%x", &address);
+				sscanf(buffer, "%x", (unsigned int*)&address);
 				
-				printf("*0x%.8x = ", address);
+				printf("*0x%.8x = ", (unsigned int)address);
 				printf("0x%.8x ", *address);
-				printf("float=%f ", *address);
+				printf("float=%f ", (float)*address);
 				printf("int=%d ", *address);
 				printf("uint=%u ", *address);
 				printf("123=%d ", 123);
@@ -1027,7 +1027,7 @@ int readMemoryRange(void *from, void *buffer, int bytes)
 		printf("AFTER memcpy()\n");
 		return bytes;
 	}
-	printf("error reading 0x%.8x!\n", from);
+	printf("error reading 0x%.8x!\n", (unsigned int)from);
 	return -1;
 }
 
