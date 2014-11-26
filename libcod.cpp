@@ -177,7 +177,7 @@ int16_t cdecl_gsc_set_field_of_struct(int a1, int a2)
 	ret_sub = sub_807B276(a1, a2);
 	ret = stack[8 * ret_sub];
 
-	printf("cdecl_gsc_set_field_of_struct(a1=%.8x, a2=%.8x) = ret=%ld ret_sub=%.8x;\n", a1, a2, ret, ret_sub);
+	printf("cdecl_gsc_set_field_of_struct(a1=%.8x, a2=%.8x) = ret=%d ret_sub=%.8x;\n", a1, a2, ret, ret_sub);
 	return ret;
 }
 
@@ -211,7 +211,7 @@ void printStackTrace()
 	int ret = backtrace(array, 10);
 	int i;
 	for (i=0; i<ret; i++)
-		printf("%.8x ", array[i]);
+		printf("%.8x ", (unsigned int)array[i]);
 }
 
 int trace_calc_fraction_805B894(aTrace *trace, float *vectorFrom, float *vectorTo, float *nullVector0, float *nullVector1, int isZero, int mask)
@@ -843,10 +843,10 @@ ssize_t hook_recvfrom(int sockfd, void *buf, size_t len, int flags, struct socka
 		
 		if (0)
 		{
-			printf("> recvfrom(fd=%d, buf=%s, len=%zu, flags=%d, src_addr=%p, addrlen=%p) ip:%s\n", sockfd, buf, len, flags, src_addr, addrlen,
+			printf("> recvfrom(fd=%d, buf=%s, len=%zu, flags=%d, src_addr=%p, addrlen=%p) ip:%s\n", sockfd, (char*)buf, len, flags, src_addr, addrlen,
 				inet_ntoa(((struct sockaddr_in *)src_addr)->sin_addr)
 			);
-			printf(">>>>>>>%s<<<<<<<<<\n", buf);
+			printf(">>>>>>>%s<<<<<<<<<\n", (char*)buf);
 		}
 		int port, debug;
 		int ret = sscanf((char*)buf, "\xff\xff\xff\xffweb %d %d", &port, &debug);
@@ -994,7 +994,7 @@ pthread_t hook_pthread_self(void)
 	
 	int ret = signature();
 
-	printf("  pthread_self() = %.8p\n", ret);
+	printf("  pthread_self() = %.8x\n", ret);
 	
     return ret;
 }
@@ -1008,7 +1008,7 @@ int hook_pthread_mutex_lock(pthread_mutex_t *mutex)
 	
 	int ret = signature(mutex);
 
-	printf("  pthread_mutex_lock(%.8p) = %d\n", mutex, ret);
+	printf("  pthread_mutex_lock(%p) = %d\n", mutex, ret);
 	
     return ret;
 }
@@ -1022,7 +1022,7 @@ int hook_pthread_mutex_unlock(pthread_mutex_t *mutex)
 	
 	int ret = signature(mutex);
 
-	printf("pthread_mutex_unlock(%.8p) = %d\n", mutex, ret);
+	printf("pthread_mutex_unlock(%p) = %d\n", mutex, ret);
 	
     return ret;
 }
@@ -1303,7 +1303,7 @@ int SV_AddServerCommand(int *client /*client_t*/, ...)
 	char *tmp = va_arg(ap, char *);
 	
 	va_end(ap);
-	printf("client: %s, tmp=%s\n", client, "");
+	printf("client: %p, tmp=%s\n", client, "");
 	return 0;
 }
 
@@ -1482,7 +1482,7 @@ void SV_SendServerCommand(/*client_t*/int *client, int bla, const char *fmt, ...
 	vsnprintf(message, 4000, fmt, argptr);
 	va_end(argptr);
 	
-	printf("client=%08x bla=%08p message=%s\n", client, bla, message);
+	printf("client=%8p bla=%8x message=%s\n", client, bla, message);
 }
 
 char * hook_AuthorizeState( int arg )
@@ -1624,7 +1624,7 @@ int BG_AnimationIndexForString(char *string)
 				strcpy((char *)(tmp + 8), string);
 				INT(tmp + 4) = hash;
 				INT(INT(0x0857142C))++;
-				if (debug) printf("tmp:%.8p , %.8p", (tmp + 0), INT(tmp + 4));
+				if (debug) printf("tmp:%.8x , %.8x", (tmp + 0), INT(tmp + 4));
 				return INT(0x0857142C) - 1;
 			}
 			if (hash == INT(i+4) && !strcmp(string, (char *)(i + 8)))
@@ -1701,7 +1701,7 @@ int BG_AnimationIndexForString(char *string)
 
 int BG_PlayAnimName(int ps, const char *animName, int bodyPart, int setTimer, int isContinue, int force)
 {
-	printf("BG_PlayAnimName ps=%.8p animName=%s bodePart=%.8p setTimer=%d isContinue=%d force=%d\n",
+	printf("BG_PlayAnimName ps=%.8x animName=%s bodePart=%.8x setTimer=%d isContinue=%d force=%d\n",
 		ps, animName, bodyPart, setTimer, isContinue, force
 	);
 	return 0;
@@ -1710,7 +1710,7 @@ int BG_PlayAnimName(int ps, const char *animName, int bodyPart, int setTimer, in
 int BG_PlayAnim(int ps, int animIndex, int bodyPart, int is_0, int setTimer, int isContinue, int force)
 {
 	if (force)
-		printf("BG_PlayAnim: ps=%.8p animIndex=%d bodyPart=%.8p is_0:%.8p setTimer=%.8p, isContinue=%.8p force=%.8p\n",
+		printf("BG_PlayAnim: ps=%.8x animIndex=%d bodyPart=%.8x is_0:%.8x setTimer=%.8x, isContinue=%.8x force=%.8x\n",
 			ps, animIndex, bodyPart, is_0, setTimer, isContinue, force
 		);
 	return 0;
@@ -1737,7 +1737,7 @@ void MSG_WriteBigString(int *MSG, char *s)
 	int len;
 
 	len = strlen(s);
-	printf("i=%d size_all=%d len=%d MSG=%.8p %s\n", i, size_all, len, MSG, s);
+	printf("i=%d size_all=%d len=%d MSG=%p %s\n", i, size_all, len, MSG, s);
 
 	size_all += len;
 	i++;

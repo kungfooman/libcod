@@ -247,7 +247,7 @@ Scr_FunctionCall Scr_GetCustomFunction(const char **fname, int *fdev) {
 }
 
 void gsc_player_printf(int id) {
-	printf("id: %.8p\n", id);
+	printf("id: %.8x\n", id);
 }
 
 Scr_Method scriptMethods[] = {
@@ -527,7 +527,7 @@ int cdecl_injected_closer_stack_debug()
 	for (i=0; i<numberOfParams; i++)
 	{
 		aStackElement *stackPtr = scriptStack - i;
-		printf("i=%d offsetData=%.8x type=%d\n", i, stackPtr->offsetData, stackPtr->type);
+		printf("i=%d offsetData=%p type=%d\n", i, stackPtr->offsetData, stackPtr->type);
 		
 		switch (stackPtr->type)
 		{
@@ -541,7 +541,7 @@ int cdecl_injected_closer_stack_debug()
 				
 				int type = *(int *)(object_table + 2*((int)stackPtr->offsetData * 8) + 4) % 31;
 				
-				printf("offsetData:%.8p type:%.8p\n", offsetData, type);
+				printf("offsetData:%.8x type:%.8x\n", offsetData, type);
 				
 				break;
 			}
@@ -844,14 +844,14 @@ int sub_807BCA8()
 	
 	var = sub_807B9F8(); // make new variable
 	
-	printf("var=%ld\n", var);
+	printf("var=%d\n", var);
 	ptr = &startStack[4*var];
 	startStack[4 * var + 2] = 96;
 	*(ptr + 2) |= 22;
 	*((int16_t*)ptr + 2) = 0;
 	*((int16_t*)ptr + 3) = 0;
-	printf("(int16_t*)ptr + 2) = %.8x\n", (int16_t*)ptr + 2);
-	printf("(int16_t*)ptr + 3) = %.8x\n", (int16_t*)ptr + 3);
+	printf("(int16_t*)ptr + 2) = %hn\n", (int16_t*)ptr + 2);
+	printf("(int16_t*)ptr + 3) = %hn\n", (int16_t*)ptr + 3);
 	
 	/*
 	var=640
@@ -875,7 +875,7 @@ int level = 0; // for a nice tabbed graphcall
 // gsc_new_variable
 int sub_807AB64(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1)
 {
-	LEVEL_SPACE; printf("setKeyInArray: int sub_807AB64(void *offsetData=%.8x, int key=%.8x, int a_plus_b_mod_fffd_plus_1=%.8x)\n", offsetData, key, a_plus_b_mod_fffd_plus_1);
+	LEVEL_SPACE; printf("setKeyInArray: int sub_807AB64(void *offsetData=%p, int key=%.8x, int a_plus_b_mod_fffd_plus_1=%.8x)\n", offsetData, key, a_plus_b_mod_fffd_plus_1);
 	LEVEL_SPACE; printf("{\n");
 	level++;
 	
@@ -916,7 +916,7 @@ int sub_807AB64(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1)
 	
 int sub_807B064(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1)
 {
-	LEVEL_SPACE; printf("int sub_807B064(void *offsetData=%.8x, int key=%.8x, int a_plus_b_mod_fffd_plus_1=%.8x)\n", offsetData, key, a_plus_b_mod_fffd_plus_1);
+	LEVEL_SPACE; printf("int sub_807B064(void *offsetData=%p, int key=%.8x, int a_plus_b_mod_fffd_plus_1=%.8x)\n", offsetData, key, a_plus_b_mod_fffd_plus_1);
 	LEVEL_SPACE; printf("{\n");
 	level++;
 	
@@ -1112,7 +1112,7 @@ int sub_807B064(void *offsetData, int key, int a_plus_b_mod_fffd_plus_1)
 }
 int sub_807B1E6(void *offsetData, int key)
 {
-	LEVEL_SPACE; printf("int sub_807B1E6(void *offsetData=%.8x, int key=%.8x)\n", offsetData, key);
+	LEVEL_SPACE; printf("int sub_807B1E6(void *offsetData=%p, int key=%.8x)\n", offsetData, key);
 	LEVEL_SPACE; printf("{\n");
 	level++;
 	
@@ -1143,7 +1143,7 @@ int sub_807B1E6(void *offsetData, int key)
 
 int sub_807C71C(void *offsetData, int key)
 {
-	LEVEL_SPACE; printf("int sub_807C71C(void *offsetData=%.8x, int key=%.8x)\n", offsetData, key);
+	LEVEL_SPACE; printf("int sub_807C71C(void *offsetData=%p, int key=%.8x)\n", offsetData, key);
 	LEVEL_SPACE; printf("{\n");
 	level++;
 	
@@ -1216,7 +1216,7 @@ int sub_807C71C(void *offsetData, int key)
 
 int sub_807CB12(int v2, aStackElement *stackElement)
 {
-	LEVEL_SPACE; printf(/*AT*/ "int sub_807CB12(int v2=%.8x, aStackElement *stackElement=%.8x(type=%d))\n", v2, stackElement, stackElement->type);
+	LEVEL_SPACE; printf(/*AT*/ "int sub_807CB12(int v2=%.8x, aStackElement *stackElement=%p(type=%d))\n", v2, stackElement, stackElement->type);
 	LEVEL_SPACE; printf("{\n");
 	level++;
 	
@@ -1280,7 +1280,7 @@ int sub_807CB12(int v2, aStackElement *stackElement)
 
 int sub_80853B6(int key) // setKeyInArray
 {
-	LEVEL_SPACE; printf("int sub_80853B6(int key=%.8p)\n", key);
+	LEVEL_SPACE; printf("int sub_80853B6(int key=%.8x)\n", key);
 	LEVEL_SPACE; printf("{\n");
 	level++;
 
@@ -1674,7 +1674,7 @@ typedef struct aSearchPath_t{
 			{
 				//printf("searhpath %.8p\n", search);
 				//printf("searhpath %.8p %s\n", search, search->dir->path);
-				printf("next:%.8p pack:%.8p dir:%.8p", search->next, search->pack, search->dir);
+				printf("next:%p pack:%p dir:%p", search->next, search->pack, search->dir);
 				if ((int)search->pack /*& 0xffff0000*/)
 				{
 					printf(" pack:");
@@ -1783,7 +1783,7 @@ typedef struct aSearchPath_t{
 
 	int (*BG_PlayAnim)(int ps, int animIndex, int bodyPart, int is_0, int setTimer, int isContinue, int force);
 	*(int *)&BG_PlayAnim = 0x080D8F92;
-	if (0) printf("newAnim=%.8p %.8p %.8p\n",
+	if (0) printf("newAnim=%.8x %.8x %.8x\n",
 		INT(0x0856E3A4) + 96 * 0x118 + 72,
 		INT((0x0856E3A4) + 96 * 0x118 + 72),
 		INT((0x0856E3A4) + 96 * 0x118 + 72) + 50
