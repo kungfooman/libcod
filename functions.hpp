@@ -198,6 +198,26 @@ typedef int (*SV_GameSendServerCommand_t)(int clientNum, signed int a2, const ch
 	static SV_GameSendServerCommand_t SV_GameSendServerCommand = (SV_GameSendServerCommand_t)NULL;
 #endif
 
+typedef void (*SV_DropClient_t)(int a1, char* message);
+#if COD_VERSION == COD2_1_0
+	static SV_DropClient_t SV_DropClient = (SV_DropClient_t)0x0808DC8C;
+#elif COD_VERSION == COD2_1_2
+	static SV_DropClient_t SV_DropClient = (SV_DropClient_t)0x0808EF9A;
+#else
+	#warning SV_DropClient_t SV_DropClient = (SV_DropClient_t)NULL;
+	static SV_DropClient_t SV_DropClient = (SV_DropClient_t)NULL;
+#end if
+
+typedef void (*SV_WriteDownloadToClient_t)(int a1, int a2);
+#if COD_VERSION == COD2_1_0
+	static SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808E544;
+#elif COD_VERSION == COD2_1_2
+	static SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808FD2E;
+#else
+	#warning static SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)NULL;
+	static SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)NULL;
+#endif
+
 typedef int (*SV_BeginDownload_f_t)(int a1);
 static SV_BeginDownload_f_t SV_BeginDownload_f = (SV_BeginDownload_f_t)NULL;
 

@@ -1552,18 +1552,16 @@ char * hook_beginDownloadCopy(char *a1, char *a2, int a3) {
 
 void hook_SV_WriteDownloadToClient(int cl, int msg)
 {
-	if((*(int*)(cl + 134248)) && (*(int*)(cl+452008)**(int*)(cl+452012)/2048000 > 6))
-	{
-		typedef void (*SV_DropClient_t)(int cl, char* message);
-		SV_DropClient_t SV_DropClient = (SV_DropClient_t)0x0808DC8C;
+	#if COD_VERSION == COD2_1_0
+		int offset = 452008;
+	#else
+		int offset = 452280;
+	#endif
+
+	if((*(int*)(cl + 134248)) && (*(int*)(cl+offset)**(int*)(cl+offset+4)/2048000 > 6))
 		SV_DropClient(cl, "broken download");
-	}
 	else
-	{
-		typedef void (*SV_WriteDownloadToClient_t)(int a1, int a2);
-		SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808E544;
 		SV_WriteDownloadToClient(cl, msg);
-	}
 }
 
 void manymaps_prepare(char *mapname);
@@ -1968,10 +1966,6 @@ class cCallOfDuty2Pro
 			*addressToDownloadPointer = (int)hook_SV_BeginDownload_f;
 		#endif
 		
-		#if COD_VERSION == COD2_1_0
-			cracking_hook_call(0x08098CD0, (int)hook_SV_WriteDownloadToClient);
-		#endif
-		
 		#if COD_VERSION == COD4_1_7
 			cracking_hook_function(0x0804AB6C, (int)hook_recvfrom);
 			cracking_hook_call(0x081721AE, (int)hook_beginDownloadCopy);
@@ -2108,6 +2102,7 @@ class cCallOfDuty2Pro
 
 			cracking_hook_call(0x807059F, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x80707C3, (int)Scr_GetCustomMethod);
+			cracking_hook_call(0x08098CD0, (int)hook_SV_WriteDownloadToClient);
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
@@ -2123,6 +2118,7 @@ class cCallOfDuty2Pro
 			
 			//hook_cmd_map = new cHook(0x0808BC7A, (int)cmd_map);
 			//hook_cmd_map->hook();
+			cracking_hook_call(0x0809AD68, (int)hook_SV_WriteDownloadToClient);
 		#elif COD_VERSION == COD2_1_3
 			if (0)
 				cracking_hook_function(0x08094750, (int)SV_AddServerCommand);
