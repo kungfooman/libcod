@@ -1552,12 +1552,18 @@ char * hook_beginDownloadCopy(char *a1, char *a2, int a3) {
 
 void hook_SV_WriteDownloadToClient(int cl, int msg)
 {
-	if(*(int*)(cl + 134248))
-		printf("[DEBUG][%d] Download blocks: %d/%d (rate: %d, snaps: %d)", cl,  *(int*)(cl + 134324), *(int*)(cl + 134332), *(int*)(cl + 452008), *(int*)(cl + 452012));
-
-	typedef void (*SV_WriteDownloadToClient_t)(int a1, int a2);
-	SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808E544;
-	SV_WriteDownloadToClient(cl, msg);
+	if((*(int*)(cl + 134248)) && (*(int*)(cl+452008)**(int*)(cl+452012)/2048000 > 6))
+	{
+		typedef void (*SV_DropClient_t)(int cl, char* message);
+		SV_DropClient_t SV_DropClient = (SV_DropClient_t)0x0808DC8C;
+		SV_DropClient(cl, "broken download");
+	}
+	else
+	{
+		typedef void (*SV_WriteDownloadToClient_t)(int a1, int a2);
+		SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808E544;
+		SV_WriteDownloadToClient(cl, msg);
+	}
 }
 
 void manymaps_prepare(char *mapname);
