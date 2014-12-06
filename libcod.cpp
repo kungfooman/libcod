@@ -1552,7 +1552,8 @@ char * hook_beginDownloadCopy(char *a1, char *a2, int a3) {
 
 void hook_SV_WriteDownloadToClient(int cl, int msg)
 {
-	printf("[DEBUG][%d] Download blocks: %d/%d (rate: %d, snaps: %d)", cl,  *(int*)(cl + 134324), *(int*)(cl + 134332), *(int*)(cl + 452008), *(int*)(cl + 452012));
+	if(*(int*)(cl + 134248))
+		printf("[DEBUG][%d] Download blocks: %d/%d (rate: %d, snaps: %d)", cl,  *(int*)(cl + 134324), *(int*)(cl + 134332), *(int*)(cl + 452008), *(int*)(cl + 452012));
 
 	typedef void (*SV_WriteDownloadToClient_t)(int a1, int a2);
 	SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808E544;
