@@ -1550,6 +1550,15 @@ char * hook_beginDownloadCopy(char *a1, char *a2, int a3) {
 	}
 }
 
+void hook_SV_WriteDownloadToClient(int cl, int msg)
+{
+	printf("[DEBUG][%d] Download blocks: %d/%d (rate: %d, snaps: %d)", cl,  *(int*)(cl + 134324), *(int*)(cl + 134332), *(int*)(cl + 452008), *(int*)(cl + 452012));
+
+	typedef void (*SV_WriteDownloadToClient_t)(int a1, int a2);
+	SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808E544;
+	SV_WriteDownloadToClient(cl, msg);
+}
+
 void manymaps_prepare(char *mapname);
 int hook_findMap(const char *qpath, void **buffer)
 {
@@ -1950,6 +1959,10 @@ class cCallOfDuty2Pro
 			printf("> [INFO] value of download=%.8x\n", *addressToDownloadPointer);
 			SV_BeginDownload_f = (SV_BeginDownload_f_t)*addressToDownloadPointer;
 			*addressToDownloadPointer = (int)hook_SV_BeginDownload_f;
+		#endif
+		
+		#if COD_VERSION == COD2_1_0
+			cracking_hook_call(0x08098CD0, (int)hook_SV_WriteDownloadToClient);
 		#endif
 		
 		#if COD_VERSION == COD4_1_7
