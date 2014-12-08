@@ -226,7 +226,7 @@ typedef int (*SV_GameSendServerCommand_t)(int clientNum, signed int a2, const ch
 	static SV_GameSendServerCommand_t SV_GameSendServerCommand = (SV_GameSendServerCommand_t)NULL;
 #endif
 
-typedef void (*SV_DropClient_t)(int a1, char* message);
+typedef int (*SV_DropClient_t)(int a1, char* message);
 #if COD_VERSION == COD2_1_0
 	static SV_DropClient_t SV_DropClient = (SV_DropClient_t)0x0808DC8C;
 #elif COD_VERSION == COD2_1_2
@@ -234,9 +234,9 @@ typedef void (*SV_DropClient_t)(int a1, char* message);
 #else
 	#warning SV_DropClient_t SV_DropClient = (SV_DropClient_t)NULL;
 	static SV_DropClient_t SV_DropClient = (SV_DropClient_t)NULL;
-#end if
+#endif
 
-typedef void (*SV_WriteDownloadToClient_t)(int a1, int a2);
+typedef int (*SV_WriteDownloadToClient_t)(int a1, int a2);
 #if COD_VERSION == COD2_1_0
 	static SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808E544;
 #elif COD_VERSION == COD2_1_2
