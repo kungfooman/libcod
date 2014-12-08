@@ -231,6 +231,8 @@ typedef int (*SV_DropClient_t)(int a1, char* message);
 	static SV_DropClient_t SV_DropClient = (SV_DropClient_t)0x0808DC8C;
 #elif COD_VERSION == COD2_1_2
 	static SV_DropClient_t SV_DropClient = (SV_DropClient_t)0x0808EF9A;
+#elif COD_VERSION == COD2_1_3
+	static SV_DropClient_t SV_DropClient = (SV_DropClient_t)0x0808F02E;
 #else
 	#warning SV_DropClient_t SV_DropClient = (SV_DropClient_t)NULL;
 	static SV_DropClient_t SV_DropClient = (SV_DropClient_t)NULL;
@@ -241,6 +243,8 @@ typedef int (*SV_WriteDownloadToClient_t)(int a1, int a2);
 	static SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808E544;
 #elif COD_VERSION == COD2_1_2
 	static SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808FD2E;
+#elif COD_VERSION == COD2_1_3
+	static SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)0x0808FDC2;
 #else
 	#warning static SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)NULL;
 	static SV_WriteDownloadToClient_t SV_WriteDownloadToClient = (SV_WriteDownloadToClient_t)NULL;
