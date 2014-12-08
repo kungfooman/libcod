@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <sys/mman.h> // mprotect
+#include <sys/time.h> // gettimeofday
 #include <execinfo.h> // stacktrace
 
 #include "cracking.hpp"
@@ -1485,6 +1486,28 @@ void SV_SendServerCommand(/*client_t*/int *client, int bla, const char *fmt, ...
 	printf("client=%8p bla=%8x message=%s\n", client, bla, message);
 }
 
+static unsigned long long lastbadrconcmdtime = 0;
+
+int hook_SVC_RemoteCommand(int from, int msg)
+{
+	char * rconpass = *(char **)(*(int *)rconPasswordAddress + 8);
+
+	if(!strlen(rconpass) || strcmp(Cmd_Argv(1), rconpass) != 0) 
+	{
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+		unsigned long long time = tv.tv_sec * 1000 + tv.tv_usec / 1000; // in ms
+		
+		if (time<(lastbadrconcmdtime+1000)) { // limit bad rcon flooding
+			return 0;
+		}
+
+		lastbadrconcmdtime = time;
+	}
+
+	SVC_RemoteCommand(from, msg);
+}
+
 char * hook_AuthorizeState( int arg )
 {
 	char * s = Cmd_Argv(arg);
@@ -2143,6 +2166,7 @@ class cCallOfDuty2Pro
 		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
 			cracking_hook_call(hook_AuthorizeState_call, (int)hook_AuthorizeState);
 			cracking_hook_call(hook_findMap_call, (int)hook_findMap);
+			cracking_hook_call(hook_SVC_RemoteCommand_call, (int)hook_SVC_RemoteCommand);
 		#endif
 		
 		#ifdef IS_JAVA_ENABLED

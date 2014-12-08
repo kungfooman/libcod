@@ -165,6 +165,34 @@ typedef int (*FS_LoadDir_t)(char *path, char *dir);
 #endif
 
 #if COD_VERSION == COD2_1_0
+	static int rconPasswordAddress = 0x0848B1C0;
+#elif COD_VERSION == COD2_1_2
+	static int rconPasswordAddress = 0x0849E6C0;
+#elif COD_VERSION == COD2_1_3
+	static int rconPasswordAddress = 0x0849F740;
+#else
+	#warning static int rconPasswordAddress = NULL;
+	static int rconPasswordAddress = NULL;
+#endif
+
+typedef int (*SVC_RemoteCommand_t)(int from, int msg);
+#if COD_VERSION == COD2_1_0
+	static SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)0x080951B4;
+	static int hook_SVC_RemoteCommand_call = 0x08094191;
+#elif COD_VERSION == COD2_1_2
+	static SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)0x080970CC;
+	static int hook_SVC_RemoteCommand_call = 0x08095D63;
+#elif COD_VERSION == COD2_1_3
+	static SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)0x08097188;
+	static int hook_SVC_RemoteCommand_call = 0x08095E1D;
+#else
+	#warning static SVC_RemoteCommand_t SVC_RemoteCommand = NULL;
+	#warning static int hook_SVC_RemoteCommand_call = NULL;
+	static SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)NULL;
+	static int hook_SVC_RemoteCommand_call = (int)NULL;
+#endif
+
+#if COD_VERSION == COD2_1_0
 	static int hook_findMap_call = 0x0808AD00;
 #elif COD_VERSION == COD2_1_2
 	static int hook_findMap_call = 0x0808BCFC;
