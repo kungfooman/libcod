@@ -172,24 +172,29 @@ typedef int (*FS_LoadDir_t)(char *path, char *dir);
 	static int rconPasswordAddress = 0x0849F740;
 #else
 	#warning static int rconPasswordAddress = NULL;
-	static int rconPasswordAddress = NULL;
+	static int rconPasswordAddress = (int)NULL;
 #endif
 
-typedef int (*SVC_RemoteCommand_t)(int from, int msg);
+typedef int (*Com_Milliseconds_t)(void);
 #if COD_VERSION == COD2_1_0
-	static SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)0x080951B4;
-	static int hook_SVC_RemoteCommand_call = 0x08094191;
+	static Com_Milliseconds_t Com_Milliseconds = (Com_Milliseconds_t)0x08061878;
+	static int hook_RemoteCommandTime_call = 0x080951BE;
+	static int remoteCommandLastTimeAddress = 0x0848B674;
 #elif COD_VERSION == COD2_1_2
-	static SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)0x080970CC;
-	static int hook_SVC_RemoteCommand_call = 0x08095D63;
+	static Com_Milliseconds_t Com_Milliseconds = (Com_Milliseconds_t)0x08061B84;
+	static int hook_RemoteCommandTime_call = 0x080970D6;
+	static int remoteCommandLastTimeAddress = 0x0849EB74;
 #elif COD_VERSION == COD2_1_3
-	static SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)0x08097188;
-	static int hook_SVC_RemoteCommand_call = 0x08095E1D;
+	static Com_Milliseconds_t Com_Milliseconds = (Com_Milliseconds_t)0x08061B7C;
+	static int hook_RemoteCommandTime_call = 0x080971BC;
+	static int remoteCommandLastTimeAddress = 0x0849FBF4;
 #else
-	#warning static SVC_RemoteCommand_t SVC_RemoteCommand = NULL;
-	#warning static int hook_SVC_RemoteCommand_call = NULL;
-	static SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)NULL;
-	static int hook_SVC_RemoteCommand_call = (int)NULL;
+	#warning static Com_Milliseconds_t Com_Milliseconds = NULL;
+	#warning static int hook_RemoteCommandTime_call = NULL;
+	#warning static int remoteCommandLastTimeAddress = NULL;
+	static Com_Milliseconds_t Com_Milliseconds = (Com_Milliseconds_t)NULL;
+	static int hook_RemoteCommandTime_call = (int)NULL;
+	static int remoteCommandLastTimeAddress = (int)NULL;
 #endif
 
 #if COD_VERSION == COD2_1_0
