@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include <sys/mman.h> // mprotect
-#include <sys/time.h> // gettimeofday
 #include <execinfo.h> // stacktrace
 
 #include "cracking.hpp"
