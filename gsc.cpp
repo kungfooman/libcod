@@ -278,6 +278,8 @@ Scr_Method scriptMethods[] = {
 	{"renameBot"             , gsc_player_renamebot          , 0},
 	{"setAlive"              , gsc_entity_setalive           , 0},
 	{"setBounds"             , gsc_entity_setbounds          , 0},
+	{"printOutOfBand"        , gsc_player_outofbandprint     , 0},
+	{"connectionlessPacket"  , gsc_player_connectionlesspacket, 0},
 	#endif
 	
 	{NULL, NULL, 0}

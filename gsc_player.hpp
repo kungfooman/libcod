@@ -43,6 +43,8 @@ void gsc_player_getclientstate(int id);
 
 void gsc_player_addresstype(int id);
 void gsc_player_renamebot(int id);
+void gsc_player_outofbandprint(int id);
+void gsc_player_connectionlesspacket(int id);
 
 // entity functions
 void gsc_entity_setalive(int id);

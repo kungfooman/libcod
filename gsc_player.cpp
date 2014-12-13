@@ -436,6 +436,85 @@ void gsc_player_renamebot(int id) {
 	stackPushInt(1);
 }
 
+typedef enum {
+	NA_BOT,
+	NA_BAD, // an address lookup failed
+        NA_LOOPBACK,
+        NA_BROADCAST,
+        NA_IP,
+        NA_IPX,
+        NA_BROADCAST_IPX
+} netadrtype_t;
+
+typedef struct {
+	netadrtype_t type;
+        char ip[4];
+        char ipx[10];
+        unsigned short port;
+} netadr_t;
+
+typedef struct {
+	bool overflowed; // 0 
+	char *data; // 4
+	int maxsize; // 8
+	int cursize; // 12
+	int readcount; // 16
+	int bit;
+} msg_t; // 0x18
+
+void gsc_player_outofbandprint(int id) {
+	char* cmd; // print\ninsert test message here!!!\n
+
+        if ( ! stackGetParams("s", &cmd)) {
+                printf("scriptengine> ERROR: gsc_player_outofbandprint(): param \"cmd\"[1] has to be an string!\n");
+                stackPushUndefined();
+                return;
+        }
+
+	int info_player = PLAYERBASE(id);
+        netadr_t * from = (netadr_t*)(info_player + 452308); // 1.3 only?
+
+	typedef int (*NET_OutOfBandPrint_t)( int sock, netadr_t adr, const char *msg );
+        NET_OutOfBandPrint_t NET_OutOfBandPrint = (NET_OutOfBandPrint_t)0x0806C8CC; // 1.3
+        NET_OutOfBandPrint(0, *from, cmd); // 0 = SERVER, 1 = CLIENT
+
+	stackReturnInt(1);
+}
+
+void gsc_player_connectionlesspacket(int id) {
+	char* cmd; // rcon pass status
+
+	if ( ! stackGetParams("s", &cmd)) {
+		printf("scriptengine> ERROR: gsc_player_connectionlesspacket(): param \"cmd\"[1] has to be an string!\n");
+		stackPushUndefined();
+		return;
+	}
+
+	char message[1024];
+        message[0] = -1;
+        message[1] = -1;
+        message[2] = -1;
+        message[3] = -1;
+        message[4] = 0;
+        strcat(message, cmd);
+	msg_t msg;
+	msg.data = message;
+        msg.maxsize = 131072;
+        msg.cursize = strlen(msg.data)+1;
+        msg.readcount = 0;
+        msg.overflowed = false;
+        msg.bit = 0;
+
+	int info_player = PLAYERBASE(id);
+	netadr_t * from = (netadr_t*)(info_player + 452308); // 1.3 only?
+
+	typedef int (*SV_ConnectionlessPacket_t)(netadr_t from, msg_t * msg);
+	SV_ConnectionlessPacket_t SV_ConnectionlessPacket = (SV_ConnectionlessPacket_t)0x0809594E; // 1.3
+	SV_ConnectionlessPacket(*from, &msg);
+
+	stackReturnInt(1);
+}
+
 // entity functions (could be in own file, but atm not many pure entity functions)
 
 void gsc_entity_setalive(int id) { // as in isAlive?
