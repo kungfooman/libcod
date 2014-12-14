@@ -219,6 +219,56 @@ typedef int (*Com_Milliseconds_t)(void);
 	static int hook_AuthorizeState_call = (int)NULL;
 #endif
 
+typedef enum {
+	NA_BOT,
+	NA_BAD, // an address lookup failed
+    NA_LOOPBACK,
+	NA_BROADCAST,
+	NA_IP,
+	NA_IPX,
+	NA_BROADCAST_IPX
+} netadrtype_t;
+
+typedef struct {
+	netadrtype_t type;
+	char ip[4];
+	char ipx[10];
+	unsigned short port;
+} netadr_t;
+
+typedef struct {
+	bool overflowed; // 0 
+	char *data; // 4
+	int maxsize; // 8
+	int cursize; // 12
+	int readcount; // 16
+	int bit;
+} msg_t; // 0x18
+
+typedef int (*SV_ConnectionlessPacket_t)(netadr_t from, msg_t * msg);
+#if COD_VERSION == COD2_1_0
+	static SV_ConnectionlessPacket_t SV_ConnectionlessPacket = (SV_ConnectionlessPacket_t)0x08093F1E;
+#elif COD_VERSION == COD2_1_2
+	static SV_ConnectionlessPacket_t SV_ConnectionlessPacket = (SV_ConnectionlessPacket_t)0x08095894;
+#elif COD_VERSION == COD2_1_3
+	static SV_ConnectionlessPacket_t SV_ConnectionlessPacket = (SV_ConnectionlessPacket_t)0x0809594E;
+#else
+	#warning static SV_ConnectionlessPacket_t SV_ConnectionlessPacket = NULL;
+	static SV_ConnectionlessPacket_t SV_ConnectionlessPacket = (SV_ConnectionlessPacket_t)NULL;
+#endif
+
+typedef int (*NET_OutOfBandPrint_t)( int sock, netadr_t adr, const char *msg );
+#if COD_VERSION == COD2_1_0
+	static NET_OutOfBandPrint_t NET_OutOfBandPrint = (NET_OutOfBandPrint_t)0x0806C40C;
+#elif COD_VERSION == COD2_1_2
+	static NET_OutOfBandPrint_t NET_OutOfBandPrint = (NET_OutOfBandPrint_t)0x0806C8D4;
+#elif COD_VERSION == COD2_1_3
+	static NET_OutOfBandPrint_t NET_OutOfBandPrint = (NET_OutOfBandPrint_t)0x0806C8CC;
+#else
+	#warning NET_OutOfBandPrint_t NET_OutOfBandPrint =  NULL;
+	static NET_OutOfBandPrint_t NET_OutOfBandPrint = (NET_OutOfBandPrint_t)NULL;
+#endif
+
 typedef int (*SV_GameSendServerCommand_t)(int clientNum, signed int a2, const char *msg);
 #if COD_VERSION == COD2_1_0
 	static SV_GameSendServerCommand_t SV_GameSendServerCommand = (SV_GameSendServerCommand_t)0x0808FE96;
