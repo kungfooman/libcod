@@ -70,7 +70,7 @@ if [ "$1" == "" ] || [ "$1" == "base" ]; then
 	echo "##### COMPILE GSC_ASTAR.CPP #####"
 	$cc $options -c gsc_astar.cpp -o objects_normal/gsc_astar.opp
 	echo "##### COMPILE GSC_MYSQL.CPP #####"
-	$cc $options -c gsc_mysql.cpp -o objects_normal/gsc_mysql.opp -lmysqlclient -L/usr/lib/mysql -std=gnu++11
+	$cc $options -c gsc_mysql.cpp -o objects_normal/gsc_mysql.opp -lmysqlclient -L/usr/lib/mysql
 	echo "##### COMPILE SERVER.C #####"
 	$cc $options -c server.c -o objects_normal/server.opp -D SERVER_PORT=8000
 	echo "##### COMPILE GSC_MEMORY.CPP #####"

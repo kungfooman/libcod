@@ -31,7 +31,8 @@ int gsc_player_state_alive_set();
 void gsc_player_stance_get(int id);
 
 void gsc_player_spectatorclient_get(int id);
-
+void gsc_get_userinfo(int id);
+void gsc_set_userinfo(int id);
 void gsc_player_getip(int id);
 void gsc_player_getping(int id);
 

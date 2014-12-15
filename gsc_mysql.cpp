@@ -10,8 +10,9 @@
 */
 
 #include <mysql/mysql.h>
-#include <thread>
-#include <unistd.h>
+//#include <thread>
+//#include <unistd.h>
+#include <pthread.h>
 
 struct mysql_async_task
 {
@@ -29,7 +30,7 @@ struct mysql_async_connection
 {
 	mysql_async_connection *prev;
 	mysql_async_connection *next;
-	bool in_use;
+	mysql_async_task* task;
 	MYSQL *connection;
 };
 
@@ -37,14 +38,24 @@ mysql_async_connection *first_async_connection = NULL;
 mysql_async_task *first_async_task = NULL;
 MYSQL *cod_mysql_connection = NULL;
 
-void mysql_async_execute_query(mysql_async_task *q, mysql_async_connection *c) //cannot be called from gsc, is threaded.
+void *mysql_async_execute_query(void *input_c) //cannot be called from gsc, is threaded.
 {
+	mysql_async_connection *c = (mysql_async_connection *) input_c;
 	int i = 0;
 	int lastquery = 0;
 	bool goodquery = false;
+	bool opened = false;
+	mysql_async_task *q = c->task;
 	while(q->query[i] != '\0')
 	{
-		if(q->query[i] == ';' && i > 0 && q->query[i - 1] != '\\')
+		if(q->query[i] == '\'' && i > 0 && q->query[i - 1] != '\\')
+		{
+			if(opened)
+				opened = false;
+			else
+				opened = true;
+		}
+		if(q->query[i] == ';' && i > 0 && q->query[i - 1] != '\\' && !opened)
 		{
 			//subquery
 			q->query[i] = '\0';
@@ -71,17 +82,18 @@ void mysql_async_execute_query(mysql_async_task *q, mysql_async_connection *c) /
 	}
 	if(goodquery && q->save)
 		q->result = mysql_store_result(c->connection);
-	c->in_use = false;
+	c->task = NULL;
 	q->done = true;
+	return NULL;
 }
 
-void mysql_async_query_handler() //is threaded after initialize
+void *mysql_async_query_handler(void* input_nothing) //is threaded after initialize
 {
 	static bool started = false;
 	if(started)
 	{
 		printf("scriptengine> async handler already started. Returning\n");
-		return;
+		return NULL;
 	}
 	started = true;
 	mysql_async_connection *c = first_async_connection;
@@ -89,7 +101,7 @@ void mysql_async_query_handler() //is threaded after initialize
 	{
 		printf("scriptengine> async handler started before any connection was initialized\n"); //this should never happen
 		started = false;
-		return;
+		return NULL;
 	}
 	mysql_async_task *q;
 	while(true)
@@ -100,7 +112,7 @@ void mysql_async_query_handler() //is threaded after initialize
 		{
 			if(!q->started)
 			{
-				while(c != NULL && c->in_use)
+				while(c != NULL && c->task != NULL)
 					c = c->next;
 				if(c == NULL)
 				{
@@ -108,15 +120,25 @@ void mysql_async_query_handler() //is threaded after initialize
 					break;
 				}
 				q->started = true;
-				c->in_use = true;
-				std::thread async_query(mysql_async_execute_query, q, c);
-				async_query.detach();
+				c->task = q;
+				pthread_t query_doer;
+				int error = pthread_create(&query_doer, NULL, mysql_async_execute_query, c);
+				if(error)
+				{
+					printf("error: %d\n", error);
+					printf("Error detaching async handler thread\n");
+					return NULL;
+				}
+				pthread_detach(query_doer);
+				//std::thread async_query(mysql_async_execute_query, q, c);
+				//async_query.detach();
 				c = c->next;
 			}
 			q = q->next;
 		}
 		usleep(10000);
 	}
+	return NULL;
 }
 
 int mysql_async_query_initializer(char *sql, bool save) //cannot be called from gsc, helper function
@@ -266,7 +288,7 @@ void gsc_mysql_async_initializer()//returns array with mysql connection handlers
 		newconnection->connection = mysql_real_connect((MYSQL*)newconnection->connection, host, user, pass, db, port, NULL, 0);
 		my_bool reconnect = true;
 		mysql_options(newconnection->connection, MYSQL_OPT_RECONNECT, &reconnect);
-		newconnection->in_use = false;
+		newconnection->task = NULL;
 		if(current == NULL)
 		{
 			newconnection->prev = NULL;
@@ -283,8 +305,15 @@ void gsc_mysql_async_initializer()//returns array with mysql connection handlers
 		stackPushInt((int)newconnection->connection);
 		stackPushArrayLast();
 	}
-	std::thread async_query(mysql_async_query_handler);
-	async_query.detach();
+	pthread_t async_handler;
+	if(pthread_create(&async_handler, NULL, mysql_async_query_handler, NULL))
+	{
+		printf("Error detaching async handler thread\n");
+		return;
+	}
+	pthread_detach(async_handler);
+	//std::thread async_query(mysql_async_query_handler);
+	//async_query.detach();
 }
 
 void gsc_mysql_init() {

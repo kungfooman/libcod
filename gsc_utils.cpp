@@ -53,12 +53,13 @@ void gsc_add_language()
 	}
 	strcpy(languages[languages_defined], str);
 	languages_defined++;
-	printf("Added %s as language %d\n", str, languages_defined);
+	//printf("Added %s as language %d\n", str, languages_defined);
 	stackPushInt(0);
 }
 
 void add_lang_item(char* lang, char* item, char* txt)
 {
+	//printf("adding %s to %s, contents: %s\n", item, lang, txt);
 	int language_number = -1;
 	for(int i = 0; i < languages_defined; i++)
 	{
@@ -90,6 +91,7 @@ void add_lang_item(char* lang, char* item, char* txt)
 	bool fill_other_langs = false;
 	if(language_item_number == language_items_defined)
 	{
+		//printf("malloccing item\n");
 		char *item_m = (char*)malloc(sizeof(char) * (COD2_MAX_STRINGLENGTH + 1));
 		if(item_m == NULL)
 		{
@@ -106,6 +108,7 @@ void add_lang_item(char* lang, char* item, char* txt)
 	char *txt_m;
 	if(!language_reference_mallocd[language_number][language_item_number])
 	{
+		//printf("malloccing text\n");
 		txt_m = (char*)malloc(sizeof(char) * (COD2_MAX_STRINGLENGTH + 1));
 		if(txt_m == NULL)
 		{
@@ -115,11 +118,14 @@ void add_lang_item(char* lang, char* item, char* txt)
 		language_reference_mallocd[language_number][language_item_number] = true;
 		language_references[language_number][language_item_number] = txt_m;
 	}
-	else
-		txt_m = language_references[language_number][language_item_number];
+	{
+		//printf("reusing previous malloc\n");
+ 		txt_m = language_references[language_number][language_item_number];
+	}
 	strncpy(txt_m, txt, COD2_MAX_STRINGLENGTH);
 	if(fill_other_langs)
 	{
+		//printf("filling other items\n");
 		for(int i = 0; i < languages_defined; i++)
 		{
 			if(i == language_number)
@@ -300,9 +306,10 @@ void gsc_get_language_item()
 		stackPushUndefined();
 		return;
 	}
-	if(str[0] == '\0' || str[1] == '\0' || str[3] != '\0')
+	//printf("str: %s, str2: %s\n", str, str2);
+	if(str[0] == '\0' || str[1] == '\0')
 	{
-		printf("Invalid language item requested. Should be like EN_HELLO_WORLD\n");
+		printf("Invalid language item requested. Should be like EN\n");
 		stackPushUndefined();
 		return;
 	}
@@ -334,10 +341,11 @@ void gsc_get_language_item()
 	}
 	if(language_item_number == -1)
 	{
-		//printf("Invalid language item selected. Load language items first\n");
+		printf("Invalid language item selected. Load language items first\n");
 		stackPushString(str2);
 		return;
 	}
+	//printf("found: %s\n", language_references[language_number][language_item_number]);
 	stackPushString(language_references[language_number][language_item_number]);
 }
 
