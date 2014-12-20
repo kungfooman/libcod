@@ -151,9 +151,22 @@ void gsc_utils_printfline() {
 	printf("\n");
 }
 
+void gsc_utils_com_printf() {
+	char *str;
+	if ( ! stackGetParams("s", &str)) {
+		printf("scriptengine> WARNING: printf undefined argument!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	Com_Printf("%s", str);
+	stackPushInt(1);
+}
+
 Scr_Function scriptFunctions[] = {
 	{"printf", gsc_utils_printf, 0},
 	{"printfline", gsc_utils_printfline, 0}, // adds \n at end
+	{"com_printf", gsc_utils_com_printf, 0},
 	
 	#if COMPILE_MYSQL == 1
 	{"mysql_init"              , gsc_mysql_init              , 0},
