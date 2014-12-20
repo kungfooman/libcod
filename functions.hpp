@@ -269,6 +269,18 @@ typedef int (*NET_OutOfBandPrint_t)( int sock, netadr_t adr, const char *msg );
 	static NET_OutOfBandPrint_t NET_OutOfBandPrint = (NET_OutOfBandPrint_t)NULL;
 #endif
 
+typedef int (*SV_FlushRedirect_t)(const char *outputbuf);
+#if COD_VERSION == COD2_1_0
+	static SV_FlushRedirect_t SV_FlushRedirect = (SV_FlushRedirect_t)0x0809507C;
+#elif COD_VERSION == COD2_1_2
+	static SV_FlushRedirect_t SV_FlushRedirect = (SV_FlushRedirect_t)0x08096F94;
+#elif COD_VERSION == COD2_1_3
+	static SV_FlushRedirect_t SV_FlushRedirect = (SV_FlushRedirect_t)0x08097050;
+#else
+	#warning SV_FlushRedirect_t SV_FlushRedirect = NULL;
+	static SV_FlushRedirect_t SV_FlushRedirect = (SV_FlushRedirect_t)NULL;
+#endif
+
 typedef int (*SV_GameSendServerCommand_t)(int clientNum, signed int a2, const char *msg);
 #if COD_VERSION == COD2_1_0
 	static SV_GameSendServerCommand_t SV_GameSendServerCommand = (SV_GameSendServerCommand_t)0x0808FE96;

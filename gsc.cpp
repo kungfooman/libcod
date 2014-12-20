@@ -154,7 +154,7 @@ void gsc_utils_printfline() {
 void gsc_utils_com_printf() {
 	char *str;
 	if ( ! stackGetParams("s", &str)) {
-		printf("scriptengine> WARNING: printf undefined argument!\n");
+		printf("scriptengine> WARNING: com_printf undefined argument!\n");
 		stackPushUndefined();
 		return;
 	}
@@ -168,10 +168,23 @@ void gsc_utils_com_printf() {
 	stackPushInt(1);
 }
 
+void gsc_utils_redirectmessage() {
+	char *str;
+	if ( ! stackGetParams("s", &str)) {
+		printf("scriptengine> WARNING: redirectmessage undefined argument!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	SV_FlushRedirect(str);
+	stackPushInt(1);
+}
+
 Scr_Function scriptFunctions[] = {
 	{"printf", gsc_utils_printf, 0},
 	{"printfline", gsc_utils_printfline, 0}, // adds \n at end
 	{"com_printf", gsc_utils_com_printf, 0},
+	{"redirectmessage", gsc_utils_redirectmessage, 0},
 	
 	#if COMPILE_MYSQL == 1
 	{"mysql_init"              , gsc_mysql_init              , 0},
