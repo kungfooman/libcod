@@ -48,7 +48,7 @@ typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
 	static trap_Argv_t trap_Argv = (trap_Argv_t)NULL;
 #endif
 
-#if COD_VERSION == COD4_1_7
+#if COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 	typedef int (*Com_Printf_t)(int a1, const char *format, ...);
 #else
 	typedef int (*Com_Printf_t)(const char *format, ...);

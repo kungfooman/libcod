@@ -159,7 +159,12 @@ void gsc_utils_com_printf() {
 		return;
 	}
 	
-	Com_Printf("%s", str);
+	#if COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
+		Com_Printf(0, "%s", str);
+	#else
+		Com_Printf("%s", str);
+	#endif
+	
 	stackPushInt(1);
 }
 
