@@ -133,60 +133,26 @@ void gsc_player_velocity_add(int id) {
 
 void gsc_get_userinfo(int id)
 {
-	int entity = PLAYERBASE(id);
-	char userinfo[1024];
-	strncpy(userinfo, (char*)entity + 12, 1024);
-	int cur = 0;
-	bool iskey = false;
-	char keyname[1024];
-	int prev = cur;
 	char* key;
+	char* val;
 	if(!stackGetParamString(0, &key))
 	{
 		printf("First param needs to be a string for get_userinfo\n");
 		stackPushUndefined();
 		return;
 	}
-	while(userinfo[cur] != '\0' && cur < 1024)
-	{
-		if(userinfo[cur] == '\\')
-		{
-			iskey = !iskey;
-			if(!iskey)
-			{
-				strncpy(keyname, &userinfo[prev + 1], cur - prev - 1);
-				keyname[cur - prev - 1] = '\0';
-				prev = cur;
-			}
-			else if(prev != cur)
-			{
-				if(strcmp(key, keyname) == 0)
-				{
-					char keyvalue[1024];
-					strncpy(keyvalue, &userinfo[prev + 1], cur - prev - 1);
-					keyvalue[cur - prev - 1] = '\0';
-					stackPushString(keyvalue);
-					return;
-				}
-				prev = cur;
-			}
-		}
-		cur++;
-	}
-	stackPushUndefined();
-	return;
+	
+	int entity = PLAYERBASE(id);
+	val = Info_ValueForKey((char*)entity+12, key);
+	
+	if(strlen(val))
+		stackPushString(val);
+	else
+		stackPushUndefined();
 }
 
 void gsc_set_userinfo(int id)
 {
-	int entity = PLAYERBASE(id);
-	char userinfo[1024];
-	char new_userinfo[1024];
-	strncpy(userinfo, (char*)entity + 12, 1024);
-	int cur = 0;
-	bool iskey = false;
-	char keyname[1024];
-	int prev = cur;
 	char* key;
 	char* value;
 	if(!stackGetParamString(0, &key))
@@ -201,42 +167,10 @@ void gsc_set_userinfo(int id)
 		stackPushUndefined();
 		return;
 	}
-	printf("using %s and %s for set_userinfo\n", key, value);
-	printf("userinfo is: %s\n", userinfo);
-	while(userinfo[cur] != '\0' && cur < 1024)
-	{
-		new_userinfo[cur] = userinfo[cur];
-		printf("adding to userinfo: %c\n", new_userinfo[cur]);
-		if(userinfo[cur] == '\\')
-		{
-			printf("equal to \\\n");
-			iskey = !iskey;
-			if(!iskey)
-			{
-				strncpy(keyname, &userinfo[prev + 1], cur - prev - 1);
-				keyname[cur - prev - 1] = '\0';
-				prev = cur;
-			}
-			else if(prev != cur)
-			{
-				if(strcmp(key, keyname) == 0)
-				{
-					printf("Found key you were looking for at position %d\n", prev + 1);
-					strncpy(&new_userinfo[prev + 1], value, strlen(value));
-					printf("Current new_userinfO: %s\n", new_userinfo);
-					strncpy(&new_userinfo[prev + 1 + strlen(value)], &userinfo[cur], 1024 - strlen(&new_userinfo[prev + 1 + strlen(value)]));
-					strncpy((char*)entity + 12, new_userinfo, 1024);
-					printf("Final newuserinfo: %s\n", new_userinfo);
-					stackPushString(new_userinfo);
-					return;
-				}
-				prev = cur;
-			}
-		}
-		cur++;
-	}
+	
+	int entity = PLAYERBASE(id);
+	Info_SetValueForKey((char*)entity + 12, key, value);
 	stackPushUndefined();
-	return;
 }
 
 void gsc_player_velocity_get(int id) {
@@ -522,21 +456,8 @@ void gsc_player_renamebot(int id) {
 	}
 	
 	int info_player = PLAYERBASE(id);
-	typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value); // move to functions.hpp?
-	
-	#if COD_VERSION == COD2_1_0
-		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B5FF6;
-	#elif COD_VERSION == COD2_1_2
-		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B848A;
-	#elif COD_VERSION == COD2_1_3
-		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B85CE;
-	#else
-		#warning Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)NULL;
-		Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)NULL;
-	#endif
-	
-	Info_SetValueForKey((char *)(unsigned int *)(info_player + 12), "name", key);
-	char * name = (char *)(unsigned int *)(info_player + 134216);
+	Info_SetValueForKey((char *)(info_player + 12), "name", key);
+	char * name = (char *)(info_player + 134216);
 	memcpy(&name[0], key, 32);
 	name[31] = '\0';
 	printf("name = %s\n", name);

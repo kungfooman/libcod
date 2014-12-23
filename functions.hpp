@@ -320,6 +320,30 @@ typedef int (*SV_WriteDownloadToClient_t)(int a1, int a2);
 typedef int (*SV_BeginDownload_f_t)(int a1);
 static SV_BeginDownload_f_t SV_BeginDownload_f = (SV_BeginDownload_f_t)NULL;
 
+typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value); // move to functions.hpp?
+#if COD_VERSION == COD2_1_0
+	static Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B5FF6;
+#elif COD_VERSION == COD2_1_2
+	static Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B848A;
+#elif COD_VERSION == COD2_1_3
+	static Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B85CE;
+#else
+	#warning Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)NULL;
+	static Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)NULL;
+#endif
+
+typedef int (*Info_ValueForKey_t)(char *s, const char *key);
+#if COD_VERSION == COD2_1_0
+	static Info_ValueForKey_t Info_ValueForKey = (Info_ValueForKey_t)0x080B5B30;
+#elif COD_VERSION == COD2_1_2
+	static Info_ValueForKey_t Info_ValueForKey = (Info_ValueForKey_t)0x080B7FC4;
+#elif COD_VERSION == COD2_1_3
+	static Info_ValueForKey_t Info_ValueForKey = (Info_ValueForKey_t)0x080B8108;
+#else
+	#warning Info_ValueForKey_t Info_ValueForKey = (Info_ValueForKey_t)NULL;
+	static Info_ValueForKey_t Info_ValueForKey = (Info_ValueForKey_t)NULL;
+#endif
+
 typedef short (*codscript_call_callback_entity_t)(int self, int callback, int params);
 #if COD_VERSION == COD2_1_0
 	static codscript_call_callback_entity_t codscript_call_callback_entity = (codscript_call_callback_entity_t)0x08118DF4; // search 'badMOD'
