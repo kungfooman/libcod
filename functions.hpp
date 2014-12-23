@@ -332,7 +332,7 @@ typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value
 	static Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)NULL;
 #endif
 
-typedef int (*Info_ValueForKey_t)(char *s, const char *key);
+typedef char* (*Info_ValueForKey_t)(char *s, const char *key);
 #if COD_VERSION == COD2_1_0
 	static Info_ValueForKey_t Info_ValueForKey = (Info_ValueForKey_t)0x080B5B30;
 #elif COD_VERSION == COD2_1_2
