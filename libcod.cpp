@@ -1850,6 +1850,11 @@ int cmd_map()
 	return ret;
 }
 
+int hook_dummytrue(const char *src)
+{
+	return 1;
+}
+
 #define TOSTRING2(str) #str
 #define TOSTRING1(str) TOSTRING2(str) // else there is written "__LINE__"
 class cCallOfDuty2Pro
@@ -2142,6 +2147,7 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x080AC5D8, (int)SV_SendServerCommand);
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
+			cracking_hook_call(0x08103FE1, (int)hook_dummytrue);
 		#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 			extern cHook *hook_Scr_GetFunction;
 			extern cHook *hook_Scr_GetMethod;
