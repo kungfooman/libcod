@@ -770,8 +770,9 @@ void gsc_G_FindConfigstringIndex() {
 	#elif COD_VERSION == COD2_1_3
 		*(int*)&sig = 0x0811D300;
 	#endif
-	
-	stackPushInt(sig(name, min, max, create, "G_FindConfigstringIndex() from GSC"));
+	int ret = sig(name, min, max, create, "G_FindConfigstringIndex() from GSC");
+	ret += min; // the real array index
+	stackPushInt(ret);
 }
 
 #endif
