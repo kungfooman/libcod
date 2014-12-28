@@ -2131,8 +2131,9 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x08094958, (int)SV_SendServerCommand);
 				
 			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
-			cracking_hook_call(0x8070B1B, (int)Scr_GetCustomFunction);
-			cracking_hook_call(0x8070D3F, (int)Scr_GetCustomMethod);
+			cracking_hook_call(0x08070B1B, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x08070D3F, (int)Scr_GetCustomMethod);
+			cracking_hook_call(0x08103E85, (int)hook_dummytrue);
 			
 			hook_MSG_WriteBigString = new cHook(0x0806825E, (int)MSG_WriteBigString);
 			//hook_MSG_WriteBigString->hook();
