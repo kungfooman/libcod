@@ -755,4 +755,23 @@ void gsc_utils_fclose() {
 	assert(file);
 	stackPushInt( fclose(file) );
 }
+
+// http://code.metager.de/source/xref/RavenSoftware/jediacademy/code/game/g_utils.cpp#36
+void gsc_G_FindConfigstringIndex() {
+	char *name;
+	int min, max, create;
+	if ( ! stackGetParams("siii", &name, &min, &max, &create)) {
+		stackPushUndefined();
+		return;
+	}
+	signed int (*sig)(char *name, int min, int max, int create, char *errormessage);
+	#if COD_VERSION == COD2_1_2
+		*(int*)&sig = 0x0811D1A4;
+	#elif COD_VERSION == COD2_1_3
+		*(int*)&sig = 0x0811D300;
+	#endif
+	
+	stackPushInt(sig(name, min, max, create, "G_FindConfigstringIndex() from GSC"));
+}
+
 #endif
