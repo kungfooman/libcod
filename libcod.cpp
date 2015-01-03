@@ -1855,7 +1855,7 @@ int hook_dummytrue(const char *src)
 	return 1;
 }
 
-const char* hook_settext_paramlocString(int param)
+const char* hook_settext_paramlocString(int param) // accept string and localized string
 {
 	typedef const char* (*stackGetParamLocalizedString_t)(int param);
 
@@ -1872,11 +1872,7 @@ const char* hook_settext_paramlocString(int param)
 		return str;
 	}
 	else
-	{
-		const char* locstring = stackGetParamLocalizedString(param); // return to original function
-		printf("Localized String: %s\n", locstring);
-		return locstring;
-	}
+		return stackGetParamLocalizedString(param); // return to original function
 }
 
 #define TOSTRING2(str) #str
