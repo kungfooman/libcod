@@ -1485,6 +1485,26 @@ void SV_SendServerCommand(/*client_t*/int *client, int bla, const char *fmt, ...
 	printf("client=%8p bla=%8x message=%s\n", client, bla, message);
 }
 
+cHook *hook_parent_of_SV_SendServerCommand;
+void parent_of_SV_SendServerCommand(signed int nr, const char *fmt, ...)
+{
+	char message[4000];
+	va_list argptr;
+	va_start(argptr, fmt);
+	vsnprintf(message, 4000, fmt, argptr);
+	va_end(argptr);
+	
+	printf("nr=%8p message=%s\n", nr, message);
+	
+	hook_parent_of_SV_SendServerCommand->unhook();
+	int (*sig)(signed int nr, const char *fmt, ...);
+	*(int *)&sig = hook_parent_of_SV_SendServerCommand->from;
+	int ret = sig(nr, fmt, argptr);
+	hook_parent_of_SV_SendServerCommand->hook();
+}
+
+
+
 int hook_RemoteCommandTime(void)
 {
 	unsigned int time = Com_Milliseconds();
@@ -2149,10 +2169,15 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x08094958, (int)SV_SendServerCommand);
-				
+			if (0) {
+				hook_parent_of_SV_SendServerCommand = new cHook(0x0809267C, (int)parent_of_SV_SendServerCommand);
+				hook_parent_of_SV_SendServerCommand->hook();
+			}
+			
 			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
-			cracking_hook_call(0x8070B1B, (int)Scr_GetCustomFunction);
-			cracking_hook_call(0x8070D3F, (int)Scr_GetCustomMethod);
+			cracking_hook_call(0x08070B1B, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x08070D3F, (int)Scr_GetCustomMethod);
+			cracking_hook_call(0x08103E85, (int)hook_dummytrue);
 			
 			hook_MSG_WriteBigString = new cHook(0x0806825E, (int)MSG_WriteBigString);
 			//hook_MSG_WriteBigString->hook();
@@ -2165,6 +2190,10 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x08094750, (int)SV_AddServerCommand);
 			if (0)
 				cracking_hook_function(0x080AC5D8, (int)SV_SendServerCommand);
+			if (0) {
+				hook_parent_of_SV_SendServerCommand = new cHook(0x08092780, (int)parent_of_SV_SendServerCommand);
+				hook_parent_of_SV_SendServerCommand->hook();
+			}
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08103FE1, (int)hook_dummytrue);

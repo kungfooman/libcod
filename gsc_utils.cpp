@@ -755,4 +755,56 @@ void gsc_utils_fclose() {
 	assert(file);
 	stackPushInt( fclose(file) );
 }
+
+// http://code.metager.de/source/xref/RavenSoftware/jediacademy/code/game/g_utils.cpp#36
+void gsc_G_FindConfigstringIndexOriginal() {
+	char *name;
+	int min, max, create;
+	if ( ! stackGetParams("siii", &name, &min, &max, &create)) {
+		stackPushUndefined();
+		return;
+	}
+	signed int (*sig)(char *name, int min, int max, int create, char *errormessage);
+	#if COD_VERSION == COD2_1_0
+		*(int*)&sig = 0x0811AE70;
+	#elif COD_VERSION == COD2_1_2
+		*(int*)&sig = 0x0811D1A4;
+	#elif COD_VERSION == COD2_1_3
+		*(int*)&sig = 0x0811D300;
+	#endif
+	int ret = sig(name, min, max, create, "G_FindConfigstringIndex() from GSC");
+	ret += min; // the real array index
+	stackPushInt(ret);
+}
+
+// simple version, without crash
+void gsc_G_FindConfigstringIndex()
+{
+	char *name;
+	int min, max;
+	char* (*func)(int i);
+	if ( ! stackGetParams("sii", &name, &min, &max)) {
+		stackPushUndefined();
+		return;
+	}
+	#if COD_VERSION == COD2_1_0
+		*(int*)&func = 0x08091108;
+	#elif COD_VERSION == COD2_1_2
+		*(int*)&func = 0x08092918;
+	#elif COD_VERSION == COD2_1_3
+		*(int*)&func = 0x08092a1c;
+	#endif
+	for (int i = 1; i < max; i++) {
+		char *curitem = func(min + i);
+		if ( ! *curitem)
+			break;
+		if ( ! strcasecmp(name, curitem)) {
+			stackPushInt(i + min);
+			return;
+		}
+	}
+	stackPushInt(0);
+	return;
+}
+
 #endif
