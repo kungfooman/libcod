@@ -1855,6 +1855,30 @@ int hook_dummytrue(const char *src)
 	return 1;
 }
 
+const char* hook_settext_paramlocString(int param)
+{
+	typedef const char* (*stackGetParamLocalizedString_t)(int param);
+
+	#if COD_VERSION == COD2_1_3
+		stackGetParamLocalizedString_t stackGetParamLocalizedString = (stackGetParamLocalizedString_t)0x08084D24;
+	#else
+		stackGetParamLocalizedString_t stackGetParamLocalizedString = (stackGetParamLocalizedString_t)NULL;
+	#endif
+	
+	if(stackGetParamType(param) == STACK_STRING)
+	{
+		char* str;
+		stackGetParamString(param, &str);
+		return str;
+	}
+	else
+	{
+		const char* locstring = stackGetParamLocalizedString(param); // return to original function
+		printf("Localized String: %s\n", locstring);
+		return locstring;
+	}
+}
+
 #define TOSTRING2(str) #str
 #define TOSTRING1(str) TOSTRING2(str) // else there is written "__LINE__"
 class cCallOfDuty2Pro
@@ -2148,6 +2172,7 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08103FE1, (int)hook_dummytrue);
+			cracking_hook_call(0x08103FE1, (int)hook_settext_paramlocString);
 		#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 			extern cHook *hook_Scr_GetFunction;
 			extern cHook *hook_Scr_GetMethod;
