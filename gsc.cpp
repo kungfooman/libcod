@@ -135,9 +135,10 @@ void gsc_utils_printf() {
 	for (int i=0; i<len; i++) {
 		if (str[i] == '%')
 		{
-			if(str[i + 1] == '%')
+			if(str[i + 1] == '%') {
 				putchar('%');
-			else
+				i++;
+			} else
 				stackPrintParam(param++);
 		}
 		else
