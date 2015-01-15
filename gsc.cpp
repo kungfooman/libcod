@@ -247,6 +247,7 @@ Scr_Function scriptFunctions[] = {
 	{"get_language_item"              , gsc_get_language_item                 , 0},
 	{"G_FindConfigstringIndex"        , gsc_G_FindConfigstringIndex           , 0},
 	{"G_FindConfigstringIndexOriginal", gsc_G_FindConfigstringIndexOriginal   , 0},
+	{"reset_rename"                   , gsc_reset_rename                      , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1
@@ -316,6 +317,8 @@ Scr_Method scriptMethods[] = {
 	{"set_userinfo"          , gsc_set_userinfo              , 0},
 	{"printOutOfBand"        , gsc_player_outofbandprint     , 0},
 	{"connectionlessPacket"  , gsc_player_connectionlesspacket, 0},
+	{"allow_rename"          , gsc_player_allow_rename       , 0},
+	{"clientuserinfochanged" , gsc_player_clientuserinfochanged, 0},
 	#endif
 	
 	{NULL, NULL, 0}

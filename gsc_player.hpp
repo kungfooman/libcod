@@ -35,8 +35,10 @@ void gsc_get_userinfo(int id);
 void gsc_set_userinfo(int id);
 void gsc_player_getip(int id);
 void gsc_player_getping(int id);
+void gsc_player_clientuserinfochanged(int id);
 
 void gsc_player_ClientCommand(int id);
+void gsc_player_allow_rename(int id);
 
 void gsc_player_getLastConnectTime(int id);
 void gsc_player_getLastMSG(int id);
