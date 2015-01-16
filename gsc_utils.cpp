@@ -20,6 +20,12 @@ char languages[MAX_LANGUAGES][3]; //add space for \0
 char *language_items[MAX_LANGUAGE_ITEMS];
 char *language_references[MAX_LANGUAGES][MAX_LANGUAGE_ITEMS];
 bool language_reference_mallocd[MAX_LANGUAGES][MAX_LANGUAGE_ITEMS];
+int rename_blocked[64] = {0};
+
+void gsc_reset_rename()
+{
+	memset(rename_blocked, 0, sizeof(rename_blocked));
+}
 
 void gsc_add_language()
 {
@@ -351,164 +357,61 @@ void gsc_get_language_item()
 
 void gsc_utils_sprintf()
 {
-	int max_iterations = stackGetNumberOfParams();
-	if(max_iterations == 0)
-	{
-		printf("scriptengine> At least 1 argument required for sprintf\n");
-		stackPushUndefined();
-		return;
-	}
-	char result[2 * COD2_MAX_STRINGLENGTH] = ""; //output buffer, cod string size should be enough
+	char result[COD2_MAX_STRINGLENGTH];
 	char *str;
-	if(!stackGetParamString(0, &str))
+	if (!stackGetParams("s", &str))
 	{
-		printf("Param 0 needs to be a string for sprintf\n");
+		printf("scriptengine> WARNING: sprintf undefined argument!\n");
 		stackPushUndefined();
 		return;
 	}
-	unsigned int i = 0;
-	unsigned int current_char = 0; //in result, from which character to start the next write
-	unsigned int prev_char = 0; //in str (have copied up to here, not including this one
-	int iteration_count = 0;
-	while(str[i] != '\0')
+	int param = 1; // maps to first %
+	int len = strlen(str);
+	int num = 0;
+	for (int i = 0; i < len; i++)
 	{
-		if(current_char > COD2_MAX_STRINGLENGTH)
+		if (str[i] == '%')
 		{
-			printf("scriptengine> Error, string in sprintf is larger than the max stringsize in cod2\n");
-			stackPushUndefined();
-			return;
-		}
-		if(str[i] == '%')
-		{
-			unsigned int j = i + 1;
-			bool found = false;
-			while(str[j] != '\0' && !found)
+			if(str[i + 1] == '%')
 			{
-				switch(str[j])
-				{
-					case 'd':
-					case 'i':
-					case 'u':
-					case 'o':
-					case 'x':
-					case 'X':
-					case 'f':
-					case 'F':
-					case 'e':
-					case 'E':
-					case 'g':
-					case 'G':
-					case 'a':
-					case 'A':
-					case 'c':
-					case 's':
-					case 'p':
-					case 'n':
-					case '%':
-						found = true;
-						break;
-					default:
-						j++;
-						break;
-				}
-			}
-			if(str[j] == '\0')
-			{
-				printf("scriptengine> error. Incorrect sprintf string input\n");
-				stackPushUndefined();
-				return;
-			}
-			char replaced_char = str[j + 1];
-			str[j + 1] = '\0';
-
-			int chars_written;
-			if(str[j] != '%')
-			{
-				iteration_count++;
-				if(iteration_count == max_iterations)
-				{
-					printf("scriptengine> Not enough input arguments for sprintf to make cake\n");
-					stackPushUndefined();
-					return;
-				}
-
-				int stackint;
-				float stackfloat;
-				char *stackstring;
-				int type = 0;
-				switch(stackGetParamType(iteration_count))
-				{
-					case STACK_STRING:
-					{
-						stackGetParamString(iteration_count, &stackstring);
-						type = 1;
-						break;
-					}
-					case STACK_FLOAT:
-					{
-						stackGetParamFloat(iteration_count, &stackfloat);
-						type = 2;
-						break;
-					}
-					case STACK_INT:
-					{
-						stackGetParamInt(iteration_count, &stackint);
-						type = 3;
-						break;
-					}
-					default:
-					{
-						printf("scriptengine> Unsupported input type for sprintf. Supported: string, int, float\n");
-						stackPushUndefined();
-						return;
-					}
-				}
-				if(type == 1)
-				{
-					chars_written = sprintf(&(result[current_char]), &(str[prev_char]), stackstring);
-				}
-				else if(type == 2)
-				{
-					chars_written = sprintf(&(result[current_char]), &(str[prev_char]), stackfloat);
-				}
-				else if(type == 3)
-				{
-					chars_written = sprintf(&(result[current_char]), &(str[prev_char]), stackint);
-				}
-				else
-				{
-					printf("scripteninge> Something bad happened during sprintf\n");
-					stackPushUndefined();
-					return;
-				}
+				result[num++] = '%';
+				i++;
 			}
 			else
 			{
-				chars_written = sprintf(&(result[current_char]), &(str[prev_char]), '\0'); //doesnt actually print that but well, needs some input
+				if(param >= stackGetNumberOfParams())
+					continue;
+				switch (stackGetParamType(param))
+				{
+					case STACK_STRING:
+						char *tmp_str;
+						stackGetParamString(param, &tmp_str); // no error checking, since we know it's a string
+						num += sprintf(&(result[num]), "%s", tmp_str);
+						break;
+					case STACK_VECTOR:
+						float vec[3];
+						stackGetParamVector(param, vec);
+						num += sprintf(&(result[num]), "(%.2f, %.2f, %.2f)", vec[0], vec[1], vec[2]);
+						break;
+					case STACK_FLOAT:
+						float tmp_float;
+						stackGetParamFloat(param, &tmp_float);
+						num += sprintf(&(result[num]), "%.3f", tmp_float); // need a way to define precision
+						break;
+					case STACK_INT:
+						int tmp_int;
+						stackGetParamInt(param, &tmp_int);
+						num += sprintf(&(result[num]), "%d", tmp_int);
+						break;
+				}
+				param++;
 			}
-			if(chars_written < 0)
-			{
-				printf("scriptengine> error. Incorrect sprintf input\n");
-				stackPushUndefined();
-				return;
-			}
-			str[j + 1] = replaced_char;
-			current_char += chars_written;
-			prev_char = j + 1;
-			i = j;
 		}
-		i++;
+		else
+			result[num++] = str[i];
 	}
-	strncpy(&(result[current_char]), &(str[prev_char]), i - prev_char); //copy the remaining part into the buffer
-	/*int k = 0;
-	while(result[k] != '\0')
-	{
-		printf("%c", result[k]);
-		k++;
-	}
-	printf("\n");*/
+	result[num] = '\0';
 	stackPushString(result);
-	return;
 }
 
 void gsc_utils_disableGlobalPlayerCollision() {

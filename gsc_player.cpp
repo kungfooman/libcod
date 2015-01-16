@@ -111,6 +111,30 @@ void gsc_player_velocity_set(int id) {
 	stackReturnInt(1);
 }
 
+extern int rename_blocked[64];
+
+void gsc_player_allow_rename(int id) {
+	int allow;
+
+	if ( ! stackGetParams("i", &allow)) {
+		printf("scriptengine> wrongs args for gsc_player_allow_rename(bool);\n");
+		stackPushUndefined();
+		return;
+	}
+	if(allow)
+		rename_blocked[id] = 0;
+	else
+		rename_blocked[id] = 1;
+	stackReturnInt(1);
+}
+
+void gsc_player_clientuserinfochanged(int id)
+{
+	signed int (*sig)(int id);
+	*(int*)&sig = 0x080F8C5E;
+	sig(id);
+}
+
 void gsc_player_velocity_add(int id) {
 	float velocity[3];
 

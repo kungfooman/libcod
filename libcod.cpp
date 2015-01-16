@@ -1564,6 +1564,40 @@ void hook_SV_BeginDownload_f( int a1 ) {
 		printf("Invalid download attempt: %s\n", file);
 }
 
+extern int rename_blocked[64];
+
+cHook *hook_ClientUserinfoChanged;
+void ClientUserinfoChanged(int a1)
+{
+	if(rename_blocked[a1])
+	{
+		#if COD_VERSION == COD2_1_0
+			*(int*)0x859B614 = 1;
+		#elif COD_VERSION == COD2_1_2
+			*(int*)0x85AF514 = 1;
+		#elif COD_VERSION == COD2_1_3
+			*(int*)0x864C594 = 1;
+		#endif
+	}
+	else
+	{
+		#if COD_VERSION == COD2_1_0
+			*(int*)0x859B614 = 0;
+		#elif COD_VERSION == COD2_1_2
+			*(int*)0x85AF514 = 0;
+		#elif COD_VERSION == COD2_1_3
+			*(int*)0x864C594 = 0;
+		#endif
+	}
+	//printf("changed: %d\n", a1);
+	hook_ClientUserinfoChanged->unhook();
+	int (*sig)(int a1);
+	*(int *)&sig = hook_ClientUserinfoChanged->from;
+	int ret = sig(a1);
+	hook_ClientUserinfoChanged->hook();
+}
+
+
 char * hook_beginDownloadCopy(char *a1, char *a2, int a3) {
 	typedef char* (*beginDownloadCopy_t)(char *a1, char *a2, int a3);
 
@@ -2144,6 +2178,8 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x807059F, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x80707C3, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08098CD0, (int)hook_SV_WriteDownloadToClient);
+			hook_ClientUserinfoChanged = new cHook(0x80F6506, (int)ClientUserinfoChanged);
+			hook_ClientUserinfoChanged->hook();
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
@@ -2164,6 +2200,8 @@ class cCallOfDuty2Pro
 			
 			//hook_cmd_map = new cHook(0x0808BC7A, (int)cmd_map);
 			//hook_cmd_map->hook();
+			hook_ClientUserinfoChanged = new cHook(0x80F8B1A, (int)ClientUserinfoChanged);
+			hook_ClientUserinfoChanged->hook();
 			cracking_hook_call(0x0809AD68, (int)hook_SV_WriteDownloadToClient);
 		#elif COD_VERSION == COD2_1_3
 			if (0)
@@ -2174,6 +2212,8 @@ class cCallOfDuty2Pro
 				hook_parent_of_SV_SendServerCommand = new cHook(0x08092780, (int)parent_of_SV_SendServerCommand);
 				hook_parent_of_SV_SendServerCommand->hook();
 			}
+			hook_ClientUserinfoChanged = new cHook(0x080F8C5E, (int)ClientUserinfoChanged);
+			hook_ClientUserinfoChanged->hook();
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08103FE1, (int)hook_dummytrue);
