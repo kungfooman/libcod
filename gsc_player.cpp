@@ -548,6 +548,19 @@ void gsc_player_connectionlesspacket(int id) {
 	stackReturnInt(1);
 }
 
+void gsc_player_resetNextReliableTime(int id)
+{
+	#if COD_VERSION == COD2_1_0
+		int offset = 134412;
+	#else
+		int offset = 134684;
+	#endif
+
+	*(int *)(PLAYERBASE(id) + offset) = 0;
+	stackPushInt(0);
+}
+
+
 // entity functions (could be in own file, but atm not many pure entity functions)
 
 void gsc_entity_setalive(int id) { // as in isAlive?

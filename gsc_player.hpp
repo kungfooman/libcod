@@ -48,6 +48,7 @@ void gsc_player_addresstype(int id);
 void gsc_player_renamebot(int id);
 void gsc_player_outofbandprint(int id);
 void gsc_player_connectionlesspacket(int id);
+void gsc_player_resetNextReliableTime(int id);
 
 // entity functions
 void gsc_entity_setalive(int id);

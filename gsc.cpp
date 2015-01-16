@@ -319,6 +319,7 @@ Scr_Method scriptMethods[] = {
 	{"connectionlessPacket"  , gsc_player_connectionlesspacket, 0},
 	{"allow_rename"          , gsc_player_allow_rename       , 0},
 	{"clientuserinfochanged" , gsc_player_clientuserinfochanged, 0},
+	{"resetNextReliableTime" , gsc_player_resetNextReliableTime, 0},
 	#endif
 	
 	{NULL, NULL, 0}
