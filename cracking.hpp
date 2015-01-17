@@ -15,6 +15,7 @@ extern "C" {
 	int singleHexToNumber(char hexchar);
 	int hexToBuffer(char *hex, char *buffer, int bufferLen);
 
+	int cracking_call_function(int func_address, char *args, unsigned char *data);
 #ifdef __cplusplus
 }
 #endif

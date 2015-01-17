@@ -43,6 +43,12 @@ void gsc_utils_fwrite();
 void gsc_utils_fclose();
 void gsc_utils_sprintf();
 
+void gsc_call_function_raw();
+
+void gsc_dlopen();
+void gsc_dlsym();
+void gsc_dlclose();
+
 #ifdef __cplusplus
 }
 #endif

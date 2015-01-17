@@ -253,6 +253,10 @@ Scr_Function scriptFunctions[] = {
 	{"G_FindConfigstringIndex"        , gsc_G_FindConfigstringIndex           , 0},
 	{"G_FindConfigstringIndexOriginal", gsc_G_FindConfigstringIndexOriginal   , 0},
 	{"reset_rename"                   , gsc_reset_rename                      , 0},
+	{"call_function_raw"              , gsc_call_function_raw                 , 0},
+	{"dlopen"                         , gsc_dlopen                            , 0},
+	{"dlsym"                          , gsc_dlsym                             , 0},
+	{"dlclose"                        , gsc_dlclose                           , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1

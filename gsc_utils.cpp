@@ -527,28 +527,22 @@ void gsc_utils_stringToFloat() {
 // rundll("print.so", "test_print")
 void gsc_utils_rundll() {
 	char *arg_library, *arg_function;
-
 	if ( ! stackGetParams("ss", &arg_library, &arg_function)) {
-		printf("scriptengine> wrongs args for: dlcall(library, function)\n");
+		printf("scriptengine> wrongs args for: rundll(library, function)\n");
 		stackPushUndefined();
 		return;
 	}
-	
 	printf("lib=%s func=%s\n", arg_library, arg_function);
-	
 	//void *handle = dlopen(arg_library, RTLD_GLOBAL); // crashes
-	// void *handle = dlopen(arg_library, RTLD_LOCAL); // crashes
+	//void *handle = dlopen(arg_library, RTLD_LOCAL); // crashes
 	//void *handle = dlopen(arg_library, RTLD_NOW); // crashes
 	void *handle = dlopen(arg_library, RTLD_LAZY);
-
 	if ( ! handle) {
 		printf("ERROR: dlopen(\"%s\") failed!\n", arg_library);
 		stackPushInt(0);
 		return;
 	}
-		
 	printf("dlopen(\"%s\") returned: %.8x\n", arg_library, (unsigned int)handle);
-	
 	void (*func)();
 	//*((void *)&func) = dlsym(handle, arg_function);
 	*(int *)&func = (int)dlsym(handle, arg_function);
@@ -557,7 +551,6 @@ void gsc_utils_rundll() {
 		stackPushInt(0);
 		return;
 	}
-	
 	printf("function-name=%s -> address=%.8x\n", arg_function, (unsigned int)func);
 	func();
 	dlclose(handle);
@@ -570,7 +563,6 @@ void gsc_utils_ExecuteString() {
 		stackPushUndefined();
 		return;
 	}
-
 	Cmd_ExecuteString(str);
 	stackPushInt(1);
 }
@@ -578,14 +570,11 @@ void gsc_utils_ExecuteString() {
 void gsc_utils_sendgameservercommand() {
 	int clientNum;
 	char *message;
-
 	if ( ! stackGetParams("is", &clientNum, &message)) {
 		stackPushUndefined();
 		return;
 	}
-
 	SV_GameSendServerCommand(clientNum, 0, message);
-
 	stackPushInt(1);
 }
 
@@ -708,6 +697,68 @@ void gsc_G_FindConfigstringIndex()
 	}
 	stackPushInt(0);
 	return;
+}
+
+void gsc_call_function_raw() {
+	int func_address;
+	char *args;
+	unsigned char *data;
+	if ( ! stackGetParams("isi", &func_address, &args, &data)) {
+		printf("scriptengine> wrongs args for call_function_raw(func_address, args, data);\n");
+		stackPushUndefined();
+		return;
+	}
+	cracking_call_function(func_address, args, data);
+}
+
+void gsc_dlopen() {
+	char *arg_library;
+	if ( ! stackGetParams("s", &arg_library)) {
+		printf("scriptengine> wrongs args for: dlopen(library)\n");
+		stackPushUndefined();
+		return;
+	}
+	int handle = (int)dlopen(arg_library, RTLD_LAZY);
+	if ( ! handle) {
+		printf("ERROR: dlopen(\"%s\") failed! Error: %s\n", arg_library, dlerror());
+		stackPushInt(0);
+		return;
+	}
+	stackPushInt(handle);
+}
+
+void gsc_dlsym() {
+	int handle;
+	char *arg_function;
+	if ( ! stackGetParams("is", &handle, &arg_function)) {
+		printf("scriptengine> wrongs args for: dlsym(handle, function)\n");
+		stackPushUndefined();
+		return;
+	}
+	int func = (int)dlsym((void *)handle, arg_function);
+	if (!func) {
+		printf("ERROR: dlsym(\"%s\") failed! Error: %s\n", arg_function, dlerror());
+		stackPushInt(0);
+		return;
+	}
+	stackPushInt(func);
+}
+
+void gsc_dlclose() {
+	int handle;
+	char *arg_function;
+	if ( ! stackGetParams("i", &handle)) {
+		printf("scriptengine> wrongs args for: dlclose(handle)\n");
+		stackPushUndefined();
+		return;
+	}
+	int ret = dlclose((void *)handle);
+	if (ret != 0) {
+		printf("ERROR: dlclose(%d) failed! Error: %s\n", handle, dlerror());
+		stackPushInt(0);
+		return;
+	}
+	stackPushInt(ret);
 }
 
 #endif
