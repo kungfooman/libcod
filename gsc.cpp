@@ -221,6 +221,11 @@ Scr_Function scriptFunctions[] = {
 	{"memory_int_get", gsc_memory_int_get, 0},
 	{"memory_int_set", gsc_memory_int_set, 0},
 	{"memory_memset" , gsc_memory_memset , 0},
+	{"binarybuffer_new"  , gsc_binarybuffer_new  , 0},
+	{"binarybuffer_free" , gsc_binarybuffer_free , 0},
+	{"binarybuffer_seek" , gsc_binarybuffer_seek , 0},
+	{"binarybuffer_write", gsc_binarybuffer_write, 0},	
+	{"binarybuffer_read" , gsc_binarybuffer_read , 0},
 	#endif
 
 	#if COMPILE_UTILS == 1
