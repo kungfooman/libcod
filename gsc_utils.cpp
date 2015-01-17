@@ -708,7 +708,8 @@ void gsc_call_function_raw() {
 		stackPushUndefined();
 		return;
 	}
-	cracking_call_function(func_address, args, data);
+	int ret = cracking_call_function(func_address, args, data);
+	stackPushInt(ret);
 }
 
 void gsc_dlopen() {
