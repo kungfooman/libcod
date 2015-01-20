@@ -626,11 +626,12 @@ void gsc_free_slot()
 void gsc_kick_slot()
 {
 	int id;
+	char* msg;
 	char* reason;
 
-	if ( ! stackGetParams("is", &id, &reason)) {
+	if ( ! stackGetParams("is", &id, &msg)) {
 		printf("scriptengine> ERROR: gsc_kick_slot(): param \"id\"[1] has to be an int!\n");
-		printf("scriptengine> ERROR: gsc_kick_slot(): param \"reason\"[2] has to be an string!\n");
+		printf("scriptengine> ERROR: gsc_kick_slot(): param \"msg\"[1] has to be an string!\n");
 		stackPushUndefined();
 		return;
 	}
@@ -655,9 +656,21 @@ void gsc_kick_slot()
 	int entity = PLAYERBASE(id);
 	char* name = Info_ValueForKey((char*)entity+12, "name"); // read before drop client resets the userinfo
 	int guid = *(int*)(entity + guid_offset);
-	SV_DropClient(entity, reason);
+	SV_DropClient(entity, msg);
 	int * lastPacketTime = (int*)getLastPacketTime(id);
 	*lastPacketTime = getSVSTime(); // in case there is a funny zombie (copied from Q3)
+	
+	if(!stackGetParamString(2, &reason))
+	{
+		#if COD_VERSION >= COD4_1_7
+			Com_Printf(0, "%s (guid %i) was kicked\n", name, guid);
+		#else
+			Com_Printf("%s (guid %i) was kicked\n", name, guid);
+		#endif
+		stackReturnInt(1);
+		return;
+	}
+	
 	#if COD_VERSION >= COD4_1_7
 		Com_Printf(0, "%s (guid %i) was kicked for %s\n", name, guid, reason);
 	#else
