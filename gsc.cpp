@@ -213,6 +213,7 @@ Scr_Function scriptFunctions[] = {
 	
 	#if COMPILE_PLAYER == 1
 	{"free_slot"                   , gsc_free_slot                         , 0},
+	{"kick2"                       , gsc_kick_slot                         , 0},
 	#endif
 	
 	#if COMPILE_MEMORY == 1

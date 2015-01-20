@@ -409,43 +409,54 @@ void gsc_player_ClientCommand(int id) {
 	stackPushInt(ClientCommand(id));
 }
 
-void gsc_player_getLastConnectTime(int id) {
+int getSVSTime()
+{
 	#if COD_VERSION == COD2_1_0
 		int info_start = *(int *)0x0841FB04;
-		int info_connecttime_offset = 0x20D14;
 	#elif COD_VERSION == COD2_1_2
 		int info_start = *(int *)0x08422004;
-		int info_connecttime_offset = 0x20E24;
 	#elif COD_VERSION == COD2_1_3
 		int info_start = *(int *)0x08423084;
+	#else
+		#warning getSVSTime() got no working addresses
+		int info_start = *(int *)0x0;
+	#endif
+	return info_start;
+}
+
+void gsc_player_getLastConnectTime(int id) {
+	#if COD_VERSION == COD2_1_0
+		int info_connecttime_offset = 0x20D14;
+	#elif COD_VERSION == COD2_1_2
+		int info_connecttime_offset = 0x20E24;
+	#elif COD_VERSION == COD2_1_3
 		int info_connecttime_offset = 0x20E24;
 	#else
 		#warning gsc_player_getLastConnectTime() got no working addresses
-		int info_start = *(int *)0x0;
 		int info_connecttime_offset = 0x0;
 	#endif
 
-	int lastconnect = info_start - *(unsigned int *)(PLAYERBASE(id) + info_connecttime_offset);
+	int lastconnect = getSVSTime() - *(unsigned int *)(PLAYERBASE(id) + info_connecttime_offset);
 	stackPushInt(lastconnect);
 }
 
-void gsc_player_getLastMSG(int id) {
+int getLastPacketTime(int id) {
 	#if COD_VERSION == COD2_1_0
-		int info_start = *(int *)0x0841FB04;
 		int info_lastmsg_offset = 0x20D10;
 	#elif COD_VERSION == COD2_1_2
-		int info_start = *(int *)0x08422004;
 		int info_lastmsg_offset = 0x20E20;
 	#elif COD_VERSION == COD2_1_3
-		int info_start = *(int *)0x08423084;
 		int info_lastmsg_offset = 0x20E20;
 	#else
-		#warning gsc_player_getlastmsg() got no working addresses
-		int info_start = *(int *)0x0;
+		#warning getLastPacketTime() got no working addresses
 		int info_lastmsg_offset = 0x0;
 	#endif
+	
+	return (PLAYERBASE(id) + info_lastmsg_offset);
+}
 
-	int lastmsg = info_start - *(unsigned int *)(PLAYERBASE(id) + info_lastmsg_offset);
+void gsc_player_getLastMSG(int id) {
+	int lastmsg = getSVSTime() - *(unsigned int *)getLastPacketTime(id);
 	stackPushInt(lastmsg);
 }
 
@@ -454,7 +465,7 @@ void gsc_player_getclientstate(int id) {
 	stackPushInt(*(int*)info_player);
 }
 
-void gsc_player_addresstype(int id) {
+int getAddressType(int id) {
 	#if COD_VERSION == COD2_1_0
 		int info_addresstype_offset = 0x6E5C4;
 	#elif COD_VERSION == COD2_1_2
@@ -467,7 +478,10 @@ void gsc_player_addresstype(int id) {
 	#endif
 
 	int addrtype = *(unsigned int *)(PLAYERBASE(id) + info_addresstype_offset);
-	stackPushInt(addrtype);
+}
+
+void gsc_player_addresstype(int id) {
+	stackPushInt(getAddressType(id));
 }
 
 void gsc_player_renamebot(int id) {
@@ -607,6 +621,49 @@ void gsc_free_slot()
 	int entity = PLAYERBASE(id);
 	*(int*)entity = 0; //CS_FREE
 	stackPushUndefined();
+}
+
+void gsc_kick_slot()
+{
+	int id;
+	char* reason;
+
+	if ( ! stackGetParams("is", &id, &reason)) {
+		printf("scriptengine> ERROR: gsc_kick_slot(): param \"id\"[1] has to be an int!\n");
+		printf("scriptengine> ERROR: gsc_kick_slot(): param \"reason\"[2] has to be an string!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	if(getAddressType(id) == NA_LOOPBACK)
+	{
+		stackReturnInt(0);
+		return; // host
+	}
+	
+	#if COD_VERSION == COD2_1_0
+		int guid_offset = 0x765F4;
+	#elif COD_VERSION == COD2_1_2
+		int guid_offset = 0x76704;
+	#elif COD_VERSION == COD2_1_3
+		int guid_offset = 0xAE704;
+	#else
+		#warning gsc_kick_slot() got no working addresses for guid_offset
+		int guid_offset = 0x0;
+	#endif
+	
+	int entity = PLAYERBASE(id);
+	char* name = Info_ValueForKey((char*)entity+12, "name"); // read before drop client resets the userinfo
+	int guid = *(int*)(entity + guid_offset);
+	SV_DropClient(entity, reason);
+	int * lastPacketTime = (int*)getLastPacketTime(id);
+	*lastPacketTime = getSVSTime(); // in case there is a funny zombie (copied from Q3)
+	#if COD_VERSION >= COD4_1_7
+		Com_Printf(0, "%s (guid %i) was kicked for %s\n", name, guid, reason);
+	#else
+		Com_Printf("%s (guid %i) was kicked for %s\n", name, guid, reason);
+	#endif
+	stackReturnInt(1);
 }
 
 #endif
