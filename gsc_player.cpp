@@ -130,9 +130,15 @@ void gsc_player_allow_rename(int id) {
 
 void gsc_player_clientuserinfochanged(int id)
 {
-	signed int (*sig)(int id);
-	*(int*)&sig = 0x080F8C5E;
-	sig(id);
+	if(rename_blocked[id])
+		*allow_clientuserchange = 1;
+	else
+		*allow_clientuserchange = 0;
+
+	int result = ClientUserinfoChanged(id);
+	*allow_clientuserchange = 0;
+
+	stackPushInt(result);
 }
 
 void gsc_player_velocity_add(int id) {
@@ -631,7 +637,7 @@ void gsc_kick_slot()
 
 	if ( ! stackGetParams("is", &id, &msg)) {
 		printf("scriptengine> ERROR: gsc_kick_slot(): param \"id\"[1] has to be an int!\n");
-		printf("scriptengine> ERROR: gsc_kick_slot(): param \"msg\"[1] has to be an string!\n");
+		printf("scriptengine> ERROR: gsc_kick_slot(): param \"msg\"[2] has to be an string!\n");
 		stackPushUndefined();
 		return;
 	}

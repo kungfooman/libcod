@@ -551,7 +551,7 @@ int hook_codscript_load_label_8075DEA(char *file, char *function)
 }
 
 int codecallback_playercommand = 0;
-
+int codecallback_userinfochanged = 0;
 
 typedef void (*gametype_scripts_t)();
 #if COD_VERSION == COD2_1_0
@@ -621,8 +621,10 @@ void hook_codscript_gametype_scripts()
 {
 	#if COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 		codecallback_playercommand = codscript_load_function_custom((char *)"maps/mp/gametypes/_callbacksetup", (char *)"CodeCallback_PlayerCommand", 0);
+		codecallback_userinfochanged = codscript_load_function_custom((char *)"maps/mp/gametypes/_callbacksetup", (char *)"CodeCallback_UserInfoChanged", 0);
 	#else
 		codecallback_playercommand = codscript_load_function((char *)"maps/mp/gametypes/_callbacksetup", (char *)"CodeCallback_PlayerCommand", 0);
+		codecallback_userinfochanged = codscript_load_function((char *)"maps/mp/gametypes/_callbacksetup", (char *)"CodeCallback_UserInfoChanged", 0);
 	#endif
 
 	//printf("codecallback_playercommand=%.8x\n", codecallback_playercommand);
@@ -1566,35 +1568,41 @@ void hook_SV_BeginDownload_f( int a1 ) {
 
 extern int rename_blocked[64];
 
-cHook *hook_ClientUserinfoChanged;
-void ClientUserinfoChanged(int a1)
+void ClientUserinfoChanged(int clientNum)
 {
-	if(rename_blocked[a1])
+	if ( ! codecallback_userinfochanged)
 	{
-		#if COD_VERSION == COD2_1_0
-			*(int*)0x859B614 = 1;
-		#elif COD_VERSION == COD2_1_2
-			*(int*)0x85AF514 = 1;
-		#elif COD_VERSION == COD2_1_3
-			*(int*)0x864C594 = 1;
-		#endif
+		if(rename_blocked[clientNum])
+			*allow_clientuserchange = 1;
+		else
+			*allow_clientuserchange = 0;
+	
+		int result = ClientUserinfoChanged(clientNum);
+		*allow_clientuserchange = 0;
+		return result;
 	}
-	else
-	{
-		#if COD_VERSION == COD2_1_0
-			*(int*)0x859B614 = 0;
-		#elif COD_VERSION == COD2_1_2
-			*(int*)0x85AF514 = 0;
-		#elif COD_VERSION == COD2_1_3
-			*(int*)0x864C594 = 0;
-		#endif
-	}
-	//printf("changed: %d\n", a1);
-	hook_ClientUserinfoChanged->unhook();
-	int (*sig)(int a1);
-	*(int *)&sig = hook_ClientUserinfoChanged->from;
-	int ret = sig(a1);
-	hook_ClientUserinfoChanged->hook();
+	
+	// todo: G_ENTITY(clientNum)
+	#if COD_VERSION == COD2_1_0 // search '\\name\\badinfo'
+		short ret = codscript_call_callback_entity(/*gentity*/0x08665480 + 560 * clientNum, codecallback_userinfochanged, 1);
+	#elif COD_VERSION == COD2_1_2
+		short ret = codscript_call_callback_entity(/*gentity*/0x08679380 + 560 * clientNum, codecallback_userinfochanged, 1);
+	#elif COD_VERSION == COD2_1_3
+		short ret = codscript_call_callback_entity(/*gentity*/0x08716400 + 560 * clientNum, codecallback_userinfochanged, 1);
+	#elif COD_VERSION == COD4_1_7
+		short ret = codscript_call_callback_entity(/*gentity*/0x0841F260 + 628 * clientNum, codecallback_userinfochanged, 1);
+	#elif COD_VERSION == COD4_1_7_L
+		short ret = codscript_call_callback_entity(/*gentity*/0x0841FFE0 + 628 * clientNum, codecallback_userinfochanged, 1);
+	#else
+		#warning short ret = codscript_call_callback_entity(NULL, codecallback_userinfochanged, 1);
+		short ret = codscript_call_callback_entity(NULL, codecallback_userinfochanged, 1);
+	#endif
+
+	//printf("codecallback_playercommand=%.8x ret=%i\n", codecallback_userinfochanged, ret);
+	codscript_callback_finish(ret);
+	//printf("after codscript_callback_finish\n");
+	
+	return 0;
 }
 
 
@@ -2175,11 +2183,10 @@ class cCallOfDuty2Pro
 			if (0)
 				cracking_hook_function(0x0809301C, (int)SV_SendServerCommand);
 
-			cracking_hook_call(0x807059F, (int)Scr_GetCustomFunction);
-			cracking_hook_call(0x80707C3, (int)Scr_GetCustomMethod);
+			cracking_hook_call(0x0808F134, (int)ClientUserinfoChanged);
+			cracking_hook_call(0x0807059F, (int)Scr_GetCustomFunction);
+			cracking_hook_call(0x080707C3, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08098CD0, (int)hook_SV_WriteDownloadToClient);
-			hook_ClientUserinfoChanged = new cHook(0x80F6506, (int)ClientUserinfoChanged);
-			hook_ClientUserinfoChanged->hook();
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
@@ -2191,6 +2198,7 @@ class cCallOfDuty2Pro
 			}
 			
 			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
+			cracking_hook_call(0x080909BE, (int)ClientUserinfoChanged);
 			cracking_hook_call(0x08070B1B, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070D3F, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08103E85, (int)hook_dummytrue);
@@ -2200,8 +2208,6 @@ class cCallOfDuty2Pro
 			
 			//hook_cmd_map = new cHook(0x0808BC7A, (int)cmd_map);
 			//hook_cmd_map->hook();
-			hook_ClientUserinfoChanged = new cHook(0x80F8B1A, (int)ClientUserinfoChanged);
-			hook_ClientUserinfoChanged->hook();
 			cracking_hook_call(0x0809AD68, (int)hook_SV_WriteDownloadToClient);
 		#elif COD_VERSION == COD2_1_3
 			if (0)
@@ -2212,8 +2218,8 @@ class cCallOfDuty2Pro
 				hook_parent_of_SV_SendServerCommand = new cHook(0x08092780, (int)parent_of_SV_SendServerCommand);
 				hook_parent_of_SV_SendServerCommand->hook();
 			}
-			hook_ClientUserinfoChanged = new cHook(0x080F8C5E, (int)ClientUserinfoChanged);
-			hook_ClientUserinfoChanged->hook();
+			
+			cracking_hook_call(0x08090A52, (int)ClientUserinfoChanged);
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08103FE1, (int)hook_dummytrue);
