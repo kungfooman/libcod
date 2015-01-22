@@ -1568,18 +1568,25 @@ void hook_SV_BeginDownload_f( int a1 ) {
 
 extern int rename_blocked[64];
 
-void ClientUserinfoChanged(int clientNum)
+int hook_ClientUserinfoChanged_Update(int clientNum)
+{
+	int val = *allow_clientuserchange; // store old value
+
+	if(rename_blocked[clientNum])
+		*allow_clientuserchange = 1;
+	else
+		*allow_clientuserchange = val; // use old value
+
+	int result = changeClientUserinfo(clientNum);
+	*allow_clientuserchange = val; // restore old value
+	return result;
+}
+
+int hook_ClientUserinfoChanged(int clientNum)
 {
 	if ( ! codecallback_userinfochanged)
 	{
-		if(rename_blocked[clientNum])
-			*allow_clientuserchange = 1;
-		else
-			*allow_clientuserchange = 0;
-	
-		int result = ClientUserinfoChanged(clientNum);
-		*allow_clientuserchange = 0;
-		return result;
+		return hook_ClientUserinfoChanged_Update(clientNum);
 	}
 	
 	// todo: G_ENTITY(clientNum)
@@ -2183,7 +2190,8 @@ class cCallOfDuty2Pro
 			if (0)
 				cracking_hook_function(0x0809301C, (int)SV_SendServerCommand);
 
-			cracking_hook_call(0x0808F134, (int)ClientUserinfoChanged);
+			cracking_hook_call(0x0808F134, (int)hook_ClientUserinfoChanged);
+			cracking_hook_call(0x080F571F, (int)hook_ClientUserinfoChanged_Update); // sessionstate
 			cracking_hook_call(0x0807059F, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x080707C3, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08098CD0, (int)hook_SV_WriteDownloadToClient);
@@ -2198,7 +2206,8 @@ class cCallOfDuty2Pro
 			}
 			
 			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
-			cracking_hook_call(0x080909BE, (int)ClientUserinfoChanged);
+			cracking_hook_call(0x080909BE, (int)hook_ClientUserinfoChanged);
+			cracking_hook_call(0x080F7D33, (int)hook_ClientUserinfoChanged_Update); // sessionstate
 			cracking_hook_call(0x08070B1B, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070D3F, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08103E85, (int)hook_dummytrue);
@@ -2219,7 +2228,8 @@ class cCallOfDuty2Pro
 				hook_parent_of_SV_SendServerCommand->hook();
 			}
 			
-			cracking_hook_call(0x08090A52, (int)ClientUserinfoChanged);
+			cracking_hook_call(0x08090A52, (int)hook_ClientUserinfoChanged);
+			cracking_hook_call(0x080F7E77, (int)hook_ClientUserinfoChanged_Update); // sessionstate
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08103FE1, (int)hook_dummytrue);

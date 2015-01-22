@@ -130,13 +130,15 @@ void gsc_player_allow_rename(int id) {
 
 void gsc_player_clientuserinfochanged(int id)
 {
+	int val = *allow_clientuserchange; // store old value
+
 	if(rename_blocked[id])
 		*allow_clientuserchange = 1;
 	else
-		*allow_clientuserchange = 0;
+		*allow_clientuserchange = val;
 
-	int result = ClientUserinfoChanged(id);
-	*allow_clientuserchange = 0;
+	int result = changeClientUserinfo(id);
+	*allow_clientuserchange = val; // restore old value
 
 	stackPushInt(result);
 }

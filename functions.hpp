@@ -333,14 +333,14 @@ static SV_BeginDownload_f_t SV_BeginDownload_f = (SV_BeginDownload_f_t)NULL;
 
 typedef int (*ClientUserinfoChanged_t)(int a1);
 #if COD_VERSION == COD2_1_0
-	static ClientUserinfoChanged_t ClientUserinfoChanged = (ClientUserinfoChanged_t)0x080F6506;
+	static ClientUserinfoChanged_t changeClientUserinfo = (ClientUserinfoChanged_t)0x080F6506;
 #elif COD_VERSION == COD2_1_2
-	static ClientUserinfoChanged_t ClientUserinfoChanged = (ClientUserinfoChanged_t)0x080F8B1A;
+	static ClientUserinfoChanged_t changeClientUserinfo = (ClientUserinfoChanged_t)0x080F8B1A;
 #elif COD_VERSION == COD2_1_3
-	static ClientUserinfoChanged_t ClientUserinfoChanged = (ClientUserinfoChanged_t)0x080F8C5E;
+	static ClientUserinfoChanged_t changeClientUserinfo = (ClientUserinfoChanged_t)0x080F8C5E;
 #else
-	#warning ClientUserinfoChanged_t ClientUserinfoChanged = (ClientUserinfoChanged_t)NULL;
-	static ClientUserinfoChanged_t ClientUserinfoChanged = (ClientUserinfoChanged_t)NULL;
+	#warning ClientUserinfoChanged_t changeClientUserinfo = (ClientUserinfoChanged_t)NULL;
+	static ClientUserinfoChanged_t changeClientUserinfo = (ClientUserinfoChanged_t)NULL;
 #endif
 
 typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value);
