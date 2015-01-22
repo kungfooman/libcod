@@ -1589,6 +1589,8 @@ int hook_ClientUserinfoChanged(int clientNum)
 		return hook_ClientUserinfoChanged_Update(clientNum);
 	}
 	
+	stackPushInt(clientNum); // one parameter is required
+	
 	// todo: G_ENTITY(clientNum)
 	#if COD_VERSION == COD2_1_0 // search '\\name\\badinfo'
 		short ret = codscript_call_callback_entity(/*gentity*/0x08665480 + 560 * clientNum, codecallback_userinfochanged, 1);
