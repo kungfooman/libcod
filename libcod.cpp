@@ -827,7 +827,7 @@ ssize_t hook_recvfrom(int sockfd, void *buf, size_t len, int flags, struct socka
 		return rf;
 	}
 
-	#if 1
+	#if COMPILE_DEBUG_SERVER == 1
 	//printf("packet!\n");
 	if (*(unsigned int *)buf == 0xFFFFFFFF)
 	{
