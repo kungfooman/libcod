@@ -320,7 +320,30 @@ typedef int (*SV_WriteDownloadToClient_t)(int a1, int a2);
 typedef int (*SV_BeginDownload_f_t)(int a1);
 static SV_BeginDownload_f_t SV_BeginDownload_f = (SV_BeginDownload_f_t)NULL;
 
-typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value); // move to functions.hpp?
+#if COD_VERSION == COD2_1_0
+	static int* allow_clientuserchange = (int*)0x0859B614;
+#elif COD_VERSION == COD2_1_2
+	static int* allow_clientuserchange = (int*)0x085AF514;
+#elif COD_VERSION == COD2_1_3
+	static int* allow_clientuserchange = (int*)0x0864C594;
+#else
+	#warning allow_clientuserchange = (int*)NULL;
+	static int* allow_clientuserchange = (int*)NULL;
+#endif
+
+typedef int (*ClientUserinfoChanged_t)(int a1);
+#if COD_VERSION == COD2_1_0
+	static ClientUserinfoChanged_t changeClientUserinfo = (ClientUserinfoChanged_t)0x080F6506;
+#elif COD_VERSION == COD2_1_2
+	static ClientUserinfoChanged_t changeClientUserinfo = (ClientUserinfoChanged_t)0x080F8B1A;
+#elif COD_VERSION == COD2_1_3
+	static ClientUserinfoChanged_t changeClientUserinfo = (ClientUserinfoChanged_t)0x080F8C5E;
+#else
+	#warning ClientUserinfoChanged_t changeClientUserinfo = (ClientUserinfoChanged_t)NULL;
+	static ClientUserinfoChanged_t changeClientUserinfo = (ClientUserinfoChanged_t)NULL;
+#endif
+
+typedef int (*Info_SetValueForKey_t)(char *s, const char *key, const char *value);
 #if COD_VERSION == COD2_1_0
 	static Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080B5FF6;
 #elif COD_VERSION == COD2_1_2

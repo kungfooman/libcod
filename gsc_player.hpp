@@ -48,11 +48,15 @@ void gsc_player_addresstype(int id);
 void gsc_player_renamebot(int id);
 void gsc_player_outofbandprint(int id);
 void gsc_player_connectionlesspacket(int id);
+void gsc_player_resetNextReliableTime(int id);
 
 // entity functions
 void gsc_entity_setalive(int id);
 void gsc_entity_setbounds(int id);
+
+// player functions without entity
 void gsc_free_slot();
+void gsc_kick_slot();
 
 #ifdef __cplusplus
 }

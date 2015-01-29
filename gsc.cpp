@@ -213,6 +213,7 @@ Scr_Function scriptFunctions[] = {
 	
 	#if COMPILE_PLAYER == 1
 	{"free_slot"                   , gsc_free_slot                         , 0},
+	{"kick2"                       , gsc_kick_slot                         , 0},
 	#endif
 	
 	#if COMPILE_MEMORY == 1
@@ -328,6 +329,7 @@ Scr_Method scriptMethods[] = {
 	{"connectionlessPacket"  , gsc_player_connectionlesspacket, 0},
 	{"allow_rename"          , gsc_player_allow_rename       , 0},
 	{"clientuserinfochanged" , gsc_player_clientuserinfochanged, 0},
+	{"resetNextReliableTime" , gsc_player_resetNextReliableTime, 0},
 	#endif
 	
 	{NULL, NULL, 0}
