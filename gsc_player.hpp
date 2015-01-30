@@ -38,14 +38,13 @@ void gsc_player_getping(int id);
 void gsc_player_clientuserinfochanged(int id);
 
 void gsc_player_ClientCommand(int id);
-void gsc_player_allow_rename(int id);
 
 void gsc_player_getLastConnectTime(int id);
 void gsc_player_getLastMSG(int id);
 void gsc_player_getclientstate(int id);
 
 void gsc_player_addresstype(int id);
-void gsc_player_renamebot(int id);
+void gsc_player_renameclient(int id);
 void gsc_player_outofbandprint(int id);
 void gsc_player_connectionlesspacket(int id);
 void gsc_player_resetNextReliableTime(int id);

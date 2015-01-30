@@ -20,12 +20,6 @@ char languages[MAX_LANGUAGES][3]; //add space for \0
 char *language_items[MAX_LANGUAGE_ITEMS];
 char *language_references[MAX_LANGUAGES][MAX_LANGUAGE_ITEMS];
 bool language_reference_mallocd[MAX_LANGUAGES][MAX_LANGUAGE_ITEMS];
-int rename_blocked[64] = {0};
-
-void gsc_reset_rename()
-{
-	memset(rename_blocked, 0, sizeof(rename_blocked));
-}
 
 void gsc_add_language()
 {

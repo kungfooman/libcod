@@ -1566,27 +1566,11 @@ void hook_SV_BeginDownload_f( int a1 ) {
 		printf("Invalid download attempt: %s\n", file);
 }
 
-extern int rename_blocked[64];
-
-int hook_ClientUserinfoChanged_Update(int clientNum)
-{
-	int val = *allow_clientuserchange; // store old value
-
-	if(rename_blocked[clientNum])
-		*allow_clientuserchange = 1;
-	else
-		*allow_clientuserchange = val; // use old value
-
-	int result = changeClientUserinfo(clientNum);
-	*allow_clientuserchange = val; // restore old value
-	return result;
-}
-
 int hook_ClientUserinfoChanged(int clientNum)
 {
 	if ( ! codecallback_userinfochanged)
 	{
-		return hook_ClientUserinfoChanged_Update(clientNum);
+		return changeClientUserinfo(clientNum);
 	}
 	
 	stackPushInt(clientNum); // one parameter is required
@@ -1651,23 +1635,16 @@ void hook_SV_WriteDownloadToClient(int cl, int msg)
 		SV_WriteDownloadToClient(cl, msg);
 }
 
-void manymaps_prepare(char *mapname);
+void manymaps_prepare(char *mapname, int read);
 int hook_findMap(const char *qpath, void **buffer)
 {
-	manymaps_prepare(Cmd_Argv(1));
-
 	int read = FS_ReadFile(qpath, buffer);
-
+	manymaps_prepare(Cmd_Argv(1), read);
+	
 	if(read != -1)
 		return read;
-
-	char *map = Cmd_Argv(1);
-	char tmp[256];
-	snprintf(tmp, 256, "%s/%s/%s.iwd", Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"), map);
-
-	int exists = access(tmp, F_OK);
-
-	return exists;
+	else
+		return FS_ReadFile(qpath, buffer);
 }
 
 /*
@@ -1854,7 +1831,7 @@ void MSG_WriteBigString(int *MSG, char *s)
 }
 
 
-void manymaps_prepare(char *mapname)
+void manymaps_prepare(char *mapname, int read)
 {
 	char *sv_iwdNames = Cvar_VariableString("sv_iwdNames");
 	char library_path[512];
@@ -1899,8 +1876,8 @@ void manymaps_prepare(char *mapname)
 	if (access(src, F_OK) != -1) {
 		int link_success = link(src, dst) == 0;
 		printf("manymaps> LINK: %s\n", link_success?"success":"failed (probably already exists)");
-		// FS_LoadDir is needed when empty.iwd is missing (then .d3dbsp isn't referenced anywhere)
-		FS_LoadDir(Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"));
+		if(read == -1) // FS_LoadDir is needed when empty.iwd is missing (then .d3dbsp isn't referenced anywhere)
+			FS_LoadDir(Cvar_VariableString("fs_homepath"), Cvar_VariableString("fs_game"));
 	}
 }
 
@@ -2193,7 +2170,6 @@ class cCallOfDuty2Pro
 				cracking_hook_function(0x0809301C, (int)SV_SendServerCommand);
 
 			cracking_hook_call(0x0808F134, (int)hook_ClientUserinfoChanged);
-			cracking_hook_call(0x080F571F, (int)hook_ClientUserinfoChanged_Update); // sessionstate
 			cracking_hook_call(0x0807059F, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x080707C3, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08098CD0, (int)hook_SV_WriteDownloadToClient);
@@ -2209,7 +2185,6 @@ class cCallOfDuty2Pro
 			
 			//cracking_hook_function((int)codscript_load_label, (int)hook_codscript_load_label_8075DEA);
 			cracking_hook_call(0x080909BE, (int)hook_ClientUserinfoChanged);
-			cracking_hook_call(0x080F7D33, (int)hook_ClientUserinfoChanged_Update); // sessionstate
 			cracking_hook_call(0x08070B1B, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070D3F, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08103E85, (int)hook_dummytrue);
@@ -2231,7 +2206,6 @@ class cCallOfDuty2Pro
 			}
 			
 			cracking_hook_call(0x08090A52, (int)hook_ClientUserinfoChanged);
-			cracking_hook_call(0x080F7E77, (int)hook_ClientUserinfoChanged_Update); // sessionstate
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08103FE1, (int)hook_dummytrue);
