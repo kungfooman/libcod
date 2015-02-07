@@ -257,6 +257,8 @@ Scr_Function scriptFunctions[] = {
 	{"dlopen"                         , gsc_dlopen                            , 0},
 	{"dlsym"                          , gsc_dlsym                             , 0},
 	{"dlclose"                        , gsc_dlclose                           , 0},
+	{"setdefaultweapon"               , gsc_utils_setdefaultweapon            , 0},
+	{"getloadedweapons"               , gsc_utils_getloadedweapons            , 0},
 	#endif
 	
 	#if COMPILE_TCC == 1

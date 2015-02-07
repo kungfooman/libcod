@@ -1903,6 +1903,36 @@ int hook_dummytrue(const char *src)
 	return 1;
 }
 
+char defaultweapon_mp[32] = "defaultweapon_mp";
+
+int hook_replace_defaultweapon(char* weapon)
+{
+	typedef int (*sub_8120DD0_t)(char* weapon);
+	sub_8120DD0_t load_weapon_file = (sub_8120DD0_t)0x08120DD0;
+	return load_weapon_file(defaultweapon_mp); // + game started check
+}
+
+int hook_replace_defaultweapon_notfound(char* weapon, int func)
+{
+	typedef int (*load_weapon_file_t)(char* weapon, int func);
+	load_weapon_file_t load_weapon_file = (load_weapon_file_t)0x080EBC24;
+	return load_weapon_file(defaultweapon_mp, func);
+}
+
+int hook_replace_defaultweapon_notfoundbackup(char* weapon, char* defaultwep)
+{
+	typedef int (*load_weapon_file_t)(char* weapon, char* defaultwep);
+	load_weapon_file_t load_weapon_file = (load_weapon_file_t)0x080F3382;
+	return load_weapon_file(weapon, defaultweapon_mp);
+}
+
+int hook_replace_defaultweapon_unknown(char* weapon)
+{
+	typedef int (*load_weapon_file_t)(char* weapon, int func);
+	load_weapon_file_t load_weapon_file = (load_weapon_file_t)0x080EBC24;
+	return load_weapon_file(defaultweapon_mp, 0); // same as hook_replace_defaultweapon_notfound but uses 80EBCC0 as wrapper
+}
+
 #define TOSTRING2(str) #str
 #define TOSTRING1(str) TOSTRING2(str) // else there is written "__LINE__"
 class cCallOfDuty2Pro
@@ -2209,6 +2239,10 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08103FE1, (int)hook_dummytrue);
+			cracking_hook_call(0x08120DBD, (int)hook_replace_defaultweapon);
+			cracking_hook_call(0x080EB1E5, (int)hook_replace_defaultweapon_notfound);
+			cracking_hook_call(0x080F288C, (int)hook_replace_defaultweapon_notfoundbackup);
+			cracking_hook_call(0x080EB9C2, (int)hook_replace_defaultweapon_unknown);
 		#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 			extern cHook *hook_Scr_GetFunction;
 			extern cHook *hook_Scr_GetMethod;

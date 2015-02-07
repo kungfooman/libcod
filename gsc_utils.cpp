@@ -756,4 +756,75 @@ void gsc_dlclose() {
 	stackPushInt(ret);
 }
 
+
+void gsc_utils_setdefaultweapon() {
+	char *weapon;
+	if ( ! stackGetParams("s", &weapon)) {
+		printf("scriptengine> wrongs args for: setdefaultweapon(handle)\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	if(strlen(weapon) >= 32)
+	{
+		printf("scriptengine> weapon name is too long: setdefaultweapon(handle)\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	strcpy(defaultweapon_mp, weapon);
+	defaultweapon_mp[strlen(weapon)] = '\0';
+	stackPushInt(1);
+}
+
+void gsc_utils_getloadedweapons() {
+	typedef int (*get_weapon_t)(int index);
+	get_weapon_t get_weapon = (get_weapon_t)0x080EB9A4;
+	int weps = *(int*)0x08627080; // see 80EBFFE (cod2 1.3)
+	
+	stackPushArray();
+	for(int i=0;i<weps;i++)
+	{
+		int w = get_weapon(i);
+		stackPushString(*(char**)w);
+		//printf("%s\n", *(char**)w);
+		//for(int j=592;j<=872;j+=4)
+		//{
+		//	printf("%d = %f\n", j, *(float*)(w + j));
+		//}
+		stackPushArrayLast();
+	}
+	
+	// 0 = weapon_mp              // 436 = world model
+	// 4 = display name           // 440 = hud icon
+	// 8 = AIOverlayDescription   // 452 = ammo name
+	// 12 = view model            // 460 = clip name
+	// 16 = hand model
+	// 24 - 112 anims
+	// 24 = idle,       28 = idle empty,     32 = fire,           36 = hold fire,     40 = lastshot,
+	// 44 = rechamber,  48 = melee,          52 = reload,         56 = reload empty,  60 = reload start,
+	// 68 = reload end, 72 = raise,          76 = alt raise,      80 = alt drop,      84 = quick raise,
+	// 88 = quick drop, 92 = ads fire,       96 = ads lastshot,  100 = ads recamber, 104 = ads up,
+	// 108 = ads down
+	// 144 = view effect
+	// 148 = world effect
+	// 152 = pick up sound
+	// 168 = fire sound
+	// 172 = fire sound player
+	// 272 = fx/shellejects/rifle.efx
+	// 284 = gfx/reticle/side_skinny_xenon.tga
+	// 468 = max ammo
+	// 472 = start ammo
+	// 476 = shot count
+	// 492 = damage
+	// 500 = melee damage
+	// 592 = slowdownAimRange
+	// 596 = slowdownAimRangeAds
+	// 600 = lockonAimRange
+	// 604 = lockonAimRangeAds
+	// 608 = enemyCrosshairRange
+	// 612 = moveSpeedScale // see 80E1C58 (cod2 1.3) call 80E268A
+	//printf("[%d][%s][%s][%s]: %s\n", i, *(char**)w, *(const char **)(w + 436), *(char**)(w + 12), *(char**)(w + 4)); // [id][weapon_mp][worldmodel][viewmodel]: displayname	
+}
+
 #endif
