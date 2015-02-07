@@ -4,6 +4,7 @@
 
 #include <dirent.h> // dir stuff
 #include <assert.h>
+#include <ctype.h> // toupper
 
 #define MAX_LANGUAGES 16
 #define MAX_LANGUAGE_ITEMS 1024
@@ -347,6 +348,50 @@ void gsc_get_language_item()
 	}
 	//printf("found: %s\n", language_references[language_number][language_item_number]);
 	stackPushString(language_references[language_number][language_item_number]);
+}
+
+void gsc_themetext()
+{
+	char *mask;
+	char *text;
+	char result[COD2_MAX_STRINGLENGTH];
+	int num = 0;
+	if (!stackGetParams("ss", &mask, &text))
+	{
+		printf("scriptengine> WARNING: themetext undefined argument!\n");
+		stackPushUndefined();
+		return;
+	}
+	while(*mask != NULL)
+	{
+		switch(*mask)
+		{
+			case 'c':
+				if(*text != NULL)
+					result[num++] = *(text++);
+				mask++;
+				break;
+			case 'C':
+				if(*text != NULL)
+					result[num++] = toupper(*(text++));
+				mask++;
+				break;
+			case 's':
+			{
+				while(*text != NULL)
+					result[num++] = *(text++);
+				mask++;
+				break;
+			}
+			default:
+				result[num++] = *(mask++);
+				break;
+		}
+	}
+	while(*text != NULL)
+		result[num++] = *(text++);
+	result[num] = '\0';
+	stackPushString(result);
 }
 
 void gsc_utils_sprintf()

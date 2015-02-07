@@ -251,6 +251,7 @@ Scr_Function scriptFunctions[] = {
 	{"add_language"                   , gsc_add_language                      , 0},
 	{"load_languages"                 , gsc_load_languages                    , 0},
 	{"get_language_item"              , gsc_get_language_item                 , 0},
+	{"themetext"                      , gsc_themetext                         , 0},
 	{"G_FindConfigstringIndex"        , gsc_G_FindConfigstringIndex           , 0},
 	{"G_FindConfigstringIndexOriginal", gsc_G_FindConfigstringIndexOriginal   , 0},
 	{"call_function_raw"              , gsc_call_function_raw                 , 0},
