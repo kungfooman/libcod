@@ -13,6 +13,8 @@ extern "C" {
 /* gsc functions */
 #include "gsc.hpp"
 
+int clientaddress_to_num(int address);
+
 void gsc_player_velocity_set(int id);
 void gsc_player_velocity_add(int id);
 void gsc_player_velocity_get(int id);
@@ -48,6 +50,8 @@ void gsc_player_renameclient(int id);
 void gsc_player_outofbandprint(int id);
 void gsc_player_connectionlesspacket(int id);
 void gsc_player_resetNextReliableTime(int id);
+long double hook_setmovespeed(int a1, int a2);
+void gsc_player_setmovespeedscale(int id);
 
 // entity functions
 void gsc_entity_setalive(int id);

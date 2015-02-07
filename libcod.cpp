@@ -2243,6 +2243,7 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x080EB1E5, (int)hook_replace_defaultweapon_notfound);
 			cracking_hook_call(0x080F288C, (int)hook_replace_defaultweapon_notfoundbackup);
 			cracking_hook_call(0x080EB9C2, (int)hook_replace_defaultweapon_unknown);
+			cracking_hook_call(0x080E268A, (int)hook_setmovespeed);
 		#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 			extern cHook *hook_Scr_GetFunction;
 			extern cHook *hook_Scr_GetMethod;

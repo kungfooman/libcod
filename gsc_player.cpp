@@ -91,6 +91,10 @@
 	#define PLAYERBASE(playerid) (*(int*)(playerinfo_base) + playerid * playerinfo_size)
 #endif
 
+int clientaddress_to_num(int address) {
+	return (address - playerStates) / sizeOfPlayer;
+}
+
 void gsc_player_velocity_set(int id) {
 	float velocity[3];
 
@@ -555,6 +559,43 @@ void gsc_player_resetNextReliableTime(int id)
 	stackPushInt(0);
 }
 
+float player_movespeedscale[64] = {1};
+
+long double hook_setmovespeed(int a1, int a2)
+{
+	typedef long double (*calc_player_speed_t)(int a1, int a2);
+	calc_player_speed_t calc_player_speed = (calc_player_speed_t)0x080E1C58;
+	float speed = calc_player_speed(a1, a2);
+	int id = clientaddress_to_num(*(int*)a1);
+	
+	//if(speed > 0)
+	//	printf("setmovespeed [%d]: %f * %f\n", id, speed, player_movespeedscale[id]);
+	
+	if(speed > 0 && player_movespeedscale[id] > 0 && player_movespeedscale[id] != 1)
+		return speed * player_movespeedscale[id];
+	else
+		return speed;
+}
+
+void gsc_player_setmovespeedscale(int id) {
+	float scale;
+
+	if ( ! stackGetParams("f", &scale)) {
+		printf("scriptengine> ERROR: gsc_player_setmovespeedscale(): param \"scale\"[1] has to be an int!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	if (scale <= 0)
+	{
+		printf("scriptengine> ERROR: gsc_player_setmovespeedscale(): param \"scale\"[1] must be above zero!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	player_movespeedscale[id] = scale;
+	stackPushInt(1);
+}
 
 // entity functions (could be in own file, but atm not many pure entity functions)
 

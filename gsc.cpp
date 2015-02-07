@@ -330,6 +330,9 @@ Scr_Method scriptMethods[] = {
 	{"connectionlessPacket"  , gsc_player_connectionlesspacket, 0},
 	{"clientuserinfochanged" , gsc_player_clientuserinfochanged, 0},
 	{"resetNextReliableTime" , gsc_player_resetNextReliableTime, 0},
+	#if COD_VERSION < COD4_1_7 
+	{"setmovespeedscale"     , gsc_player_setmovespeedscale  , 0},
+	#endif
 	#endif
 	
 	{NULL, NULL, 0}
