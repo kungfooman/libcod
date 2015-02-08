@@ -834,17 +834,17 @@ void gsc_utils_setdefaultweapon() {
 	#if COD_VERSION == COD2_1_0
 		memcpy((void*)0x0811E929, &defaultweapon_mp, 4); // default
 		memcpy((void*)0x080E8AAD, &defaultweapon_mp, 4); // not found
-		memcpy((void*)0x080F014D, &defaultweapon_mp, 4); // not found backup
+		//memcpy((void*)0x080F014D, &defaultweapon_mp, 4); // not found backup
 		memcpy((void*)0x080E928A, &defaultweapon_mp, 4); // unknown
 	#elif COD_VERSION == COD2_1_2
 		memcpy((void*)0x08120C5A, &defaultweapon_mp, 4); // default
 		memcpy((void*)0x080EB09D, &defaultweapon_mp, 4); // not found
-		memcpy((void*)0x080F273D, &defaultweapon_mp, 4); // not found backup
+		//memcpy((void*)0x080F273D, &defaultweapon_mp, 4); // not found backup
 		memcpy((void*)0x080EB87A, &defaultweapon_mp, 4); // unknown
 	#elif COD_VERSION == COD2_1_3
 		memcpy((void*)0x08120DB9, &defaultweapon_mp, 4); // default
 		memcpy((void*)0x080EB1E1, &defaultweapon_mp, 4); // not found
-		memcpy((void*)0x080F2881, &defaultweapon_mp, 4); // not found backup
+		//memcpy((void*)0x080F2881, &defaultweapon_mp, 4); // not found backup
 		memcpy((void*)0x080EB9BE, &defaultweapon_mp, 4); // unknown
 	#endif
 	stackPushInt(1);
