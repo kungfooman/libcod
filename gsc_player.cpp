@@ -563,8 +563,6 @@ float player_movespeedscale[64] = {1};
 
 long double hook_setmovespeed(int a1, int a2)
 {
-	typedef long double (*calc_player_speed_t)(int a1, int a2);
-	calc_player_speed_t calc_player_speed = (calc_player_speed_t)0x080E1C58;
 	float speed = calc_player_speed(a1, a2);
 	int id = clientaddress_to_num(*(int*)a1);
 	

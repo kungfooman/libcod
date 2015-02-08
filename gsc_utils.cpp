@@ -801,31 +801,77 @@ void gsc_dlclose() {
 	stackPushInt(ret);
 }
 
+char* defaultweapon_mp = (char*)malloc(32);
+
+void gsc_utils_free()
+{
+	free(defaultweapon_mp);
+}
 
 void gsc_utils_setdefaultweapon() {
-	char *weapon;
+	char* weapon;
 	if ( ! stackGetParams("s", &weapon)) {
-		printf("scriptengine> wrongs args for: setdefaultweapon(handle)\n");
+		printf("scriptengine> wrongs args for: setdefaultweapon(weapon)\n");
 		stackPushUndefined();
 		return;
 	}
 	
-	if(strlen(weapon) >= 32)
+	if(strlen(weapon) > 31)
 	{
-		printf("scriptengine> weapon name is too long: setdefaultweapon(handle)\n");
+		printf("scriptengine> weapon name is too long: setdefaultweapon(weapon)\n");
 		stackPushUndefined();
+		return;
+	}
+	
+	if(strcmp(defaultweapon_mp, weapon) == 0)
+	{
+		stackPushInt(2);
 		return;
 	}
 	
 	strcpy(defaultweapon_mp, weapon);
 	defaultweapon_mp[strlen(weapon)] = '\0';
+	#if COD_VERSION == COD2_1_0
+		memcpy((void*)0x0811E929, &defaultweapon_mp, 4); // default
+		memcpy((void*)0x080E8AAD, &defaultweapon_mp, 4); // not found
+		memcpy((void*)0x080F014D, &defaultweapon_mp, 4); // not found backup
+		memcpy((void*)0x080E928A, &defaultweapon_mp, 4); // unknown
+	#elif COD_VERSION == COD2_1_2
+		memcpy((void*)0x08120C5A, &defaultweapon_mp, 4); // default
+		memcpy((void*)0x080EB09D, &defaultweapon_mp, 4); // not found
+		memcpy((void*)0x080F273D, &defaultweapon_mp, 4); // not found backup
+		memcpy((void*)0x080EB87A, &defaultweapon_mp, 4); // unknown
+	#elif COD_VERSION == COD2_1_3
+		memcpy((void*)0x08120DB9, &defaultweapon_mp, 4); // default
+		memcpy((void*)0x080EB1E1, &defaultweapon_mp, 4); // not found
+		memcpy((void*)0x080F2881, &defaultweapon_mp, 4); // not found backup
+		memcpy((void*)0x080EB9BE, &defaultweapon_mp, 4); // unknown
+	#endif
 	stackPushInt(1);
 }
 
 void gsc_utils_getloadedweapons() {
 	typedef int (*get_weapon_t)(int index);
-	get_weapon_t get_weapon = (get_weapon_t)0x080EB9A4;
-	int weps = *(int*)0x08627080; // see 80EBFFE (cod2 1.3)
+	#if COD_VERSION == COD2_1_0
+		get_weapon_t get_weapon = (get_weapon_t)0x080E9270;
+		int weps = *(int*)0x08576140;
+	#elif COD_VERSION == COD2_1_2
+		get_weapon_t get_weapon = (get_weapon_t)0x080EB860;
+		int weps = *(int*)0x0858A000;
+	#elif COD_VERSION == COD2_1_3
+		get_weapon_t get_weapon = (get_weapon_t)0x080EB9A4;
+		int weps = *(int*)0x08627080; // see 80EBFFE (cod2 1.3)
+	#else
+		#warning get_weapon_t get_weapon = NULL;
+		get_weapon_t get_weapon = (get_weapon_t)NULL;
+		int weps = 0;
+	#endif
+	
+	if(weps == 0)
+	{
+		stackPushUndefined();
+		return;
+	}
 	
 	stackPushArray();
 	for(int i=0;i<weps;i++)

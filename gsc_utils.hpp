@@ -15,7 +15,6 @@ extern "C" {
 
 /* link unlink */
 #include <unistd.h>
-extern char defaultweapon_mp[32]; // initialized in libcod.cpp
 
 void gsc_utils_disableGlobalPlayerCollision();
 void gsc_utils_getAscii();
@@ -50,6 +49,7 @@ void gsc_dlopen();
 void gsc_dlsym();
 void gsc_dlclose();
 
+void gsc_utils_free();
 void gsc_utils_setdefaultweapon();
 void gsc_utils_getloadedweapons();
 
