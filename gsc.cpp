@@ -259,6 +259,7 @@ Scr_Function scriptFunctions[] = {
 	{"dlsym"                          , gsc_dlsym                             , 0},
 	{"dlclose"                        , gsc_dlclose                           , 0},
 	{"setdefaultweapon"               , gsc_utils_setdefaultweapon            , 0},
+	{"getweaponmaxammo"               , gsc_utils_getweaponmaxammo            , 0},
 	{"getloadedweapons"               , gsc_utils_getloadedweapons            , 0},
 	#endif
 	

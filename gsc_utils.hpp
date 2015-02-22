@@ -51,6 +51,7 @@ void gsc_dlclose();
 
 void gsc_utils_free();
 void gsc_utils_setdefaultweapon();
+void gsc_utils_getweaponmaxammo();
 void gsc_utils_getloadedweapons();
 
 #ifdef __cplusplus

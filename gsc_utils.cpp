@@ -850,23 +850,56 @@ void gsc_utils_setdefaultweapon() {
 	stackPushInt(1);
 }
 
-void gsc_utils_getloadedweapons() {
+int weaponCount() {
+	#if COD_VERSION == COD2_1_0
+		return *(int*)0x08576140;
+	#elif COD_VERSION == COD2_1_2
+		return *(int*)0x0858A000;
+	#elif COD_VERSION == COD2_1_3
+		return *(int*)0x08627080; // see 80EBFFE (cod2 1.3)
+	#else
+		return 0;
+	#endif
+}
+
+int getWeapon(int index)
+{
 	typedef int (*get_weapon_t)(int index);
 	#if COD_VERSION == COD2_1_0
 		get_weapon_t get_weapon = (get_weapon_t)0x080E9270;
-		int weps = *(int*)0x08576140;
 	#elif COD_VERSION == COD2_1_2
 		get_weapon_t get_weapon = (get_weapon_t)0x080EB860;
-		int weps = *(int*)0x0858A000;
 	#elif COD_VERSION == COD2_1_3
 		get_weapon_t get_weapon = (get_weapon_t)0x080EB9A4;
-		int weps = *(int*)0x08627080; // see 80EBFFE (cod2 1.3)
 	#else
 		#warning get_weapon_t get_weapon = NULL;
 		get_weapon_t get_weapon = (get_weapon_t)NULL;
-		int weps = 0;
 	#endif
+	return get_weapon(index);
+}
+
+void gsc_utils_getweaponmaxammo() {
+	int id;
+	if ( ! stackGetParams("i", &id)) {
+		printf("scriptengine> wrongs args for: getweaponmaxammo(id)\n");
+		stackPushInt(0);
+		return;
+	}
 	
+	int weps = weaponCount();
+	if(id >= weps || weps == 0)
+	{
+		printf("scriptengine> index out of bounds: getweaponmaxammo(id)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	int maxammo = getWeapon(id) + 468;
+	stackPushInt(*(int*)maxammo);
+}
+
+void gsc_utils_getloadedweapons() {
+	int weps = weaponCount();
 	if(weps == 0)
 	{
 		stackPushUndefined();
@@ -876,7 +909,7 @@ void gsc_utils_getloadedweapons() {
 	stackPushArray();
 	for(int i=0;i<weps;i++)
 	{
-		int w = get_weapon(i);
+		int w = getWeapon(i);
 		stackPushString(*(char**)w);
 		//printf("%s\n", *(char**)w);
 		//for(int j=592;j<=872;j+=4)
@@ -891,7 +924,7 @@ void gsc_utils_getloadedweapons() {
 	// 8 = AIOverlayDescription   // 452 = ammo name
 	// 12 = view model            // 460 = clip name
 	// 16 = hand model
-	// 24 - 112 anims
+	// (24 - 112 anims)
 	// 24 = idle,       28 = idle empty,     32 = fire,           36 = hold fire,     40 = lastshot,
 	// 44 = rechamber,  48 = melee,          52 = reload,         56 = reload empty,  60 = reload start,
 	// 68 = reload end, 72 = raise,          76 = alt raise,      80 = alt drop,      84 = quick raise,
