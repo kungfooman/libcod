@@ -28,8 +28,13 @@ options="$options $no_warning_spam"
 tmp="/root/q3rally/q3rallysa/build";
 objects_car="$tmp/q_shared.o $tmp/q_math.o $tmp/com_printf.o $tmp/bg_wheel_forces.o $tmp/bg_pmove.o $tmp/bg_physics.o $tmp/bg_misc.o"
 
-mysql_link="-lmysqlclient"
-#mysql_link=""
+mysql_config="`mysql_config --cflags --libs`"
+mysql_link=""
+
+if [ -d "./vendors/lib" ]; then
+	mysql_config=""
+	mysql_link="-lmysqlclient -L./vendors/lib"
+fi
 
 # if dir $java_jdk exists: add java support to libcod
 # download url: https://jdk8.java.net/download.html
@@ -124,7 +129,7 @@ if [ "$1" == "" ] || [ "$1" == "cod2_1_3" ]; then
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	$cc -m32 -shared -L/lib32 -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib `mysql_config --cflags --libs`
+	$cc -m32 -shared -L/lib32 $mysql_link -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib $mysql_config
 fi
 # -Xlinker --defsym -Xlinker stackStart=0x08297500 
 
@@ -143,7 +148,7 @@ if [ "$1" == "" ] || [ "$1" == "cod2_1_2" ]; then
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	$cc -m32 -shared -L/lib32 -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib `mysql_config --cflags --libs`
+	$cc -m32 -shared -L/lib32 $mysql_link -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib $mysql_config
 fi
 
 if [ "$1" == "" ] || [ "$1" == "cod2_1_0" ]; then
@@ -161,7 +166,7 @@ if [ "$1" == "" ] || [ "$1" == "cod2_1_0" ]; then
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	$cc -m32 -shared -L/lib32 -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib `mysql_config --cflags --libs`
+	$cc -m32 -shared -L/lib32 $mysql_link -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib $mysql_config
 fi
 
 
@@ -176,7 +181,7 @@ if [ "$1" == "" ] || [ "$1" == "cod1_1_5" ]; then
 	#$cc $options $constants -c gsc_player.cpp -o gsc_player.opp
 
 	echo "##### LINK libcod1_1_5.so #####"
-	$cc -m32 -shared -L/lib32 -o bin/libcod1_1_5.so libcod2.opp gsc.opp gsc_player.opp gsc_astar.opp gsc_mysql.opp server.opp gsc_memory.opp cracking.opp $objects_tcc -Os -s -ldl -Wall `mysql_config --cflags --libs`
+	$cc -m32 -shared -L/lib32 $mysql_link -o bin/libcod1_1_5.so libcod2.opp gsc.opp gsc_player.opp gsc_astar.opp gsc_mysql.opp server.opp gsc_memory.opp cracking.opp $objects_tcc -Os -s -ldl -Wall $mysql_config
 fi
 
 
@@ -195,7 +200,7 @@ if [ "$1" == "" ] || [ "$1" == "cod4_1_7" ]; then
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	$cc -m32 -shared -L/lib32 -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib `mysql_config --cflags --libs`
+	$cc -m32 -shared -L/lib32 $mysql_link -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib $mysql_config
 fi
 
 
@@ -214,7 +219,7 @@ if [ "$1" == "" ] || [ "$1" == "cod4_1_7_l" ]; then
 
 	echo "##### LINK lib$1.so #####"
 	objects="$(ls objects_normal/*.opp) $(ls objects_$1/*.opp)"
-	$cc -m32 -shared -L/lib32 -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib `mysql_config --cflags --libs`
+	$cc -m32 -shared -L/lib32 $mysql_link -o bin/lib$1.so $objects $objects_tcc -Os -s -ldl -Wall $java_lib $mysql_config
 fi
 
 
