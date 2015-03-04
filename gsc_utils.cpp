@@ -878,6 +878,18 @@ int getWeapon(int index)
 	return get_weapon(index);
 }
 
+bool isValidWeaponId(int id)
+{
+	int weps = weaponCount();
+	if(id >= weps || weps == 0)
+	{
+		stackPushInt(0);
+		return false;
+	}
+	
+	return true;
+}
+
 void gsc_utils_getweaponmaxammo() {
 	int id;
 	if ( ! stackGetParams("i", &id)) {
@@ -886,11 +898,9 @@ void gsc_utils_getweaponmaxammo() {
 		return;
 	}
 	
-	int weps = weaponCount();
-	if(id >= weps || weps == 0)
+	if(!isValidWeaponId(id))
 	{
 		printf("scriptengine> index out of bounds: getweaponmaxammo(id)\n");
-		stackPushInt(0);
 		return;
 	}
 	
@@ -898,15 +908,86 @@ void gsc_utils_getweaponmaxammo() {
 	stackPushInt(*(int*)maxammo);
 }
 
-void gsc_utils_getloadedweapons() {
-	int weps = weaponCount();
-	if(weps == 0)
-	{
-		stackPushUndefined();
+void gsc_utils_getweapondamage() {
+	int id;
+	if ( ! stackGetParams("i", &id)) {
+		printf("scriptengine> wrongs args for: getweapondamage(id)\n");
+		stackPushInt(0);
 		return;
 	}
 	
+	if(!isValidWeaponId(id))
+	{
+		printf("scriptengine> index out of bounds: getweapondamage(id)\n");
+		return;
+	}
+	
+	int dmg = *(int*)(getWeapon(id) + 492);
+	stackPushInt(dmg);
+}
+
+void gsc_utils_setweapondamage() {
+	int id, dmg;
+	if ( ! stackGetParams("ii", &id, &dmg)) {
+		printf("scriptengine> wrongs args for: setweapondamage(id, dmg)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	if(!isValidWeaponId(id))
+	{
+		printf("scriptengine> index out of bounds: setweapondamage(id, dmg)\n");
+		return;
+	}
+	
+	int* weapondmg = (int*)(getWeapon(id) + 492);
+	*weapondmg = dmg;
+	stackPushInt(1);
+}
+
+void gsc_utils_getweaponmeleedamage() {
+	int id;
+	if ( ! stackGetParams("i", &id)) {
+		printf("scriptengine> wrongs args for: getweapondamagemelee(id)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	if(!isValidWeaponId(id))
+	{
+		printf("scriptengine> index out of bounds: getweapondamagemelee(id)\n");
+		return;
+	}
+	
+	int dmg = *(int*)(getWeapon(id) + 500);
+	stackPushInt(dmg);
+}
+
+void gsc_utils_setweaponmeleedamage() {
+	int id, dmg;
+	if ( ! stackGetParams("ii", &id, &dmg)) {
+		printf("scriptengine> wrongs args for: setweapondamagemelee(id, dmg)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	if(!isValidWeaponId(id))
+	{
+		printf("scriptengine> index out of bounds: setweapondamagemelee(id, dmg)\n");
+		return;
+	}
+	
+	int* weapondmg = (int*)(getWeapon(id) + 500);
+	*weapondmg = dmg;
+	stackPushInt(1);
+}
+
+void gsc_utils_getloadedweapons() {
 	stackPushArray();
+	int weps = weaponCount();
+	if(weps == 0)
+		return;
+	
 	for(int i=0;i<weps;i++)
 	{
 		int w = getWeapon(i);
