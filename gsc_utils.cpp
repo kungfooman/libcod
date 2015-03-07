@@ -816,15 +816,13 @@ void gsc_utils_setdefaultweapon() {
 		return;
 	}
 	
-	if(strlen(weapon) > 31)
-	{
+	if(strlen(weapon) > 31) {
 		printf("scriptengine> weapon name is too long: setdefaultweapon(weapon)\n");
 		stackPushUndefined();
 		return;
 	}
 	
-	if(strcmp(defaultweapon_mp, weapon) == 0)
-	{
+	if(strcmp(defaultweapon_mp, weapon) == 0) {
 		stackPushInt(2);
 		return;
 	}
@@ -881,11 +879,8 @@ int getWeapon(int index)
 bool isValidWeaponId(int id)
 {
 	int weps = weaponCount();
-	if(id >= weps || weps == 0)
-	{
-		stackPushInt(0);
+	if(id >= weps || id < 0 || weps == 0)
 		return false;
-	}
 	
 	return true;
 }
@@ -898,9 +893,9 @@ void gsc_utils_getweaponmaxammo() {
 		return;
 	}
 	
-	if(!isValidWeaponId(id))
-	{
+	if(!isValidWeaponId(id)) {
 		printf("scriptengine> index out of bounds: getweaponmaxammo(id)\n");
+		stackPushInt(0);
 		return;
 	}
 	
@@ -916,9 +911,9 @@ void gsc_utils_getweapondamage() {
 		return;
 	}
 	
-	if(!isValidWeaponId(id))
-	{
+	if(!isValidWeaponId(id)) {
 		printf("scriptengine> index out of bounds: getweapondamage(id)\n");
+		stackPushInt(0);
 		return;
 	}
 	
@@ -934,9 +929,9 @@ void gsc_utils_setweapondamage() {
 		return;
 	}
 	
-	if(!isValidWeaponId(id))
-	{
+	if(!isValidWeaponId(id)) {
 		printf("scriptengine> index out of bounds: setweapondamage(id, dmg)\n");
+		stackPushInt(0);
 		return;
 	}
 	
@@ -953,9 +948,9 @@ void gsc_utils_getweaponmeleedamage() {
 		return;
 	}
 	
-	if(!isValidWeaponId(id))
-	{
+	if(!isValidWeaponId(id)) {
 		printf("scriptengine> index out of bounds: getweapondamagemelee(id)\n");
+		stackPushInt(0);
 		return;
 	}
 	
@@ -971,9 +966,9 @@ void gsc_utils_setweaponmeleedamage() {
 		return;
 	}
 	
-	if(!isValidWeaponId(id))
-	{
+	if(!isValidWeaponId(id)) {
 		printf("scriptengine> index out of bounds: setweapondamagemelee(id, dmg)\n");
+		stackPushInt(0);
 		return;
 	}
 	
@@ -982,54 +977,125 @@ void gsc_utils_setweaponmeleedamage() {
 	stackPushInt(1);
 }
 
+void gsc_utils_getweaponfiretime() {
+	int id;
+	if ( ! stackGetParams("i", &id)) {
+		printf("scriptengine> wrongs args for: getweaponfiretime(id)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	if(!isValidWeaponId(id)) {
+		printf("scriptengine> index out of bounds: getweaponfiretime(id)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	int firetime = *(int*)(getWeapon(id) + 516);
+	stackPushInt(firetime);
+}
+
+void gsc_utils_setweaponfiretime() {
+	int id, time;
+	if ( ! stackGetParams("ii", &id, &time)) {
+		printf("scriptengine> wrongs args for: setweaponfiretime(id, time)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	if(!isValidWeaponId(id)) {
+		printf("scriptengine> index out of bounds: setweaponfiretime(id, time)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	int* firetime = (int*)(getWeapon(id) + 516); // see 80EF58A
+	*firetime = time;
+	stackPushInt(1);
+}
+
+char* hitlocs[] = {"none", "helmet", "head", "neck", "torso_upper", "torso_lower", "right_arm_upper", 
+"right_arm_lower", "right_hand", "left_arm_upper", "left_arm_lower", "left_hand", "right_leg_upper", 
+"right_leg_lower", "right_foot", "left_leg_upper", "left_leg_lower", "left_foot", "gun"};
+
+int getHitLocOffset(char* hitloc)
+{
+	int offset = 0; // none
+	for (int i=0;i<19;i++) { // prevent out of bound
+		if(strcmp(hitlocs[i], hitloc) == 0) {
+			offset = i;
+			break;
+		}
+	}
+	return offset;
+}
+
+void gsc_utils_getweaponhitlocmultiplier() {
+	int id;
+	char* hitloc;
+	if ( ! stackGetParams("is", &id, &hitloc)) {
+		printf("scriptengine> wrongs args for: getweaponhitlocmultiplier(id, hitloc)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	if(!isValidWeaponId(id)) {
+		printf("scriptengine> index out of bounds: getweaponhitlocmultiplier(id, hitloc)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	int offset = getHitLocOffset(hitloc);
+	float multiplier = *(float*)(getWeapon(id) + 4 * offset + 1456);
+	stackPushFloat(multiplier);
+}
+
+void gsc_utils_setweaponhitlocmultiplier() {
+	int id;
+	float multiplier;
+	char* hitloc;
+	if ( ! stackGetParams("isf", &id, &hitloc, &multiplier)) {
+		printf("scriptengine> wrongs args for: getweaponhitlocmultiplier(id, hitloc, multiplier)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	if(!isValidWeaponId(id)) {
+		printf("scriptengine> index out of bounds: getweaponhitlocmultiplier(id, hitloc, multiplier)\n");
+		stackPushInt(0);
+		return;
+	}
+	
+	int offset = getHitLocOffset(hitloc);
+	float* multiPointer = (float*)(getWeapon(id) + 4 * offset + 1456);
+	*multiPointer = multiplier;
+	stackPushFloat(1);
+}
+
 void gsc_utils_getloadedweapons() {
 	stackPushArray();
 	int weps = weaponCount();
 	if(weps == 0)
 		return;
 	
-	for(int i=0;i<weps;i++)
-	{
+	for(int i=0;i<weps;i++) {
 		int w = getWeapon(i);
 		stackPushString(*(char**)w);
-		//printf("%s\n", *(char**)w);
-		//for(int j=592;j<=872;j+=4)
-		//{
-		//	printf("%d = %f\n", j, *(float*)(w + j));
-		//}
 		stackPushArrayLast();
 	}
 	
-	// 0 = weapon_mp              // 436 = world model
-	// 4 = display name           // 440 = hud icon
-	// 8 = AIOverlayDescription   // 452 = ammo name
-	// 12 = view model            // 460 = clip name
-	// 16 = hand model
-	// (24 - 112 anims)
-	// 24 = idle,       28 = idle empty,     32 = fire,           36 = hold fire,     40 = lastshot,
-	// 44 = rechamber,  48 = melee,          52 = reload,         56 = reload empty,  60 = reload start,
-	// 68 = reload end, 72 = raise,          76 = alt raise,      80 = alt drop,      84 = quick raise,
-	// 88 = quick drop, 92 = ads fire,       96 = ads lastshot,  100 = ads recamber, 104 = ads up,
-	// 108 = ads down
-	// 144 = view effect
-	// 148 = world effect
-	// 152 = pick up sound
-	// 168 = fire sound
-	// 172 = fire sound player
-	// 272 = fx/shellejects/rifle.efx
-	// 284 = gfx/reticle/side_skinny_xenon.tga
+	// the offset are written in hex after each name (e.g fireTime at 8187084 with 0x204 (516))
+	// 0 = weapon_mp
+	// 4 = display name
 	// 468 = max ammo
 	// 472 = start ammo
 	// 476 = shot count
 	// 492 = damage
 	// 500 = melee damage
-	// 592 = slowdownAimRange
-	// 596 = slowdownAimRangeAds
-	// 600 = lockonAimRange
-	// 604 = lockonAimRangeAds
-	// 608 = enemyCrosshairRange
 	// 612 = moveSpeedScale // see 80E1C58 (cod2 1.3) call 80E268A
-	//printf("[%d][%s][%s][%s]: %s\n", i, *(char**)w, *(const char **)(w + 436), *(char**)(w + 12), *(char**)(w + 4)); // [id][weapon_mp][worldmodel][viewmodel]: displayname	
+	// 1456 - 1528 = locNone till locGun
+	// [id][weapon_mp][worldmodel][viewmodel]: displayname
+	//printf("[%d][%s][%s][%s]: %s\n", i, *(char**)w, *(const char **)(w + 436), *(char**)(w + 12), *(char**)(w + 4)); 	
 }
 
 #endif

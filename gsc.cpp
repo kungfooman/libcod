@@ -264,6 +264,10 @@ Scr_Function scriptFunctions[] = {
 	{"setweapondamage"                , gsc_utils_setweapondamage             , 0},
 	{"getweaponmeleedamage"           , gsc_utils_getweaponmeleedamage        , 0},
 	{"setweaponmeleedamage"           , gsc_utils_setweaponmeleedamage        , 0},
+	{"getweaponfiretime"              , gsc_utils_getweaponfiretime           , 0},
+	{"setweaponfiretime"              , gsc_utils_setweaponfiretime           , 0},
+	{"getweaponhitlocmultiplier"      , gsc_utils_getweaponhitlocmultiplier   , 0},
+	{"setweaponhitlocmultiplier"      , gsc_utils_setweaponhitlocmultiplier   , 0},
 	{"getloadedweapons"               , gsc_utils_getloadedweapons            , 0},
 	#endif
 	

@@ -56,6 +56,10 @@ void gsc_utils_getweapondamage();
 void gsc_utils_setweapondamage();
 void gsc_utils_getweaponmeleedamage();
 void gsc_utils_setweaponmeleedamage();
+void gsc_utils_getweaponfiretime();
+void gsc_utils_setweaponfiretime();
+void gsc_utils_getweaponhitlocmultiplier();
+void gsc_utils_setweaponhitlocmultiplier();
 void gsc_utils_getloadedweapons();
 
 #ifdef __cplusplus
