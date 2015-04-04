@@ -560,14 +560,12 @@ void gsc_player_resetNextReliableTime(int id)
 }
 
 float player_movespeedscale[64] = {1};
+//float player_firetimescale[64] = {1};
 
-long double hook_setmovespeed(int a1, int a2)
+long double hook_player_setmovespeed(int client, int a2)
 {
-	float speed = calc_player_speed(a1, a2);
-	int id = clientaddress_to_num(*(int*)a1);
-	
-	//if(speed > 0)
-	//	printf("setmovespeed [%d]: %f * %f\n", id, speed, player_movespeedscale[id]);
+	float speed = calc_player_speed(client, a2);
+	int id = clientaddress_to_num(*(int*)client);
 	
 	if(speed > 0 && player_movespeedscale[id] > 0 && player_movespeedscale[id] != 1)
 		return speed * player_movespeedscale[id];
@@ -575,17 +573,76 @@ long double hook_setmovespeed(int a1, int a2)
 		return speed;
 }
 
+int hook_player_setfiretime(int state, int a2)
+{
+	typedef int (*update_playerweapon_t)(int a1, int a2);
+	update_playerweapon_t update_playerweapon = (update_playerweapon_t)0x080EF1AC;
+	int result = update_playerweapon(state, a2);
+	/*int id = clientaddress_to_num(state);
+	if(player_firetimescale[id] != 1) {
+		int* timetillnextshot = (int *)(state + 0x34);
+		int currenttime = *timetillnextshot;
+		*timetillnextshot = (int)(currenttime * player_firetimescale[id]);
+	}*/
+	return result;
+}
+
+int hook_player_setfiretimeoffhand(int state)
+{
+	typedef int (*update_playerweapon_t)(int a1);
+	int* timetillnextshot = (int *)(state + 0x34);
+	update_playerweapon_t update_playerweapon = (update_playerweapon_t)0x080EFB12;
+	int result = update_playerweapon(state);
+	printf("setfiretime2 after: %d\n", *timetillnextshot); 
+	return result;
+}
+
+typedef int (*update_reloadweapon_t)(int a1);
+update_reloadweapon_t update_reloadweapon = (update_reloadweapon_t)0x080ED8B4;
+
+int hook_player_setreloadtime(int state)
+{
+	int result = update_reloadweapon(state);
+	int* reloadtime = (int *)(state + 0x38);
+	printf("setreloadtime: %d\n", *reloadtime);
+	return result;
+}
+
+int hook_player_setreloadtime2(int state)
+{
+	int result = update_reloadweapon(state);
+	int* reloadtime = (int *)(state + 0x38);
+	printf("setreloadtime2: %d\n", *reloadtime);
+	return result;
+}
+
+void gsc_player_setfiretimescale(int id) {
+	float scale;
+	if ( ! stackGetParams("f", &scale)) {
+		printf("scriptengine> ERROR: gsc_player_setfiretimescale(): param \"scale\"[1] has to be an int!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	if (scale < 0) {
+		printf("scriptengine> ERROR: gsc_player_setfiretimescale(): param \"scale\"[1] must be zero or above!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	//player_firetimescale[id] = scale;
+	stackPushInt(1);
+}
+
 void gsc_player_setmovespeedscale(int id) {
 	float scale;
-
 	if ( ! stackGetParams("f", &scale)) {
 		printf("scriptengine> ERROR: gsc_player_setmovespeedscale(): param \"scale\"[1] has to be an int!\n");
 		stackPushUndefined();
 		return;
 	}
 	
-	if (scale <= 0)
-	{
+	if (scale <= 0) {
 		printf("scriptengine> ERROR: gsc_player_setmovespeedscale(): param \"scale\"[1] must be above zero!\n");
 		stackPushUndefined();
 		return;
@@ -632,8 +689,7 @@ void gsc_entity_setbounds(int id) {
 void gsc_free_slot()
 {
 	int id = 0;
-	if(!stackGetParamInt(0, &id))
-	{
+	if(!stackGetParamInt(0, &id)) {
 		printf("Param 0 needs to be an int for free_slot\n");
 		stackPushUndefined();
 		return;
@@ -656,8 +712,7 @@ void gsc_kick_slot()
 		return;
 	}
 	
-	if(getAddressType(id) == NA_LOOPBACK)
-	{
+	if(getAddressType(id) == NA_LOOPBACK) {
 		stackReturnInt(0);
 		return; // host
 	}
@@ -680,8 +735,7 @@ void gsc_kick_slot()
 	int * lastPacketTime = (int*)getLastPacketTime(id);
 	*lastPacketTime = getSVSTime(); // in case there is a funny zombie (copied from Q3)
 	
-	if(!stackGetParamString(2, &reason))
-	{
+	if(!stackGetParamString(2, &reason)) {
 		#if COD_VERSION >= COD4_1_7
 			Com_Printf(0, "%s (guid %i) was kicked\n", name, guid);
 		#else

@@ -58,6 +58,8 @@ void gsc_utils_getweaponmeleedamage();
 void gsc_utils_setweaponmeleedamage();
 void gsc_utils_getweaponfiretime();
 void gsc_utils_setweaponfiretime();
+void gsc_utils_getweaponmeleetime();
+void gsc_utils_setweaponmeleetime();
 void gsc_utils_getweaponhitlocmultiplier();
 void gsc_utils_setweaponhitlocmultiplier();
 void gsc_utils_getloadedweapons();

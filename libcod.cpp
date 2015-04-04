@@ -2172,7 +2172,7 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x0807059F, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x080707C3, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08098CD0, (int)hook_SV_WriteDownloadToClient);
-			cracking_hook_call(0x080DFF66, (int)hook_setmovespeed);
+			cracking_hook_call(0x080DFF66, (int)hook_player_setmovespeed);
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
@@ -2187,8 +2187,7 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x080909BE, (int)hook_ClientUserinfoChanged);
 			cracking_hook_call(0x08070B1B, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070D3F, (int)Scr_GetCustomMethod);
-			cracking_hook_call(0x08103E85, (int)hook_dummytrue);
-			cracking_hook_call(0x080E2546, (int)hook_setmovespeed);
+			cracking_hook_call(0x080E2546, (int)hook_player_setmovespeed);
 			hook_MSG_WriteBigString = new cHook(0x0806825E, (int)MSG_WriteBigString);
 			//hook_MSG_WriteBigString->hook();
 			
@@ -2208,8 +2207,11 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x08090A52, (int)hook_ClientUserinfoChanged);
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
-			cracking_hook_call(0x08103FE1, (int)hook_dummytrue);
-			cracking_hook_call(0x080E268A, (int)hook_setmovespeed);
+			cracking_hook_call(0x080E268A, (int)hook_player_setmovespeed);
+			//cracking_hook_call(0x080EF5B1, (int)hook_player_setfiretime);
+			//cracking_hook_call(0x080EDAFD, (int)hook_player_setreloadtime);
+			//cracking_hook_call(0x080EDC17, (int)hook_player_setreloadtime2);
+			//cracking_hook_call(0x080F08A4, (int)hook_player_setfiretimeoffhand);
 		#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 			extern cHook *hook_Scr_GetFunction;
 			extern cHook *hook_Scr_GetMethod;

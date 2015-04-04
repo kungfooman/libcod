@@ -266,6 +266,8 @@ Scr_Function scriptFunctions[] = {
 	{"setweaponmeleedamage"           , gsc_utils_setweaponmeleedamage        , 0},
 	{"getweaponfiretime"              , gsc_utils_getweaponfiretime           , 0},
 	{"setweaponfiretime"              , gsc_utils_setweaponfiretime           , 0},
+        {"getweaponmeleetime"              , gsc_utils_getweaponmeleetime           , 0},
+        {"setweaponmeleetime"              , gsc_utils_setweaponmeleetime           , 0},
 	{"getweaponhitlocmultiplier"      , gsc_utils_getweaponhitlocmultiplier   , 0},
 	{"setweaponhitlocmultiplier"      , gsc_utils_setweaponhitlocmultiplier   , 0},
 	{"getloadedweapons"               , gsc_utils_getloadedweapons            , 0},
@@ -340,6 +342,7 @@ Scr_Method scriptMethods[] = {
 	{"connectionlessPacket"  , gsc_player_connectionlesspacket, 0},
 	{"clientuserinfochanged" , gsc_player_clientuserinfochanged, 0},
 	{"resetNextReliableTime" , gsc_player_resetNextReliableTime, 0},
+	//{"setfiretimescale"      , gsc_player_setfiretimescale   , 0},
 	#if COD_VERSION < COD4_1_7 
 	{"setmovespeedscale"     , gsc_player_setmovespeedscale  , 0},
 	#endif
