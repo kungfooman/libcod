@@ -803,8 +803,7 @@ void gsc_dlclose() {
 
 char* defaultweapon_mp = (char*)malloc(32);
 
-void gsc_utils_free()
-{
+void gsc_utils_free() {
 	free(defaultweapon_mp);
 }
 
@@ -860,8 +859,7 @@ int weaponCount() {
 	#endif
 }
 
-int getWeapon(int index)
-{
+int getWeapon(int index) {
 	typedef int (*get_weapon_t)(int index);
 	#if COD_VERSION == COD2_1_0
 		get_weapon_t get_weapon = (get_weapon_t)0x080E9270;
@@ -876,8 +874,7 @@ int getWeapon(int index)
 	return get_weapon(index);
 }
 
-bool isValidWeaponId(int id)
-{
+bool isValidWeaponId(int id) {
 	int weps = weaponCount();
 	if(id >= weps || id < 0 || weps == 0)
 		return false;
@@ -886,41 +883,41 @@ bool isValidWeaponId(int id)
 }
 
 void gsc_utils_getweaponoffsetint(char* funcname, int offset) {
-        int id;
-        if ( ! stackGetParams("i", &id)) {
-                printf("scriptengine> wrongs args for: %s(id)\n", funcname);
-                stackPushInt(0);
-                return;
-        }
+	int id;
+	if ( ! stackGetParams("i", &id)) {
+		printf("scriptengine> wrongs args for: %s(id)\n", funcname);
+		stackPushInt(0);
+		return;
+	}
 
-        if(!isValidWeaponId(id)) {
-                printf("scriptengine> index out of bounds: %s(id)\n", funcname);
-                stackPushInt(0);
-                return;
-        }
+	if(!isValidWeaponId(id)) {
+		printf("scriptengine> index out of bounds: %s(id)\n", funcname);
+		stackPushInt(0);
+		return;
+	}
 
-        int value = *(int*)(getWeapon(id) + offset);
-        stackPushInt(value);
+	int value = *(int*)(getWeapon(id) + offset);
+	stackPushInt(value);
 }
 
 void gsc_utils_setweaponoffsetint(char* funcname, int offset) {
-        int id;
-        int value;
-        if ( ! stackGetParams("ii", &id, &value)) {
-                printf("scriptengine> wrongs args for: %s(id, value)\n", funcname);
-                stackPushInt(0);
-                return;
-        }
+	int id;
+	int value;
+	if ( ! stackGetParams("ii", &id, &value)) {
+		printf("scriptengine> wrongs args for: %s(id, value)\n", funcname);
+		stackPushInt(0);
+		return;
+	}
 
-        if(!isValidWeaponId(id)) {
-                printf("scriptengine> index out of bounds: %s(id, value)\n", funcname);
-                stackPushInt(0);
-                return;
-        }
+	if(!isValidWeaponId(id)) {
+		printf("scriptengine> index out of bounds: %s(id, value)\n", funcname);
+		stackPushInt(0);
+		return;
+	}
 
-        int* index = (int*)(getWeapon(id) + offset);
-        *index = value;
-        stackPushInt(1);
+	int* index = (int*)(getWeapon(id) + offset);
+	*index = value;
+	stackPushInt(1);
 }
 
 void gsc_utils_getweaponmaxammo() {
@@ -952,19 +949,18 @@ void gsc_utils_setweaponfiretime() {
 }
 
 void gsc_utils_getweaponmeleetime() {
-        gsc_utils_getweaponoffsetint("getweaponmeleetime", 532);
+	gsc_utils_getweaponoffsetint("getweaponmeleetime", 532);
 }
 
 void gsc_utils_setweaponmeleetime() {
-        gsc_utils_setweaponoffsetint("setweaponmeleetime", 532);
+	gsc_utils_setweaponoffsetint("setweaponmeleetime", 532);
 }
 
 char* hitlocs[] = {"none", "helmet", "head", "neck", "torso_upper", "torso_lower", "right_arm_upper", 
 "right_arm_lower", "right_hand", "left_arm_upper", "left_arm_lower", "left_hand", "right_leg_upper", 
 "right_leg_lower", "right_foot", "left_leg_upper", "left_leg_lower", "left_foot", "gun"};
 
-int getHitLocOffset(char* hitloc)
-{
+int getHitLocOffset(char* hitloc) {
 	int offset = 0; // none
 	for (int i=0;i<19;i++) { // prevent out of bound
 		if(strcmp(hitlocs[i], hitloc) == 0) {

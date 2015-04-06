@@ -50,6 +50,8 @@ void gsc_player_renameclient(int id);
 void gsc_player_outofbandprint(int id);
 void gsc_player_connectionlesspacket(int id);
 void gsc_player_resetNextReliableTime(int id);
+void gsc_player_ismantling(int id);
+void gsc_player_isonladder(int id);
 long double hook_player_setmovespeed(int client, int a2);
 int hook_player_setfiretime(int state, int a2);
 int hook_player_setfiretimeoffhand(int state);

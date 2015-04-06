@@ -547,8 +547,7 @@ void gsc_player_connectionlesspacket(int id) {
 	stackReturnInt(1);
 }
 
-void gsc_player_resetNextReliableTime(int id)
-{
+void gsc_player_resetNextReliableTime(int id) {
 	#if COD_VERSION == COD2_1_0
 		int offset = 134412;
 	#else
@@ -559,11 +558,28 @@ void gsc_player_resetNextReliableTime(int id)
 	stackPushInt(0);
 }
 
+void gsc_player_ismantling(int id) {
+	int flags = PLAYERSTATE(id) + 0xc;
+	
+	if(*(int*)flags & 4) //oi m8 im mantling
+		stackPushInt(1);
+	else 
+		stackPushInt(0);
+}
+
+void gsc_player_isonladder(int id) {
+	int flags = PLAYERSTATE(id) + 0xc;
+	
+	if(*(int*)flags & 32)
+		stackPushInt(1);
+	else 
+		stackPushInt(0);
+}
+
 float player_movespeedscale[64] = {1};
 //float player_firetimescale[64] = {1};
 
-long double hook_player_setmovespeed(int client, int a2)
-{
+long double hook_player_setmovespeed(int client, int a2) {
 	float speed = calc_player_speed(client, a2);
 	int id = clientaddress_to_num(*(int*)client);
 	
@@ -573,8 +589,7 @@ long double hook_player_setmovespeed(int client, int a2)
 		return speed;
 }
 
-int hook_player_setfiretime(int state, int a2)
-{
+int hook_player_setfiretime(int state, int a2) {
 	typedef int (*update_playerweapon_t)(int a1, int a2);
 	update_playerweapon_t update_playerweapon = (update_playerweapon_t)0x080EF1AC;
 	int result = update_playerweapon(state, a2);
@@ -587,8 +602,7 @@ int hook_player_setfiretime(int state, int a2)
 	return result;
 }
 
-int hook_player_setfiretimeoffhand(int state)
-{
+int hook_player_setfiretimeoffhand(int state) {
 	typedef int (*update_playerweapon_t)(int a1);
 	int* timetillnextshot = (int *)(state + 0x34);
 	update_playerweapon_t update_playerweapon = (update_playerweapon_t)0x080EFB12;
@@ -600,16 +614,14 @@ int hook_player_setfiretimeoffhand(int state)
 typedef int (*update_reloadweapon_t)(int a1);
 update_reloadweapon_t update_reloadweapon = (update_reloadweapon_t)0x080ED8B4;
 
-int hook_player_setreloadtime(int state)
-{
+int hook_player_setreloadtime(int state) {
 	int result = update_reloadweapon(state);
 	int* reloadtime = (int *)(state + 0x38);
 	printf("setreloadtime: %d\n", *reloadtime);
 	return result;
 }
 
-int hook_player_setreloadtime2(int state)
-{
+int hook_player_setreloadtime2(int state) {
 	int result = update_reloadweapon(state);
 	int* reloadtime = (int *)(state + 0x38);
 	printf("setreloadtime2: %d\n", *reloadtime);
@@ -686,8 +698,7 @@ void gsc_entity_setbounds(int id) {
 	stackReturnInt(1);
 }
 
-void gsc_free_slot()
-{
+void gsc_free_slot() {
 	int id = 0;
 	if(!stackGetParamInt(0, &id)) {
 		printf("Param 0 needs to be an int for free_slot\n");
@@ -699,8 +710,7 @@ void gsc_free_slot()
 	stackPushUndefined();
 }
 
-void gsc_kick_slot()
-{
+void gsc_kick_slot() {
 	int id;
 	char* msg;
 	char* reason;
