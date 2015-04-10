@@ -956,6 +956,22 @@ void gsc_utils_setweaponmeleetime() {
 	gsc_utils_setweaponoffsetint("setweaponmeleetime", 532);
 }
 
+void gsc_utils_getweaponreloadtime() {
+	gsc_utils_getweaponoffsetint("getweaponreloadtime", 536);
+}
+
+void gsc_utils_setweaponreloadtime() {
+	gsc_utils_setweaponoffsetint("setweaponreloadtime", 536);
+}
+
+void gsc_utils_getweaponreloademptytime() {
+	gsc_utils_getweaponoffsetint("getweaponreloademptytime", 540);
+}
+
+void gsc_utils_setweaponreloademptytime() {
+	gsc_utils_setweaponoffsetint("setweaponreloademptytime", 540);
+}
+
 char* hitlocs[] = {"none", "helmet", "head", "neck", "torso_upper", "torso_lower", "right_arm_upper", 
 "right_arm_lower", "right_hand", "left_arm_upper", "left_arm_lower", "left_hand", "right_leg_upper", 
 "right_leg_lower", "right_foot", "left_leg_upper", "left_leg_lower", "left_foot", "gun"};
