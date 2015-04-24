@@ -496,6 +496,33 @@ void gsc_utils_getAscii() {
 	stackPushInt(str[0]);
 }
 
+void gsc_utils_toupper() {
+	char *str;
+	int offset = 0;
+	int len = 0;
+	if ( ! stackGetParams("s", &str) || strlen(str) == 0) {
+		stackPushString("");
+		return;
+	}
+	
+	stackGetParamInt(1, &offset);
+	if(offset < 0)
+		offset = 0;
+	if(!stackGetParamInt(2, &len) || len == 0)
+		len = strlen(str);
+	if(len - offset > strlen(str))
+		len = strlen(str) - offset;
+	if(len <= 0) {
+		stackPushString("");
+		return;
+	}
+	
+	for (int i = offset; i < len; i++)
+        str[i] = toupper(str[i]);
+	
+	stackPushString(str);
+}
+
 void gsc_utils_system() { // closer 903, "ls"
 	char *cmd;
 	if ( ! stackGetParams("s",  &cmd)) {

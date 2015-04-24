@@ -18,6 +18,7 @@ extern "C" {
 
 void gsc_utils_disableGlobalPlayerCollision();
 void gsc_utils_getAscii();
+void gsc_utils_toupper();
 void gsc_utils_system();
 void gsc_utils_file_link();
 void gsc_utils_file_unlink();
