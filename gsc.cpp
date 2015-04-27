@@ -57,6 +57,25 @@
 	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)NULL;
 #endif
 
+#if COD2_VERSION == COD2_VERSION_1_2
+	unsigned short (*GetVariableName)(unsigned short) = (unsigned short(*)(unsigned short))0x807CFF6;
+	unsigned short (*GetNextVariable)(unsigned short) = (unsigned short(*)(unsigned short))0x807CF52; //idk original funcname
+#elif COD2_VERSION == COD2_VERSION_1_3
+	unsigned short (*GetVariableName)(unsigned short) = (unsigned short(*)(unsigned short))0x807D0C2;
+	unsigned short (*GetNextVariable)(unsigned short) = (unsigned short(*)(unsigned short))0x807D01E; //idk original funcname
+#else
+	unsigned short (*GetVariableName)(unsigned short) = (unsigned short(*)(unsigned short))NULL;
+	unsigned short (*GetNextVariable)(unsigned short) = (unsigned short(*)(unsigned short))NULL;
+#endif
+
+#if COD2_VERSION == COD2_VERSION_1_2
+	char *(*SL_ConvertToString)(unsigned short) = (char*(*)(unsigned short))0x8078E1A;
+#elif COD2_VERSION == COD2_VERSION_1_3
+	char *(*SL_ConvertToString)(unsigned short) = (char*(*)(unsigned short))0x8078EE6;
+#else
+	char *SL_ConvertToString(unsigned short) { return NULL; }//error_wrong_patch
+#endif
+
 char *stackGetParamTypeAsString(int param) {
 	aStackElement *scriptStack = *(aStackElement**)getStack();
 	aStackElement *arg = scriptStack - param;
@@ -186,6 +205,7 @@ Scr_Function scriptFunctions[] = {
 	{"printfline", gsc_utils_printfline, 0}, // adds \n at end
 	{"com_printf", gsc_utils_com_printf, 0},
 	{"redirectprintf", gsc_utils_redirectprintf, 0},
+	{"getArrayKeys", Scr_GetArrayKeys, 0},
 	
 	#if COMPILE_MYSQL == 1
 	{"mysql_init"              , gsc_mysql_init              , 0},
@@ -625,6 +645,53 @@ int cdecl_injected_closer_stack_debug()
 		
 	}
 	return 1;
+}
+
+unsigned short get_var_by_idx(unsigned short index) {
+	#if COD2_VERSION == COD2_VERSION_1_2
+	unsigned short *words = (unsigned short*)0x817C902;
+	#elif COD2_VERSION == COD2_VERSION_1_3
+	unsigned short *words = (unsigned short*)0x817D922;
+	#else
+	unsigned short *words = (unsigned short*)0xdeadbeef;
+	#endif
+	return words[6 * index];
+}
+
+//thanks to riicchhaarrd/php
+
+unsigned short Scr_GetArray(int index) {
+	if(index >= stackGetNumberOfParams()) {
+		printf("scriptengine> Scr_GetArray: one parameter is required\n");
+		return 0;
+	}
+	
+	int stack = getStack();
+	int base = *(int*)(stack - 8 * index); //in cod1 its without dereferencing the ptr
+	int vartype = *(int*)(base + 4);
+	
+	if(vartype == STACK_OBJECT) //VT_OBJECT
+		return *(unsigned short*)base;
+	printf("scriptengine> Scr_GetArray: the parameter must be an array\n");
+	return 0;
+}
+
+void Scr_GetArrayKeys() {
+	unsigned short arrIndex = Scr_GetArray(0);
+	stackPushArray();
+	if(arrIndex == 0)
+		return; // we didn't find a valid array
+ 
+	unsigned short i, var;
+	for(i = GetNextVariable(arrIndex); i != 0;) {
+		//printf("%d: %s = %s\n", i, SL_ConvertToString(GetVariableName(i)), SL_ConvertToString(var));
+		
+		stackPushString(SL_ConvertToString(GetVariableName(i)));
+		stackPushArrayLast();
+ 
+		i = GetNextVariable(i);
+		var = get_var_by_idx(i);
+	}
 }
 
 /* THE BEGINNING of generalizing the push-value-functions! */

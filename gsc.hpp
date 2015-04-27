@@ -196,6 +196,10 @@ int stackSetKeyInArray(int precachedStringOffset);
 int cdecl_injected_closer();
 int cdecl_injected_closer_stack_debug();
 
+unsigned short get_var_by_idx(unsigned short index);
+unsigned short Scr_GetArray(int index);
+void Scr_GetArrayKeys();
+
 int sub_8101B40(int self, int eInflictor, int eAttacker, float *vDir, float *vPoint, int iDamage, int iDFlags, int iMeansOfDeath, int iHitLoc, int psOffsetTime);
 int cdecl_cod2_player_damage_new(int self, int eInflictor, int eAttacker, float *vDir, float *vPoint, int iDamage, int iDFlags, int iMeansOfDeath, int iHitLoc, int psOffsetTime);
 
