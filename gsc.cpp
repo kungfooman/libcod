@@ -57,21 +57,26 @@
 	Scr_GetMethod_t Scr_GetMethod = (Scr_GetMethod_t)NULL;
 #endif
 
-#if COD2_VERSION == COD2_VERSION_1_2
-	unsigned short (*GetVariableName)(unsigned short) = (unsigned short(*)(unsigned short))0x807CFF6;
-	unsigned short (*GetNextVariable)(unsigned short) = (unsigned short(*)(unsigned short))0x807CF52; //idk original funcname
-#elif COD2_VERSION == COD2_VERSION_1_3
-	unsigned short (*GetVariableName)(unsigned short) = (unsigned short(*)(unsigned short))0x807D0C2;
-	unsigned short (*GetNextVariable)(unsigned short) = (unsigned short(*)(unsigned short))0x807D01E; //idk original funcname
+#if COD_VERSION == COD2_1_0 // search "animation '%s' not defined in anim tree '%s'"
+	unsigned short (*GetVariableName)(unsigned short) = (unsigned short(*)(unsigned short))0x0807CA72;
+	unsigned short (*GetNextVariable)(unsigned short) = (unsigned short(*)(unsigned short))0x0807C9CE; //idk original funcname
+#elif COD_VERSION == COD2_1_2
+	unsigned short (*GetVariableName)(unsigned short) = (unsigned short(*)(unsigned short))0x0807CFF6;
+	unsigned short (*GetNextVariable)(unsigned short) = (unsigned short(*)(unsigned short))0x0807CF52; //idk original funcname
+#elif COD_VERSION == COD2_1_3
+	unsigned short (*GetVariableName)(unsigned short) = (unsigned short(*)(unsigned short))0x0807D0C2;
+	unsigned short (*GetNextVariable)(unsigned short) = (unsigned short(*)(unsigned short))0x0807D01E; //idk original funcname
 #else
 	unsigned short (*GetVariableName)(unsigned short) = (unsigned short(*)(unsigned short))NULL;
 	unsigned short (*GetNextVariable)(unsigned short) = (unsigned short(*)(unsigned short))NULL;
 #endif
 
-#if COD2_VERSION == COD2_VERSION_1_2
-	char *(*SL_ConvertToString)(unsigned short) = (char*(*)(unsigned short))0x8078E1A;
-#elif COD2_VERSION == COD2_VERSION_1_3
-	char *(*SL_ConvertToString)(unsigned short) = (char*(*)(unsigned short))0x8078EE6;
+#if COD_VERSION == COD2_1_0
+	char *(*SL_ConvertToString)(unsigned short) = (char*(*)(unsigned short))0x08078896;
+#elif COD_VERSION == COD2_1_2
+	char *(*SL_ConvertToString)(unsigned short) = (char*(*)(unsigned short))0x08078E1A;
+#elif COD_VERSION == COD2_1_3
+	char *(*SL_ConvertToString)(unsigned short) = (char*(*)(unsigned short))0x08078EE6;
 #else
 	char *SL_ConvertToString(unsigned short) { return NULL; }//error_wrong_patch
 #endif
@@ -205,7 +210,9 @@ Scr_Function scriptFunctions[] = {
 	{"printfline", gsc_utils_printfline, 0}, // adds \n at end
 	{"com_printf", gsc_utils_com_printf, 0},
 	{"redirectprintf", gsc_utils_redirectprintf, 0},
+	#if COD_VERSION < COD4_1_7
 	{"getArrayKeys", Scr_GetArrayKeys, 0},
+	#endif
 	
 	#if COMPILE_MYSQL == 1
 	{"mysql_init"              , gsc_mysql_init              , 0},
@@ -648,12 +655,14 @@ int cdecl_injected_closer_stack_debug()
 }
 
 unsigned short get_var_by_idx(unsigned short index) {
-	#if COD2_VERSION == COD2_VERSION_1_2
-	unsigned short *words = (unsigned short*)0x817C902;
-	#elif COD2_VERSION == COD2_VERSION_1_3
-	unsigned short *words = (unsigned short*)0x817D922;
+	#if COD_VERSION == COD2_1_0
+		unsigned short *words = (unsigned short*)0x0815AB82;
+	#elif COD_VERSION == COD2_1_2
+		unsigned short *words = (unsigned short*)0x0817C902;
+	#elif COD_VERSION == COD2_1_3
+		unsigned short *words = (unsigned short*)0x0817D922;
 	#else
-	unsigned short *words = (unsigned short*)0xdeadbeef;
+		unsigned short *words = (unsigned short*)0xdeadbeef;
 	#endif
 	return words[6 * index];
 }
