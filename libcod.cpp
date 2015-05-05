@@ -2208,10 +2208,7 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x08070BE7, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x080E268A, (int)hook_player_setmovespeed);
-			//cracking_hook_call(0x080EF5B1, (int)hook_player_setfiretime);
-			//cracking_hook_call(0x080EDAFD, (int)hook_player_setreloadtime);
-			//cracking_hook_call(0x080EDC17, (int)hook_player_setreloadtime2);
-			//cracking_hook_call(0x080F08A4, (int)hook_player_setfiretimeoffhand);
+			cracking_hook_call(0x080F7803, (int)hook_player_g_speed);
 		#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 			extern cHook *hook_Scr_GetFunction;
 			extern cHook *hook_Scr_GetMethod;

@@ -53,12 +53,9 @@ void gsc_player_resetNextReliableTime(int id);
 void gsc_player_ismantling(int id);
 void gsc_player_isonladder(int id);
 long double hook_player_setmovespeed(int client, int a2);
-int hook_player_setfiretime(int state, int a2);
-int hook_player_setfiretimeoffhand(int state);
-int hook_player_setreloadtime(int state);
-int hook_player_setreloadtime2(int state);
+void hook_player_g_speed(int client);
 void gsc_player_setmovespeedscale(int id);
-void gsc_player_setfiretimescale(int id);
+void gsc_player_setg_speed(int id);
 
 // entity functions
 void gsc_entity_setalive(int id);

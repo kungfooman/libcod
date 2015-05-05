@@ -517,10 +517,16 @@ void gsc_utils_toupper() {
 		return;
 	}
 	
-	for (int i = offset; i < len; i++)
-        str[i] = toupper(str[i]);
+	int maxlen = strlen(str);
+	char result[maxlen+1];
+	strcpy(result, str);
+
+	for (int i = offset; i < len; i++) {
+		result[i] = toupper(str[i]);
+	}
+	result[maxlen] = '\0';
 	
-	stackPushString(str);
+	stackPushString(result);
 }
 
 void gsc_utils_system() { // closer 903, "ls"

@@ -95,6 +95,10 @@ int clientaddress_to_num(int address) {
 	return (address - playerStates) / sizeOfPlayer;
 }
 
+int gentityaddress_to_num(int client) {
+	return (client - gentities) / gentities_size;
+}
+
 void gsc_player_velocity_set(int id) {
 	float velocity[3];
 
@@ -576,8 +580,8 @@ void gsc_player_isonladder(int id) {
 		stackPushInt(0);
 }
 
-float player_movespeedscale[64] = {1};
-//float player_firetimescale[64] = {1};
+float player_movespeedscale[64] = {0};
+int player_g_speed[64] = {0};
 
 long double hook_player_setmovespeed(int client, int a2) {
 	float speed = calc_player_speed(client, a2);
@@ -589,67 +593,10 @@ long double hook_player_setmovespeed(int client, int a2) {
 		return speed;
 }
 
-int hook_player_setfiretime(int state, int a2) {
-	typedef int (*update_playerweapon_t)(int a1, int a2);
-	update_playerweapon_t update_playerweapon = (update_playerweapon_t)0x080EF1AC;
-	int result = update_playerweapon(state, a2);
-	/*int id = clientaddress_to_num(state);
-	if(player_firetimescale[id] != 1) {
-		int* timetillnextshot = (int *)(state + 0x34);
-		int currenttime = *timetillnextshot;
-		*timetillnextshot = (int)(currenttime * player_firetimescale[id]);
-	}*/
-	return result;
-}
-
-int hook_player_setfiretimeoffhand(int state) {
-	typedef int (*update_playerweapon_t)(int a1);
-	int* timetillnextshot = (int *)(state + 0x34);
-	update_playerweapon_t update_playerweapon = (update_playerweapon_t)0x080EFB12;
-	int result = update_playerweapon(state);
-	printf("setfiretime2 after: %d\n", *timetillnextshot); 
-	return result;
-}
-
-typedef int (*update_reloadweapon_t)(int a1);
-update_reloadweapon_t update_reloadweapon = (update_reloadweapon_t)0x080ED8B4;
-
-int hook_player_setreloadtime(int state) {
-	int result = update_reloadweapon(state);
-	int* reloadtime = (int *)(state + 0x38);
-	printf("setreloadtime: %d\n", *reloadtime);
-	return result;
-}
-
-int hook_player_setreloadtime2(int state) {
-	int result = update_reloadweapon(state);
-	int* reloadtime = (int *)(state + 0x38);
-	printf("setreloadtime2: %d\n", *reloadtime);
-	return result;
-}
-
-void gsc_player_setfiretimescale(int id) {
-	float scale;
-	if ( ! stackGetParams("f", &scale)) {
-		printf("scriptengine> ERROR: gsc_player_setfiretimescale(): param \"scale\"[1] has to be an int!\n");
-		stackPushUndefined();
-		return;
-	}
-	
-	if (scale < 0) {
-		printf("scriptengine> ERROR: gsc_player_setfiretimescale(): param \"scale\"[1] must be zero or above!\n");
-		stackPushUndefined();
-		return;
-	}
-	
-	//player_firetimescale[id] = scale;
-	stackPushInt(1);
-}
-
 void gsc_player_setmovespeedscale(int id) {
 	float scale;
 	if ( ! stackGetParams("f", &scale)) {
-		printf("scriptengine> ERROR: gsc_player_setmovespeedscale(): param \"scale\"[1] has to be an int!\n");
+		printf("scriptengine> ERROR: gsc_player_setmovespeedscale(): param \"scale\"[1] has to be an float!\n");
 		stackPushUndefined();
 		return;
 	}
@@ -662,6 +609,37 @@ void gsc_player_setmovespeedscale(int id) {
 	
 	player_movespeedscale[id] = scale;
 	stackPushInt(1);
+}
+
+void gsc_player_setg_speed(int id) {
+	int speed;
+	if ( ! stackGetParams("i", &speed)) {
+		printf("scriptengine> ERROR: gsc_player_setg_speed(): param \"speed\"[1] has to be an int!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	if (speed <= 0) {
+		printf("scriptengine> ERROR: gsc_player_setg_speed(): param \"speed\"[1] must be above zero!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	player_g_speed[id] = speed;
+	stackPushInt(1);
+}
+
+void hook_player_g_speed(int client) {
+	int player = *(int *)(client + 344);
+	int id = gentityaddress_to_num(client);
+	
+	int newspeed = player_g_speed[id];
+	if(newspeed > 0)
+		*(int *)(player + 80) = newspeed;
+	
+	typedef void (*calc_client_speed_t)(int client);
+	calc_client_speed_t calc_client_speed = (calc_client_speed_t)0x0812200A;
+	calc_client_speed(client);
 }
 
 // entity functions (could be in own file, but atm not many pure entity functions)
