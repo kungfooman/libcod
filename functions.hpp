@@ -111,18 +111,6 @@ typedef int (*ClientCommand_t)(int clientNum);
 	static int hook_ClientCommand_call = (int)NULL;
 #endif
 
-typedef long double (*calc_player_speed_t)(int a1, int a2);
-#if COD_VERSION == COD2_1_0
-	static calc_player_speed_t calc_player_speed = (calc_player_speed_t)0x080DF534;
-#elif COD_VERSION == COD2_1_2
-	static calc_player_speed_t calc_player_speed = (calc_player_speed_t)0x080E1B14;
-#elif COD_VERSION == COD2_1_3
-	static calc_player_speed_t calc_player_speed = (calc_player_speed_t)0x080E1C58;
-#else
-	#warning static calc_player_speed_t calc_player_speed = NULL;
-	static calc_player_speed_t calc_player_speed = (calc_player_speed_t)NULL;
-#endif
-
 typedef int (*Cvar_VariableValue_t)(const char *var_name); // search for 'sv_allowAnonymous'
 #if COD_VERSION == COD2_1_0
 	static Cvar_VariableValue_t CvarVariableValue = (Cvar_VariableValue_t)0x080B0BB6;

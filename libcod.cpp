@@ -2173,6 +2173,7 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x080707C3, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x08098CD0, (int)hook_SV_WriteDownloadToClient);
 			cracking_hook_call(0x080DFF66, (int)hook_player_setmovespeed);
+			cracking_hook_call(0x080F50AB, (int)hook_player_g_speed);
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
@@ -2188,6 +2189,7 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x08070B1B, (int)Scr_GetCustomFunction);
 			cracking_hook_call(0x08070D3F, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x080E2546, (int)hook_player_setmovespeed);
+			cracking_hook_call(0x080F76BF, (int)hook_player_g_speed);
 			hook_MSG_WriteBigString = new cHook(0x0806825E, (int)MSG_WriteBigString);
 			//hook_MSG_WriteBigString->hook();
 			

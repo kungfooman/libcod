@@ -56,6 +56,7 @@ long double hook_player_setmovespeed(int client, int a2);
 void hook_player_g_speed(int client);
 void gsc_player_setmovespeedscale(int id);
 void gsc_player_setg_speed(int id);
+void gsc_player_setg_gravity(int id);
 
 // entity functions
 void gsc_entity_setalive(int id);

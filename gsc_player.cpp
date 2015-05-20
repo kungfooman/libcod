@@ -580,8 +580,33 @@ void gsc_player_isonladder(int id) {
 		stackPushInt(0);
 }
 
+typedef long double (*calc_player_speed_t)(int a1, int a2);
+#if COD_VERSION == COD2_1_0
+	calc_player_speed_t calc_player_speed = (calc_player_speed_t)0x080DF534;
+#elif COD_VERSION == COD2_1_2
+	calc_player_speed_t calc_player_speed = (calc_player_speed_t)0x080E1B14;
+#elif COD_VERSION == COD2_1_3
+	calc_player_speed_t calc_player_speed = (calc_player_speed_t)0x080E1C58;
+#else
+	#warning calc_player_speed_t calc_player_speed = NULL;
+	calc_player_speed_t calc_player_speed = (calc_player_speed_t)NULL;
+#endif
+
+typedef void (*calc_client_speed_t)(int client);
+#if COD_VERSION == COD2_1_0
+	calc_client_speed_t calc_client_speed = (calc_client_speed_t)0x0811FB7A;
+#elif COD_VERSION == COD2_1_2
+	calc_client_speed_t calc_client_speed = (calc_client_speed_t)0x08121EAE;
+#elif COD_VERSION == COD2_1_3
+	calc_client_speed_t calc_client_speed = (calc_client_speed_t)0x0812200A;
+#else
+	#warning calc_client_speed_t calc_client_speed = NULL;
+	calc_client_speed_t calc_client_speed = (calc_client_speed_t)NULL;
+#endif
+
 float player_movespeedscale[64] = {0};
 int player_g_speed[64] = {0};
+int player_g_gravity[64] = {0};
 
 long double hook_player_setmovespeed(int client, int a2) {
 	float speed = calc_player_speed(client, a2);
@@ -611,6 +636,24 @@ void gsc_player_setmovespeedscale(int id) {
 	stackPushInt(1);
 }
 
+void gsc_player_setg_gravity(int id) {
+	int gravity;
+	if ( ! stackGetParams("i", &gravity)) {
+		printf("scriptengine> ERROR: gsc_player_setg_gravity(): param \"gravity\"[1] has to be an int!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	if (gravity < 0) {
+		printf("scriptengine> ERROR: gsc_player_setg_gravity(): param \"gravity\"[1] must be equal or above zero!\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	player_g_gravity[id] = gravity;
+	stackPushInt(1);
+}
+
 void gsc_player_setg_speed(int id) {
 	int speed;
 	if ( ! stackGetParams("i", &speed)) {
@@ -619,8 +662,8 @@ void gsc_player_setg_speed(int id) {
 		return;
 	}
 	
-	if (speed <= 0) {
-		printf("scriptengine> ERROR: gsc_player_setg_speed(): param \"speed\"[1] must be above zero!\n");
+	if (speed < 0) {
+		printf("scriptengine> ERROR: gsc_player_setg_speed(): param \"speed\"[1] must be equal or above zero!\n");
 		stackPushUndefined();
 		return;
 	}
@@ -633,12 +676,14 @@ void hook_player_g_speed(int client) {
 	int player = *(int *)(client + 344);
 	int id = gentityaddress_to_num(client);
 	
+	int newgravity = player_g_gravity[id];
+	if(newgravity > 0)
+		*(int *)(player + 72) = newgravity;
+	
 	int newspeed = player_g_speed[id];
 	if(newspeed > 0)
 		*(int *)(player + 80) = newspeed;
 	
-	typedef void (*calc_client_speed_t)(int client);
-	calc_client_speed_t calc_client_speed = (calc_client_speed_t)0x0812200A;
 	calc_client_speed(client);
 }
 
