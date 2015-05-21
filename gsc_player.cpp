@@ -687,6 +687,26 @@ void hook_player_g_speed(int client) {
 	calc_client_speed(client);
 }
 
+void gsc_player_setweaponfiremeleedelay(int id) {
+    int delay;
+    if ( ! stackGetParams("i", &delay)) {
+        printf("scriptengine> ERROR: gsc_player_setweaponfiremeleedelay(): param \"delay\"[1] has to be an int!\n");
+        stackPushUndefined();
+        return;
+    }
+
+    if(delay < 0) {
+        printf("scriptengine> ERROR: gsc_player_setweaponfiremeleedelay(): param \"delay\"[1] must be equal or above zero!\n");
+        stackPushUndefined();
+        return;
+    }
+
+	int state = PLAYERSTATE(id);
+    int* weapondelay = (int *)(state + 0x34);
+    *weapondelay = delay;
+	*(int *)(state + 216) = 11;
+}  
+
 // entity functions (could be in own file, but atm not many pure entity functions)
 
 void gsc_entity_setalive(int id) { // as in isAlive?

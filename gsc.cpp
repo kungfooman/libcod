@@ -376,6 +376,7 @@ Scr_Method scriptMethods[] = {
 	{"resetNextReliableTime" , gsc_player_resetNextReliableTime, 0},
 	{"setg_speed"            , gsc_player_setg_speed         , 0},
 	{"setg_gravity"          , gsc_player_setg_gravity       , 0},
+	{"setweaponfiremeleedelay", gsc_player_setweaponfiremeleedelay, 0},
 	#if COD_VERSION < COD4_1_7
 	{"setmovespeedscale"     , gsc_player_setmovespeedscale  , 0},
 	{"ismantling"            , gsc_player_ismantling         , 0},
