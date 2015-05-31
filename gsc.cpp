@@ -184,12 +184,7 @@ void gsc_utils_com_printf() {
 		return;
 	}
 	
-	#if COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
-		Com_Printf(0, "%s", str);
-	#else
-		Com_Printf("%s", str);
-	#endif
-	
+	Com_Printf("%s", str);
 	stackPushInt(1);
 }
 
@@ -286,6 +281,8 @@ Scr_Function scriptFunctions[] = {
 	{"dlopen"                         , gsc_dlopen                            , 0},
 	{"dlsym"                          , gsc_dlsym                             , 0},
 	{"dlclose"                        , gsc_dlclose                           , 0},
+	{"resetignoredweapons"            , gsc_utils_resetignoredweapons         , 0},
+	{"ignoreweapon"                   , gsc_utils_ignoreweapon                , 0},
 	{"setdefaultweapon"               , gsc_utils_setdefaultweapon            , 0},
 	{"getweaponmaxammo"               , gsc_utils_getweaponmaxammo            , 0},
 	{"getweapondamage"                , gsc_utils_getweapondamage             , 0},

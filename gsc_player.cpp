@@ -688,24 +688,24 @@ void hook_player_g_speed(int client) {
 }
 
 void gsc_player_setweaponfiremeleedelay(int id) {
-    int delay;
-    if ( ! stackGetParams("i", &delay)) {
-        printf("scriptengine> ERROR: gsc_player_setweaponfiremeleedelay(): param \"delay\"[1] has to be an int!\n");
-        stackPushUndefined();
-        return;
-    }
+	int delay;
+	if ( ! stackGetParams("i", &delay)) {
+		printf("scriptengine> ERROR: gsc_player_setweaponfiremeleedelay(): param \"delay\"[1] has to be an int!\n");
+		stackPushUndefined();
+		return;
+	}
 
-    if(delay < 0) {
-        printf("scriptengine> ERROR: gsc_player_setweaponfiremeleedelay(): param \"delay\"[1] must be equal or above zero!\n");
-        stackPushUndefined();
-        return;
-    }
+	if(delay < 0) {
+		printf("scriptengine> ERROR: gsc_player_setweaponfiremeleedelay(): param \"delay\"[1] must be equal or above zero!\n");
+		stackPushUndefined();
+		return;
+	}
 
 	int state = PLAYERSTATE(id);
-    int* weapondelay = (int *)(state + 0x34);
-    *weapondelay = delay;
+	int* weapondelay = (int *)(state + 0x34);
+	*weapondelay = delay;
 	*(int *)(state + 216) = 11;
-}  
+}
 
 // entity functions (could be in own file, but atm not many pure entity functions)
 
@@ -789,20 +789,12 @@ void gsc_kick_slot() {
 	*lastPacketTime = getSVSTime(); // in case there is a funny zombie (copied from Q3)
 	
 	if(!stackGetParamString(2, &reason)) {
-		#if COD_VERSION >= COD4_1_7
-			Com_Printf(0, "%s (guid %i) was kicked\n", name, guid);
-		#else
-			Com_Printf("%s (guid %i) was kicked\n", name, guid);
-		#endif
+		Com_Printf("%s (guid %i) was kicked\n", name, guid);
 		stackReturnInt(1);
 		return;
 	}
 	
-	#if COD_VERSION >= COD4_1_7
-		Com_Printf(0, "%s (guid %i) was kicked for %s\n", name, guid, reason);
-	#else
-		Com_Printf("%s (guid %i) was kicked for %s\n", name, guid, reason);
-	#endif
+	Com_Printf("%s (guid %i) was kicked for %s\n", name, guid, reason);
 	stackReturnInt(1);
 }
 

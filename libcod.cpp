@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h> // gettimeofday
 
 #include <sys/mman.h> // mprotect
 #include <execinfo.h> // stacktrace
@@ -1505,24 +1506,6 @@ void parent_of_SV_SendServerCommand(signed int nr, const char *fmt, ...)
 	hook_parent_of_SV_SendServerCommand->hook();
 }
 
-
-
-int hook_RemoteCommandTime(void)
-{
-	unsigned int time = Com_Milliseconds();
-	char * rconpass = *(char **)(*(int *)rconPasswordAddress + 8);
-
-	if(!strlen(rconpass) || strcmp(Cmd_Argv(1), rconpass) != 0) 
-	{
-		unsigned int lasttime = *(int*)remoteCommandLastTimeAddress;
-		if (time<(lasttime+1000)) { // limit bad rcon flooding
-			return lasttime;
-		}
-	}
-
-	return time;
-}
-
 char * hook_AuthorizeState( int arg )
 {
 	char * s = Cmd_Argv(arg);
@@ -1634,6 +1617,271 @@ void hook_SV_WriteDownloadToClient(int cl, int msg)
 	else
 		SV_WriteDownloadToClient(cl, msg);
 }
+
+#if COD_VERSION < COD4_1_7 && COMPILE_RATELIMITER == 1
+// ioquake3 rate limit connectionless requests
+// https://github.com/ioquake/ioq3/commits/dd82b9d1a8d0cf492384617aff4712a683e70007/code/server/sv_main.c
+
+/* base time in seconds, that's our origin
+   timeval:tv_sec is an int:
+   assuming this wraps every 0x7fffffff - ~68 years since the Epoch (1970) - we're safe till 2038 */
+unsigned long sys_timeBase = 0;
+/* current time in ms, using sys_timeBase as origin
+   NOTE: sys_timeBase*1000 + curtime -> ms since the Epoch
+     0x7fffffff ms - ~24 days
+   although timeval:tv_usec is an int, I'm not sure wether it is actually used as an unsigned int
+     (which would affect the wrap period) */
+int curtime;
+int Sys_Milliseconds (void)
+{
+	struct timeval tp;
+	gettimeofday(&tp, NULL);
+
+	if (!sys_timeBase)
+	{
+		sys_timeBase = tp.tv_sec;
+		return tp.tv_usec/1000;
+	}
+
+	curtime = (tp.tv_sec - sys_timeBase)*1000 + tp.tv_usec/1000;
+	return curtime;
+}
+
+typedef struct leakyBucket_s leakyBucket_t;
+struct leakyBucket_s {
+	netadrtype_t type;
+	unsigned char _4[4];
+	int	lastTime;
+	signed char	burst;
+	long hash;
+
+	leakyBucket_t *prev, *next;
+};
+
+// This is deliberately quite large to make it more of an effort to DoS
+#define MAX_BUCKETS	16384
+#define MAX_HASHES 1024
+
+static leakyBucket_t buckets[ MAX_BUCKETS ];
+static leakyBucket_t* bucketHashes[ MAX_HASHES ];
+leakyBucket_t outboundLeakyBucket;
+
+static long SVC_HashForAddress( netadr_t address ) {
+	unsigned char *ip = address.ip;
+	size_t size = 4;
+	int	i;
+	long hash = 0;
+
+	for ( i = 0; i < size; i++ ) {
+		hash += (long)( ip[ i ] ) * ( i + 119 );
+	}
+
+	hash = ( hash ^ ( hash >> 10 ) ^ ( hash >> 20 ) );
+	hash &= ( MAX_HASHES - 1 );
+
+	return hash;
+}
+
+static leakyBucket_t *SVC_BucketForAddress( netadr_t address, int burst, int period ) {
+	leakyBucket_t *bucket = NULL;
+	int	i;
+	long hash = SVC_HashForAddress( address );
+	int	now = Sys_Milliseconds();
+
+	for ( bucket = bucketHashes[ hash ]; bucket; bucket = bucket->next ) {
+		if ( memcmp( bucket->_4, address.ip, 4 ) == 0 ) {
+			return bucket;
+		}
+	}
+
+	for ( i = 0; i < MAX_BUCKETS; i++ ) {
+		int interval;
+
+		bucket = &buckets[ i ];
+		interval = now - bucket->lastTime;
+
+		// Reclaim expired buckets
+		if ( bucket->lastTime > 0 && ( interval > ( burst * period ) ||
+					interval < 0 ) ) {
+			if ( bucket->prev != NULL ) {
+				bucket->prev->next = bucket->next;
+			} else {
+				bucketHashes[ bucket->hash ] = bucket->next;
+			}
+			
+			if ( bucket->next != NULL ) {
+				bucket->next->prev = bucket->prev;
+			}
+
+			memset( bucket, 0, sizeof( leakyBucket_t ) );
+		}
+
+		if ( bucket->type == 0 ) {
+			bucket->type = address.type;
+			memcpy( bucket->_4, address.ip, 4 );
+
+			bucket->lastTime = now;
+			bucket->burst = 0;
+			bucket->hash = hash;
+
+			// Add to the head of the relevant hash chain
+			bucket->next = bucketHashes[ hash ];
+			if ( bucketHashes[ hash ] != NULL ) {
+				bucketHashes[ hash ]->prev = bucket;
+			}
+
+			bucket->prev = NULL;
+			bucketHashes[ hash ] = bucket;
+
+			return bucket;
+		}
+	}
+
+	// Couldn't allocate a bucket for this address
+	return NULL;
+}
+
+bool SVC_RateLimit( leakyBucket_t *bucket, int burst, int period ) {
+	if ( bucket != NULL ) {
+		int now = Sys_Milliseconds();
+		int interval = now - bucket->lastTime;
+		int expired = interval / period;
+		int expiredRemainder = interval % period;
+
+		if ( expired > bucket->burst || interval < 0 ) {
+			bucket->burst = 0;
+			bucket->lastTime = now;
+		} else {
+			bucket->burst -= expired;
+			bucket->lastTime = now - expiredRemainder;
+		}
+
+		if ( bucket->burst < burst ) {
+			bucket->burst++;
+			
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SVC_RateLimitAddress( netadr_t from, int burst, int period ) {
+	leakyBucket_t *bucket = SVC_BucketForAddress( from, burst, period );
+
+	return SVC_RateLimit( bucket, burst, period );
+}
+
+typedef int (*SVC_RemoteCommand_t)(netadr_t from);
+typedef int (*SV_GetChallenge_t)(netadr_t from);
+typedef int (*SVC_Info_t)(netadr_t from);
+typedef int (*SVC_Status_t)(netadr_t from);
+typedef const char* (*NET_AdrToString_t)(netadr_t a);
+#if COD_VERSION == COD2_1_0
+	SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)0x080951B4;
+	SV_GetChallenge_t SV_GetChallenge = (SV_GetChallenge_t)0x0808BE54;
+	SVC_Info_t SVC_Info = (SVC_Info_t)0x08093980;
+	SVC_Status_t SVC_Status = (SVC_Status_t)0x08093288;
+	NET_AdrToString_t NET_AdrToString = (NET_AdrToString_t)0x0806AD14;
+#elif COD_VERSION == COD2_1_2
+	SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)0x080970CC;
+	SV_GetChallenge_t SV_GetChallenge = (SV_GetChallenge_t)0x0808D0C2;
+	SVC_Info_t SVC_Info = (SVC_Info_t)0x080952C4;
+	SVC_Status_t SVC_Status = (SVC_Status_t)0x08094BCC;
+	NET_AdrToString_t NET_AdrToString = (NET_AdrToString_t)0x0806B1DC;
+#elif COD_VERSION == COD2_1_3
+	SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)0x08097188;
+	SV_GetChallenge_t SV_GetChallenge = (SV_GetChallenge_t)0x0808D18E;
+	SVC_Info_t SVC_Info = (SVC_Info_t)0x0809537C;
+	SVC_Status_t SVC_Status = (SVC_Status_t)0x08094C84;
+	NET_AdrToString_t NET_AdrToString = (NET_AdrToString_t)0x0806B1D4;
+#else
+	SVC_RemoteCommand_t SVC_RemoteCommand = (SVC_RemoteCommand_t)NULL;
+	SV_GetChallenge_t SV_GetChallenge = (SV_GetChallenge_t)NULL;
+	SVC_Status_t SVC_Status = (SVC_Status_t)NULL;
+	NET_AdrToString_t NET_AdrToString = (NET_AdrToString_t)NULL;
+#endif
+
+int hook_SVC_RemoteCommand(netadr_t from)
+{
+	// Prevent using rcon as an amplifier and make dictionary attacks impractical
+	if ( SVC_RateLimitAddress( from, 10, 1000 ) ) {
+		Com_DPrintf( "SVC_RemoteCommand: rate limit from %s exceeded, dropping request\n",
+			NET_AdrToString( from ) );
+		return 0;
+	}
+	
+	char * rconPassword = *(char **)(*(int *)rconPasswordAddress + 8);
+	if(!strlen(rconPassword) || strcmp(Cmd_Argv(1), rconPassword) != 0) {
+		static leakyBucket_t bucket;
+
+		// Make DoS via rcon impractical
+		if ( SVC_RateLimit( &bucket, 10, 1000 ) ) {
+			Com_DPrintf( "SVC_RemoteCommand: rate limit exceeded, dropping request\n" );
+			return 0;
+		}
+	}
+	
+	return SVC_RemoteCommand(from);
+}
+
+int hook_SV_GetChallenge(netadr_t from)
+{
+	// Prevent using getchallenge as an amplifier
+	if ( SVC_RateLimitAddress( from, 10, 1000 ) ) {
+		Com_DPrintf( "SV_GetChallenge: rate limit from %s exceeded, dropping request\n",
+			NET_AdrToString( from ) );
+		return 0;
+	}
+
+	// Allow getchallenge to be DoSed relatively easily, but prevent
+	// excess outbound bandwidth usage when being flooded inbound
+	if ( SVC_RateLimit( &outboundLeakyBucket, 10, 100 ) ) {
+		Com_DPrintf( "SV_GetChallenge: rate limit exceeded, dropping request\n" );
+		return 0;
+	}
+	
+	return SV_GetChallenge(from);
+}
+
+int hook_SVC_Info(netadr_t from)
+{	
+	// Prevent using getinfo as an amplifier
+	if ( SVC_RateLimitAddress( from, 10, 1000 ) ) {
+		Com_DPrintf( "SVC_Info: rate limit from %s exceeded, dropping request\n",
+			NET_AdrToString( from ) );
+		return 0;
+	}
+
+	// Allow getinfo to be DoSed relatively easily, but prevent
+	// excess outbound bandwidth usage when being flooded inbound
+	if ( SVC_RateLimit( &outboundLeakyBucket, 10, 100 ) ) {
+		Com_DPrintf( "SVC_Info: rate limit exceeded, dropping request\n" );
+		return 0;
+	}
+
+	return SVC_Info(from);
+}
+
+int hook_SVC_Status(netadr_t from)
+{	
+	// Prevent using getstatus as an amplifier
+	if ( SVC_RateLimitAddress( from, 10, 1000 ) ) {
+		Com_DPrintf( "SVC_Status: rate limit from %s exceeded, dropping request\n",
+			NET_AdrToString( from ) );
+		return 0;
+	}
+
+	// Allow getstatus to be DoSed relatively easily, but prevent
+	// excess outbound bandwidth usage when being flooded inbound
+	if ( SVC_RateLimit( &outboundLeakyBucket, 10, 100 ) ) {
+		Com_DPrintf( "SVC_Status: rate limit exceeded, dropping request\n" );
+		return 0;
+	}
+
+	return SVC_Status(from);
+}
+#endif
 
 void manymaps_prepare(char *mapname, int read);
 int hook_findMap(const char *qpath, void **buffer)
@@ -2174,6 +2422,17 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x08098CD0, (int)hook_SV_WriteDownloadToClient);
 			cracking_hook_call(0x080DFF66, (int)hook_player_setmovespeed);
 			cracking_hook_call(0x080F50AB, (int)hook_player_g_speed);
+			cracking_hook_call(0x080E9524, (int)hook_findWeaponIndex);
+			
+			#if COMPILE_RATELIMITER == 1
+				cracking_hook_call(0x08094081, (int)hook_SVC_Info);
+				cracking_hook_call(0x0809403E, (int)hook_SVC_Status);
+				cracking_hook_call(0x080940C4, (int)hook_SV_GetChallenge);
+				cracking_hook_call(0x08094191, (int)hook_SVC_RemoteCommand);
+				cracking_write_hex(0x080951BE, (char *)"9090909090909090"); // time = Com_Milliseconds();
+				cracking_write_hex(0x080951E0, (char *)"EB"); // skip `time - lasttime` check
+				cracking_write_hex(0x080951E7, (char *)"9090909090909090"); // lasttime = time;
+			#endif
 		#elif COD_VERSION == COD2_1_2
 			if (0)
 				cracking_hook_function(0x08094698, (int)SV_AddServerCommand);
@@ -2190,12 +2449,23 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x08070D3F, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x080E2546, (int)hook_player_setmovespeed);
 			cracking_hook_call(0x080F76BF, (int)hook_player_g_speed);
+			cracking_hook_call(0x080EBB14, (int)hook_findWeaponIndex);
 			hook_MSG_WriteBigString = new cHook(0x0806825E, (int)MSG_WriteBigString);
 			//hook_MSG_WriteBigString->hook();
 			
 			//hook_cmd_map = new cHook(0x0808BC7A, (int)cmd_map);
 			//hook_cmd_map->hook();
 			cracking_hook_call(0x0809AD68, (int)hook_SV_WriteDownloadToClient);
+			
+			#if COMPILE_RATELIMITER == 1
+				cracking_hook_call(0x08095B8E, (int)hook_SVC_Info);
+				cracking_hook_call(0x08095ADA, (int)hook_SVC_Status);
+				cracking_hook_call(0x08095BF8, (int)hook_SV_GetChallenge);
+				cracking_hook_call(0x08095D63, (int)hook_SVC_RemoteCommand);
+				cracking_write_hex(0x080970D6, (char *)"9090909090909090"); // time = Com_Milliseconds();
+				cracking_write_hex(0x080970F8, (char *)"EB"); // skip `time - lasttime` check
+				cracking_write_hex(0x080970FF, (char *)"9090909090909090"); // lasttime = time;
+			#endif
 		#elif COD_VERSION == COD2_1_3
 			if (0)
 				cracking_hook_function(0x08094750, (int)SV_AddServerCommand);
@@ -2211,6 +2481,17 @@ class cCallOfDuty2Pro
 			cracking_hook_call(0x08070E0B, (int)Scr_GetCustomMethod);
 			cracking_hook_call(0x080E268A, (int)hook_player_setmovespeed);
 			cracking_hook_call(0x080F7803, (int)hook_player_g_speed);
+			cracking_hook_call(0x080EBC58, (int)hook_findWeaponIndex);
+			
+			#if COMPILE_RATELIMITER == 1
+				cracking_hook_call(0x08095C48, (int)hook_SVC_Info);
+				cracking_hook_call(0x08095B94, (int)hook_SVC_Status);
+				cracking_hook_call(0x08095CB2, (int)hook_SV_GetChallenge);
+				cracking_hook_call(0x08095E1D, (int)hook_SVC_RemoteCommand);
+				cracking_write_hex(0x080971BC, (char *)"9090909090909090"); // time = Com_Milliseconds();
+				cracking_write_hex(0x080971DE, (char *)"EB"); // skip `time - lasttime` check
+				cracking_write_hex(0x080971F3, (char *)"9090909090909090"); // lasttime = time;
+			#endif
 		#elif COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
 			extern cHook *hook_Scr_GetFunction;
 			extern cHook *hook_Scr_GetMethod;
@@ -2228,20 +2509,20 @@ class cCallOfDuty2Pro
 		#if COD_VERSION == COD2_1_0 || COD_VERSION == COD2_1_2 || COD_VERSION == COD2_1_3
 			cracking_hook_call(hook_AuthorizeState_call, (int)hook_AuthorizeState);
 			cracking_hook_call(hook_findMap_call, (int)hook_findMap);
-			cracking_hook_call(hook_RemoteCommandTime_call, (int)hook_RemoteCommandTime);
 		#endif
 		
 		#ifdef IS_JAVA_ENABLED
 		embed_java();
 		#endif
-		
+
+		gsc_utils_init();
 		printf("> [PLUGIN LOADED]\n");
 	}
 	
 	~cCallOfDuty2Pro()
 	{
-		printf("> [PLUGIN UNLOADED]\n");
 		gsc_utils_free();
+		printf("> [PLUGIN UNLOADED]\n");
 	}
 };
 

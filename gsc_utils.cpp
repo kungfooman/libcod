@@ -834,10 +834,80 @@ void gsc_dlclose() {
 	stackPushInt(ret);
 }
 
-char* defaultweapon_mp = (char*)malloc(32);
+#define MAX_WEAPON_IGNORE_SIZE 20
+#define MAX_WEAPON_NAME_SIZE 32
+char* defaultweapon_mp = (char*)malloc(MAX_WEAPON_NAME_SIZE);
+char ignoredWeapons[MAX_WEAPON_IGNORE_SIZE][MAX_WEAPON_NAME_SIZE];
+int ignoredWeaponCount = 0;
+
+void gsc_utils_init() {
+	strcpy(defaultweapon_mp, "defaultweapon_mp");
+	defaultweapon_mp[strlen(defaultweapon_mp)] = '\0';
+}
 
 void gsc_utils_free() {
 	free(defaultweapon_mp);
+}
+
+bool isOnIgnoreList(char* weapon) {
+	if(ignoredWeaponCount == 0)
+		return false;
+	
+	for(int i=0;i<ignoredWeaponCount;i++) {
+		if(strcmp(ignoredWeapons[i], weapon) == 0)
+			return true;
+	}
+	
+	return false;
+}
+
+int hook_findWeaponIndex(char* weapon) {
+	typedef int (*findIndexWeapon_t)(char* weapon);
+	#if COD_VERSION == COD2_1_0
+		findIndexWeapon_t findIndexWeapon = (findIndexWeapon_t)0x080E949C;
+	#elif COD_VERSION == COD2_1_2
+		findIndexWeapon_t findIndexWeapon = (findIndexWeapon_t)0x080EBA8C;
+	#elif COD_VERSION == COD2_1_3
+		findIndexWeapon_t findIndexWeapon = (findIndexWeapon_t)0x080EBBD0;
+	#else
+		#warning findIndexWeapon_t findIndexWeapon = NULL;
+		findIndexWeapon_t findIndexWeapon = (findIndexWeapon_t)NULL;
+	#endif
+	
+	if(isOnIgnoreList(weapon))
+		return findIndexWeapon(defaultweapon_mp);
+	else
+		return findIndexWeapon(weapon);
+}
+
+void gsc_utils_resetignoredweapons() {
+	ignoredWeaponCount = 0;
+}
+
+void gsc_utils_ignoreweapon() {
+	char* weapon;
+	if ( ! stackGetParams("s", &weapon)) {
+		printf("scriptengine> wrongs args for: ignoreWeapon(weapon)\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	if(strlen(weapon) > MAX_WEAPON_NAME_SIZE - 1) {
+		printf("scriptengine> weapon name is too long: ignoreWeapon(weapon)\n");
+		stackPushUndefined();
+		return;
+	}
+	
+	if(ignoredWeaponCount >= MAX_WEAPON_IGNORE_SIZE) {
+		printf("scriptengine> Exceeded MAX_WEAPON_IGNORE_SIZE %d\n", MAX_WEAPON_IGNORE_SIZE);
+		stackPushUndefined();
+		return;
+	}
+	
+	strcpy(ignoredWeapons[ignoredWeaponCount], weapon);
+	ignoredWeapons[ignoredWeaponCount][strlen(weapon)] = '\0';
+	ignoredWeaponCount++;
+	stackPushInt(1);
 }
 
 void gsc_utils_setdefaultweapon() {
@@ -848,7 +918,7 @@ void gsc_utils_setdefaultweapon() {
 		return;
 	}
 	
-	if(strlen(weapon) > 31) {
+	if(strlen(weapon) > MAX_WEAPON_NAME_SIZE - 1) {
 		printf("scriptengine> weapon name is too long: setdefaultweapon(weapon)\n");
 		stackPushUndefined();
 		return;

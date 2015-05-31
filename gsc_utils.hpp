@@ -50,7 +50,11 @@ void gsc_dlopen();
 void gsc_dlsym();
 void gsc_dlclose();
 
+void gsc_utils_init();
 void gsc_utils_free();
+int hook_findWeaponIndex(char* weapon);
+void gsc_utils_resetignoredweapons();
+void gsc_utils_ignoreweapon();
 void gsc_utils_setdefaultweapon();
 void gsc_utils_getweaponmaxammo();
 void gsc_utils_getweapondamage();

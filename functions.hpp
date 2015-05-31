@@ -48,25 +48,29 @@ typedef int (*trap_Argv_t)(unsigned int param, char *buf, int bufLen);
 	static trap_Argv_t trap_Argv = (trap_Argv_t)NULL;
 #endif
 
-#if COD_VERSION == COD4_1_7 || COD_VERSION == COD4_1_7_L
-	typedef int (*Com_Printf_t)(int a1, const char *format, ...);
-#else
-	typedef int (*Com_Printf_t)(const char *format, ...);
-#endif
-
+typedef int (*Com_Printf_t)(const char *format, ...);
+/// A Com_Printf that only shows up if the "developer" cvar is set
+typedef int (*Com_DPrintf_t)(const char *format, ...);
 #if COD_VERSION == COD2_1_0
-    static Com_Printf_t Com_Printf = (Com_Printf_t)0x08060B2C;
+	static Com_Printf_t Com_Printf = (Com_Printf_t)0x08060B2C;
+	static Com_DPrintf_t Com_DPrintf = (Com_DPrintf_t)0x08060B7C;
 #elif COD_VERSION == COD2_1_2
-    static Com_Printf_t Com_Printf = (Com_Printf_t)0x08060DF2;
+	static Com_Printf_t Com_Printf = (Com_Printf_t)0x08060DF2;
+	static Com_DPrintf_t Com_DPrintf = (Com_DPrintf_t)0x08060E42;
 #elif COD_VERSION == COD2_1_3
-    static Com_Printf_t Com_Printf = (Com_Printf_t)0x08060DEA;
+	static Com_Printf_t Com_Printf = (Com_Printf_t)0x08060DEA;
+	static Com_DPrintf_t Com_DPrintf = (Com_DPrintf_t)0x08060E3A;
 #elif COD_VERSION == COD4_1_7
 	static Com_Printf_t Com_Printf = (Com_Printf_t)0x08122B0E;
+	static Com_DPrintf_t Com_DPrintf = (Com_DPrintf_t)0x08122D74;
 #elif COD_VERSION == COD4_1_7_L
-    static Com_Printf_t Com_Printf = (Com_Printf_t)0x08122B2E;
+	static Com_Printf_t Com_Printf = (Com_Printf_t)0x08122B2E;
+	static Com_DPrintf_t Com_DPrintf = (Com_DPrintf_t)0x08122D94;
 #else
 	#warning static Com_Printf_t Com_Printf = (Com_Printf_t)NULL;
+	#warning static Com_DPrintf_t Com_DPrintf = (Com_DPrintf_t)NULL;
 	static Com_Printf_t Com_Printf = (Com_Printf_t)NULL;
+	static Com_DPrintf_t Com_DPrintf = (Com_DPrintf_t)NULL;
 #endif
 
 /*
@@ -175,28 +179,6 @@ typedef int (*FS_LoadDir_t)(char *path, char *dir);
 	static int rconPasswordAddress = (int)NULL;
 #endif
 
-typedef int (*Com_Milliseconds_t)(void);
-#if COD_VERSION == COD2_1_0
-	static Com_Milliseconds_t Com_Milliseconds = (Com_Milliseconds_t)0x08061878;
-	static int hook_RemoteCommandTime_call = 0x080951BE;
-	static int remoteCommandLastTimeAddress = 0x0848B674;
-#elif COD_VERSION == COD2_1_2
-	static Com_Milliseconds_t Com_Milliseconds = (Com_Milliseconds_t)0x08061B84;
-	static int hook_RemoteCommandTime_call = 0x080970D6;
-	static int remoteCommandLastTimeAddress = 0x0849EB74;
-#elif COD_VERSION == COD2_1_3
-	static Com_Milliseconds_t Com_Milliseconds = (Com_Milliseconds_t)0x08061B7C;
-	static int hook_RemoteCommandTime_call = 0x080971BC;
-	static int remoteCommandLastTimeAddress = 0x0849FBF4;
-#else
-	#warning static Com_Milliseconds_t Com_Milliseconds = NULL;
-	#warning static int hook_RemoteCommandTime_call = NULL;
-	#warning static int remoteCommandLastTimeAddress = NULL;
-	static Com_Milliseconds_t Com_Milliseconds = (Com_Milliseconds_t)NULL;
-	static int hook_RemoteCommandTime_call = (int)NULL;
-	static int remoteCommandLastTimeAddress = (int)NULL;
-#endif
-
 #if COD_VERSION == COD2_1_0
 	static int hook_findMap_call = 0x0808AD00;
 #elif COD_VERSION == COD2_1_2
@@ -231,7 +213,7 @@ typedef enum {
 
 typedef struct {
 	netadrtype_t type;
-	char ip[4];
+	unsigned char ip[4];
 	char ipx[10];
 	unsigned short port;
 } netadr_t;
